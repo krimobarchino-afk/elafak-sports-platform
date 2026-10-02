@@ -1064,7 +1064,7 @@ migrateOfficialMemberOrder();ensureHistorical2025Finance();opts();updateMemberPa
 /* ===== الإصدار المهني 5.0 — طبقة الحوكمة والبيانات ===== */
 const SYSTEM_KEY='afak_system_v1';
 let systemState=JSON.parse(localStorage.getItem(SYSTEM_KEY)||'null')||{association:'جمعية الأفق للرياضات الجوية والجبلية',foundationDate:'2025-08-31',foundationYear:'2025',activeYear:String(new Date().getFullYear()),currency:'DZD',schema:'5.1',dataPolicy:'البيانات التجريبية لا تعتمد كسجل رسمي',officialFoundationVerified:true};
-systemState.schema='5.1';systemState.dataPolicy=systemState.dataPolicy||'البيانات التجريبية لا تعتمد كسجل رسمي';systemState.officialFoundationVerified=true;
+systemState.schema='7.1';systemState.dataPolicy=systemState.dataPolicy||'البيانات التجريبية لا تعتمد كسجل رسمي';systemState.officialFoundationVerified=true;
 if(!/^[0-9]{4}$/.test(systemState.activeYear)||!settings.years.includes(String(systemState.activeYear)))systemState.activeYear=settings.years.includes('2026')?'2026':'2025';
 function saveSystem(){localStorage.setItem(SYSTEM_KEY,JSON.stringify(systemState));}
 function setActiveYear(y){y=String(y);if(!settings.years.includes(y))return;systemState.activeYear=y;saveSystem();render();}
@@ -1136,7 +1136,7 @@ saveFinance=function(){
  _saveFinanceV5();
  var id=opId||db.finance.slice(-1)[0]?.id;var f=id&&db.finance.find(function(x){return x.id===id;});if(f){f.historical=!!hist;f.financialYear=f.financialYear||document.getElementById('fFinancialYear').value;save();}
 };
-exportJSON=function(){var payload={schema:'5.1',exportedAt:new Date().toISOString(),system:systemState,db:db,settings:settings,packs:packs};var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));a.download='نسخة_احتياطية_جمعية_الأفق_5.1.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);};
+exportJSON=function(){var payload={schema:'7.1',exportedAt:new Date().toISOString(),system:systemState,db:db,settings:settings,packs:packs};var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));a.download='نسخة_احتياطية_جمعية_الأفق_7.1.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);};
 function renderGovernance(){
  var sum=document.getElementById('govSummary'),years=document.getElementById('govYears'),src=document.getElementById('govSources'),health=document.getElementById('govHealth');if(!sum)return;
  var officialMembers=db.members.filter(function(m){return m.recordStatus==='رسمي'||m.source==='بيانات تأسيسية مؤكدة';}).length;
@@ -1220,7 +1220,99 @@ render();
   const oldShow=window.show;window.show=function(id){oldShow(id);if(id==='integrated70'){section();i70tab('overview');}};
   setTimeout(()=>{section();},100);
 })();
+</script>
+<script>
+/* ===== الإصدار 7.1 — حماية السنوات والمالية والنسخ الاحتياطية ===== */
+(function(){
+  const META_KEY='afak_year_meta_v1';
+  function readMeta(){try{return JSON.parse(localStorage.getItem(META_KEY)||'{}')}catch(e){return {}}}
+  function writeMeta(m){localStorage.setItem(META_KEY,JSON.stringify(m));}
+  function money71(n){return (Number(n)||0).toLocaleString('ar-DZ')+' دج';}
+  // سجل السنوات الرسمي: 2025 مغلقة تاريخيًا برصيد 405 دج، و2026 مفتوحة برصيد مرحل 405 دج.
+  const meta=readMeta();
+  if(!meta['2025']) meta['2025']={status:'closed',kind:'foundation',openingBalance:0,closingBalance:405,closedDate:'2025-12-31',note:'السنة التأسيسية التاريخية'};
+  else {meta['2025'].status='closed';meta['2025'].kind='foundation';meta['2025'].openingBalance=0;meta['2025'].closingBalance=405;meta['2025'].closedDate=meta['2025'].closedDate||'2025-12-31';}
+  if(!meta['2026']) meta['2026']={status:'open',kind:'annual',openingBalance:405,openingFrom:'2025',createdDate:'2026-01-01'};
+  if(!settings.years.includes('2025'))settings.years.push('2025');
+  if(!settings.years.includes('2026'))settings.years.push('2026');
+  settings.years=Array.from(new Set(settings.years.map(String))).sort();
+  writeMeta(meta); save();
 
+  function yearMeta(y){return readMeta()[String(y)]||{};}
+  function isClosed(y){return yearMeta(y).status==='closed';}
+  function financeFormYear(){
+    const el=document.getElementById('fFinancialYear');
+    return String(el&&el.value||document.getElementById('fDate')?.value||'').slice(0,4);
+  }
+  function currentOpId(){return document.getElementById('fOpId')?.value||'';}
+  function lockMessage(y){return 'السنة '+y+' مغلقة، ولا يمكن إضافة أو تعديل أو إلغاء حركة مالية فيها. استخدم السنة المفتوحة أو إجراء تصحيح موثق وفق وثائق الجمعية.';}
 
+  const oldSaveFinance=window.saveFinance;
+  window.saveFinance=function(){
+    const y=financeFormYear();
+    const id=currentOpId();
+    if(y && isClosed(y)) return alert(lockMessage(y));
+    if(id){const old=db.finance.find(x=>x.id===id);if(old && isClosed(yearOfFinance(old)))return alert(lockMessage(yearOfFinance(old)));}
+    const before=db.finance.map(x=>x.id);
+    oldSaveFinance();
+    const after=db.finance.find(x=>x.id===id)||db.finance.find(x=>!before.includes(x.id));
+    if(after){after.financialYear=after.financialYear||y;after.updatedAt=new Date().toISOString();after.recordStatus=after.recordStatus||'رسمي';save();
+      if(typeof audit==='function')audit(id?'تعديل':'إضافة','حركة مالية',after.id,(after.type||'')+' — '+money71(after.amount||0));
+    }
+  };
+
+  const oldEditFinance=window.editFinance;
+  window.editFinance=function(id){const f=db.finance.find(x=>x.id===id);if(f&&isClosed(yearOfFinance(f)))return alert(lockMessage(yearOfFinance(f)));return oldEditFinance(id);};
+  const oldCancelFinance=window.cancelFinance;
+  window.cancelFinance=function(id){const f=db.finance.find(x=>x.id===id);if(f&&isClosed(yearOfFinance(f)))return alert(lockMessage(yearOfFinance(f)));return oldCancelFinance(id);};
+
+  // منع إضافة/حذف السنوات من شاشة الإعدادات بطريقة تتجاوز دورة الإقفال.
+  window.addYear=function(){
+    const input=document.getElementById('newYear'); const y=String(input?.value||'').trim();
+    if(!/^\d{4}$/.test(y))return alert('أدخل سنة صحيحة من 4 أرقام.');
+    const ys=(settings.years||[]).map(Number); const last=Math.max.apply(null,ys);
+    if(+y!==last+1)return alert('للحفاظ على التسلسل، السنة التالية المسموح بها هي '+(last+1)+'. استخدم «السنوات» داخل مركز التسيير المتكامل.');
+    if(!isClosed(last))return alert('يجب إقفال السنة '+last+' أولًا قبل إنشاء السنة التالية.');
+    if(typeof createYear70==='function')return createYear70();
+  };
+  window.removeYear=function(i){
+    const y=String(settings.years[i]);
+    if(y==='2025'||y==='2026')return alert('لا تُحذف السنوات الرسمية 2025 و2026 من سجل الجمعية.');
+    const m=yearMeta(y); if(m.status==='closed')return alert('السنة مغلقة ولا تُحذف من السجل.');
+    return alert('إدارة إنشاء السنوات وحالتها تتم من مركز التسيير المتكامل للحفاظ على تسلسل السجل.');
+  };
+
+  // إضافة حالة السنة إلى النموذج المالي دون تغيير بيانات المستخدم.
+  function markFinanceYear(){
+    const y=financeFormYear(), box=document.getElementById('financeYearLock71');
+    if(!box)return;
+    if(!y){box.innerHTML='';return;}
+    const m=yearMeta(y);
+    box.innerHTML='<div class="'+(m.status==='closed'?'warning':'notice')+'"><b>السنة '+y+':</b> '+(m.status==='closed'?'مغلقة — الإدخال المالي مقفل.':'مفتوحة — الرصيد الافتتاحي '+money71(m.openingBalance||0)+'.')+'</div>';
+  }
+  ['fFinancialYear','fDate'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',markFinanceYear);});
+  const financeForm=document.getElementById('financeForm');
+  if(financeForm&&!document.getElementById('financeYearLock71')){const d=document.createElement('div');d.id='financeYearLock71';d.style.margin='8px 0';financeForm.insertBefore(d,financeForm.firstChild);}
+
+  // نسخة احتياطية شاملة تشمل طبقة التسيير المتكامل.
+  const oldExport=window.exportJSON;
+  window.exportJSON=function(){
+    let integrated={};
+    try{integrated=JSON.parse(localStorage.getItem('afak_integrated_v70')||'{}');}catch(e){}
+    const payload={schema:'7.1',exportedAt:new Date().toISOString(),system:systemState,db:db,settings:settings,packs:packs,yearMeta:readMeta(),integrated:integrated};
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));a.download='نسخة_احتياطية_جمعية_الأفق_7.1.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  };
+
+  // فحص سنوي سريع يظهر في مركز التسيير.
+  window.runAnnualHealth71=function(y){
+    const m=yearMeta(y), fs=typeof financeForYear==='function'?financeForYear(y).filter(x=>!x.voided):[], issues=[];
+    if(!m.status)issues.push('السنة بلا حالة.');
+    fs.forEach(x=>{if(String(yearOfFinance(x))!==String(y))issues.push('حركة مالية بسنة غير متطابقة: '+x.id);if((+x.amount||0)<=0)issues.push('مبلغ غير صالح: '+x.id);});
+    return {year:String(y),status:m.status||'غير محددة',opening:+m.openingBalance||0,income:fs.filter(x=>x.type!=='مصروف').reduce((s,x)=>s+(+x.amount||0),0),expense:fs.filter(x=>x.type==='مصروف').reduce((s,x)=>s+(+x.amount||0),0),issues};
+  };
+  // عند فتح الصفحة، حدث الحالة دون إدخال أي بيانات تشغيلية جديدة.
+  setTimeout(function(){if(typeof renderProfessionalLayer==='function')renderProfessionalLayer();if(typeof markFinanceYear==='function')markFinanceYear();},150);
+})();
+</script>
 </script>
 </body></html>
