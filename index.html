@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f766e"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>منصة الأفق لإدارة الجمعية</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--p:#0f766e;--p2:#115e59;--bg:#f5f7f8;--card:#fff;--txt:#17202a;--muted:#64748b;--line:#e2e8f0;--danger:#b91c1c;--warn:#b45309;--ok:#15803d}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt)}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{min-height:100vh}.top{position:sticky;top:0;z-index:10;background:var(--p);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px #0002}.top h1{font-size:17px;margin:0}.top small{opacity:.8}.menu{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px}.nav{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:right;box-shadow:0 1px 3px #0000000d}.nav b{display:block}.nav span{font-size:12px;color:var(--muted)}.content{padding:0 12px 80px}.section{display:none}.section.active{display:block}.title{font-size:20px;margin:16px 2px 10px}.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px}.card .n{font-size:24px;font-weight:bold}.card small{color:var(--muted)}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.btn{border:0;border-radius:10px;padding:10px 13px;background:var(--p);color:#fff}.btn.alt{background:#e2e8f0;color:#17202a}.btn.danger{background:var(--danger)}.form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}.field label{font-size:12px;color:var(--muted)}.field input,.field select,.field textarea{border:1px solid #cbd5e1;border-radius:9px;padding:10px;background:#fff}.field textarea{min-height:75px}.tablewrap{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px}.table{border-collapse:collapse;width:100%;min-width:650px}.table th,.table td{padding:9px;border-bottom:1px solid var(--line);font-size:12px;text-align:right;white-space:nowrap}.table th{background:#f1f5f9}.badge{display:inline-block;border-radius:20px;padding:4px 8px;font-size:11px}.ok{background:#dcfce7;color:var(--ok)}.debt{background:#fee2e2;color:var(--danger)}.credit{background:#dbeafe;color:#1d4ed8}.muted{color:var(--muted)}.search{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:10px;margin:6px 0 10px}.empty{padding:30px;text-align:center;color:var(--muted)}.bottom{position:fixed;bottom:0;right:0;left:0;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:20}.bottom button{border:0;background:#fff;padding:10px 4px;font-size:11px}.bottom button.active{color:var(--p);font-weight:bold}.hide{display:none!important}.profileHead{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}.avatar{width:58px;height:58px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold}.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv div{background:#f8fafc;border-radius:10px;padding:9px}.kv small{display:block;color:var(--muted);font-size:11px}.kv b{display:block;margin-top:3px}.profileActions{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.mini{font-size:12px}.tabs{display:flex;gap:6px;overflow:auto;margin:10px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px;white-space:nowrap}.tab.active{background:var(--p);color:#fff}.photo{width:86px;height:86px;border-radius:50%;object-fit:cover;background:#e2e8f0;border:2px solid #fff;box-shadow:0 1px 4px #0002}.statusline{display:flex;gap:7px;flex-wrap:wrap;margin-top:5px}.timeline{border-right:3px solid #cbd5e1;padding-right:10px}.timeline .item{padding:8px 0;border-bottom:1px dashed #cbd5e1}.dangerText{color:var(--danger)}@media(min-width:700px){.menu{grid-template-columns:repeat(4,1fr)}.content{max-width:1100px;margin:auto}.cards{grid-template-columns:repeat(4,1fr)}}
+</style>.notice{background:#ecfeff;border:1px solid #a5f3fc;color:#164e63;border-radius:10px;padding:10px;margin:8px 0;font-size:12px}.warning{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:10px}.health-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.health-item{padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}.health-item b{display:block;font-size:18px}.row-actions{display:flex;gap:5px;flex-wrap:wrap}.btn.sm{padding:6px 8px;font-size:11px}.year-pill{display:inline-block;padding:4px 8px;border-radius:12px;background:#e0f2fe;color:#075985;font-size:11px}<meta name="mobile-web-app-capable" content="yes"><meta name="application-name" content="منصة الأفق"><link rel="icon" href="icon.svg"><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script></head>
+<body><div class="app">
+<header class="top"><div><h1>جمعية الأفق للرياضات الجوية والجبلية</h1><small>منصة التسيير المهنية — الإصدار 5.1 — حوكمة البيانات وتوثيق 2025</small></div><button class="btn alt" onclick="show('settings')">⚙</button></header>
+<main class="content">
+<section id="home" class="section active"><h2 class="title">لوحة القيادة</h2>
+<div class="form"><div class="grid"><div class="field"><label>السنة المعروضة</label><select id="dashYear" onchange="setActiveYear(this.value)"></select></div><div class="field"><label>حالة السنة</label><input id="dashYearStatus" readonly></div></div><div id="dashNotice" class="notice"></div></div>
+<div class="cards" id="dash"></div><h3>الوصول السريع</h3><div class="menu"><button class="nav" onclick="show('members')"><b>👥 الأعضاء</b><span>الأعضاء والبيانات الأساسية</span></button><button class="nav" onclick="show('memberships')"><b>🪪 العضويات</b><span>العضوية السنوية والدفعات</span></button><button class="nav" onclick="show('finance')"><b>💰 المالية</b><span>السجل المالي الموحد</span></button><button class="nav" onclick="show('mail')"><b>✉️ البريد</b><span>الوارد والصادر</span></button><button class="nav" onclick="show('activities')"><b>🏔️ الأنشطة</b><span>الأنشطة والمشاركة</span></button><button class="nav" onclick="show('attendance')"><b>🕐 الحضور</b><span>سجل الحضور</span></button><button class="nav" onclick="show('certificates')"><b>📜 الشهادات</b><span>سجل الشهادات</span></button><button class="nav" onclick="show('admin-mail-section')"><b>📁 الإدارة والمراسلات</b><span>السجل الإداري والبريد</span></button><button class="nav" onclick="show('equipment-tech-section')"><b>🪂 العتاد</b><span>المعدات والمراقبة والصيانة</span></button><button class="nav" onclick="show('tech-card-section')"><b>📋 البطاقة التقنية</b><span>ملف كل قطعة عتاد</span></button><button class="nav" onclick="show('governance')"><b>🛡️ الحوكمة وجودة البيانات</b><span>سلامة السجل ومصدر البيانات</span></button></div></section>
+<section id="members" class="section"><h2 class="title">سجل الأعضاء</h2><input class="search" id="memberSearch" placeholder="بحث بالاسم أو رقم العضوية" oninput="renderMembers()"><div class="toolbar"><button class="btn" onclick="toggle('memberForm')">+ عضو جديد</button><button class="btn alt" onclick="exportJSON()">نسخ احتياطي</button></div><div id="memberForm" class="form hide"><div class="grid"><div class="field"><label>رقم العضوية</label><input id="mNo"><button type="button" class="btn alt" onclick="nextMemberNo()">توليد الرقم</button></div><div class="field"><label>الاسم واللقب</label><input id="mName"></div><div class="field"><label>تاريخ الميلاد</label><input id="mDob" type="date"></div><div class="field"><label>الهاتف</label><input id="mPhone" inputmode="tel"></div><div class="field"><label>البريد الإلكتروني</label><input id="mEmail" type="email"></div><div class="field"><label>مكان الميلاد</label><input id="mBirthPlace"></div><div class="field"><label>الجنس</label><select id="mGender"><option>ذكر</option><option>أنثى</option></select></div><div class="field full"><label>العنوان</label><input id="mAddress"></div><div class="field"><label>تاريخ الانضمام</label><input id="mJoinDate" type="date"></div><div class="field"><label>الحالة الإدارية</label><select id="mAdminStatus"><option>فعالة إداريا</option><option>معلقة</option><option>منتهية</option><option>منسحبة</option><option>غير مكتملة</option></select></div><div class="field"><label>الصفة في المكتب التنفيذي</label><select id="mOfficeRole"><option value="">— لا توجد صفة —</option><option>الرئيس</option><option>نائب الرئيس</option><option>الأمين العام</option><option>أمين المال</option><option>نائب أمين المال</option></select></div><div class="field"><label>المهنة</label><input id="mOccupation"></div><div class="field"><label>نوع العضوية</label><select id="mType"></select></div><div class="field"><label>رمز الباقة</label><select id="mPack" onchange="updateMemberPackage()"></select></div><div class="field"><label>سنة الاشتراك</label><select id="mYear"></select></div><div class="field"><label>المستحق السنوي</label><input id="mDue" readonly></div><div class="field"><label>المبلغ المدفوع ش1</label><input id="mPaid" type="number" min="0"></div><div class="field"><label>طريقة الدفع ش1</label><select id="mMethod"></select></div><div class="field"><label>تاريخ الدفع ش1</label><input id="mDate" type="date"></div><div class="field"><label>صورة العضو</label><input id="mPhoto" type="file" accept="image/*"></div><div class="field full"><label>ملاحظات</label><textarea id="mNotes"></textarea></div></div><div class="toolbar"><button class="btn" onclick="saveMember()">حفظ العضو</button><button class="btn alt" onclick="toggle('memberForm')">إلغاء</button></div></div><div id="membersTable"></div></section>
+
+<section id="memberships" class="section">
+<h2 class="title">سجل العضويات السنوية</h2>
+<div class="form"><div class="grid">
+<div class="field"><label>العضو</label><select id="msMember"></select></div>
+<div class="field"><label>سنة العضوية</label><input id="msYear" type="number" min="2020" max="2100"></div>
+<div class="field"><label>الباقة</label><select id="msPack"></select></div>
+<div class="field"><label>المستحق السنوي</label><input id="msDue" readonly></div>
+<div class="field"><label>إجمالي المدفوع</label><input id="msPaid" readonly></div>
+<div class="field"><label>المتبقي</label><input id="msBalance" readonly></div>
+<div class="field"><label>حالة التسديد</label><input id="msStatus" readonly></div>
+<div class="field"><label>حالة مزاولة النشاط</label><input id="msActivity" readonly></div>
+</div><div class="toolbar">
+<button class="btn" onclick="saveMembership()">حفظ/تحديث العضوية</button>
+<button class="btn alt" onclick="openSelectedMember()">فتح ملف العضو</button>
+</div></div>
+<div id="membershipSummary"></div><div id="membershipTable"></div>
+</section>
+<section id="profile" class="section"><h2 class="title">ملف العضو</h2><div id="profileBox"></div></section>
+<section id="finance" class="section"><h2 class="title">السجل المالي الموحد</h2><div class="toolbar"><button class="btn" onclick="toggle('financeForm')">+ حركة مالية</button></div><div id="financeForm" class="form hide"><div class="grid">
+<div class="field"><label>نوع الحركة</label><select id="fType"><option>دخل اشتراكات</option><option>دخل غير اشتراكات</option><option>مصروف</option></select></div>
+<div class="field"><label>التصنيف المالي</label><input id="fCategory" list="financeCategoryOptions" placeholder="مثال: اشتراك / نقل / عتاد"><datalist id="financeCategoryOptions"></datalist></div>
+<div class="field"><label>طبيعة الحركة</label><select id="fNature"><option>هبة/تبرع</option><option>اشتراك</option><option>دخل غير اشتراكات</option><option>إعانة/دعم</option><option>مصروف الجمعية</option><option>أخرى</option></select></div>
+<div class="field"><label>العضو (اختياري)</label><input id="fMember" list="memberOptions"><datalist id="memberOptions"></datalist></div>
+<div class="field"><label>العضوية السنوية (اختياري)</label><select id="fMembership"></select></div>
+<div class="field"><label>النشاط المرتبط (اختياري)</label><select id="fActivity"></select></div>
+<div class="field"><label>المورد/الشريك (اختياري)</label><input id="fParty" placeholder="اسم الجهة أو المورد"></div>
+<div class="field"><label>المبلغ</label><input id="fAmount" type="number" min="0"></div>
+<div class="field"><label>التاريخ</label><input id="fDate" type="date" onchange="syncFinanceYear()"></div><div class="field"><label>السنة المالية</label><select id="fFinancialYear"></select></div>
+<div class="field full"><label><input id="fHistorical" type="checkbox"> حركة تاريخية: التاريخ غير محدد في الوثيقة الأصلية</label></div>
+<div class="field"><label>طريقة الدفع</label><select id="fMethod"></select></div>
+<div class="field"><label>الحساب المالي</label><select id="fAccount"></select></div>
+<div class="field full"><label>البيان</label><input id="fDesc"></div>
+<div class="field"><label>رقم الوصل/المرجع</label><input id="fRef"></div>
+<div class="field"><label>رقم العملية</label><input id="fOpId" readonly placeholder="يولد آليًا"></div>
+</div><div class="toolbar"><button class="btn" onclick="saveFinance()">تسجيل الحركة</button><button class="btn alt" onclick="loadSecondDue()">إظهار الشطر الثاني</button><button class="btn alt" onclick="toggle('financeForm')">إلغاء</button></div><div id="secondDueBox" class="muted"></div></div><div id="financeTools" class="form">
+<h3>أدوات السجل المالي</h3><div class="notice">السجل المالي موحد: كل قبض وكل دفع يظهر في نفس السجل، مع ربط اختياري بالعضو أو العضوية أو النشاط.</div>
+<div class="grid">
+<div class="field"><label>السنة المالية</label><select id="finYearFilter"><option value="">كل السنوات</option></select></div><div class="field"><label>من تاريخ</label><input id="finFrom" type="date">
+<div class="field"><label>إلى تاريخ</label><input id="finTo" type="date"></div>
+<div class="field"><label>نوع الحركة</label><select id="finKind"><option value="">الكل</option><option value="income">قبض</option><option value="expense">دفع</option></select></div>
+<div class="field"><label>الحساب</label><select id="finAccountFilter"><option value="">كل الحسابات</option></select></div>
+<div class="field"><label>العضو</label><input id="finMemberFilter" list="finMemberOptions" placeholder="رقم أو اسم العضو"><datalist id="finMemberOptions"></datalist></div>
+<div class="field"><label>النشاط</label><select id="finActivityFilter"><option value="">كل الأنشطة</option></select></div>
+<div class="field"><label>التصنيف</label><select id="finCategoryFilter"><option value="">كل التصنيفات</option></select></div>
+<div class="field"><label>بحث</label><input id="finSearch" placeholder="البيان، المرجع، المورد..."></div>
+</div>
+<div class="actions"><button class="btn" onclick="applyFinanceFilters()">تطبيق</button><button class="btn alt" onclick="resetFinanceFilters()">إعادة ضبط</button><button class="btn alt" onclick="exportFinanceCSV()">تصدير CSV</button></div>
+</div>
+<div id="financeReports" class="form">
+<h3>الكشوف والتقارير المالية</h3>
+<div class="grid">
+<div class="field"><label>نوع الكشف</label><select id="reportType">
+<option value="member">كشف حساب عضو</option>
+<option value="activity">كشف حساب نشاط</option>
+<option value="annual">التقرير المالي السنوي</option>
+<option value="account">كشف حساب مالي</option>
+</select></div>
+<div class="field" id="reportMemberBox"><label>العضو</label><select id="reportMember"></select></div>
+<div class="field hide" id="reportActivityBox"><label>النشاط</label><select id="reportActivity"></select></div>
+<div class="field hide" id="reportAccountBox"><label>الحساب</label><select id="reportAccount"></select></div>
+<div class="field"><label>السنة</label><select id="reportYear"></select></div>
+</div>
+<div class="actions">
+<button class="btn" onclick="generateFinanceReport()">عرض الكشف</button>
+<button class="btn alt" onclick="printFinanceReport()">طباعة الكشف</button>
+</div>
+<div id="financeReportOutput"></div>
+</div>
+<div id="financeTable"></div></section>
+<section id="mail" class="section"><h2 class="title">البريد الإداري</h2><div class="toolbar"><button class="btn" onclick="toggle('mailForm')">+ مراسلة</button></div><div id="mailForm" class="form hide"><div class="grid"><div class="field"><label>الصنف</label><select id="mailDir"><option>وارد</option><option>صادر</option></select></div><div class="field"><label>التاريخ</label><input id="mailDate" type="date"></div><div class="field"><label>نوع المراسلة</label><select id="mailType"><option>مراسلة رسمية</option><option>طلب</option><option>رد</option><option>دعوة</option><option>إشعار</option><option>استدعاء</option><option>تقرير</option><option>إحالة</option><option>مذكرة</option><option>شكوى</option><option>ترخيص</option><option>اتفاقية</option><option>أخرى</option></select></div><div class="field"><label>الجهة</label><input id="mailParty"></div><div class="field full"><label>الموضوع</label><input id="mailSubject"></div><div class="field"><label>درجة الاستعجال</label><select id="mailUrgency"><option>عادي</option><option>مهم</option><option>مستعجل</option><option>عاجل جدًا</option></select></div><div class="field"><label>الحالة</label><select id="mailStatus"><option>جديدة</option><option>قيد المعالجة</option><option>أحيلت</option><option>تم الرد</option><option>مغلقة</option><option>مؤرشفة</option></select></div></div><div class="toolbar"><button class="btn" onclick="saveMail()">حفظ المراسلة</button><button class="btn alt" onclick="toggle('mailForm')">إلغاء</button></div></div><div id="mailTable"></div></section>
+<section id="activities" class="section"><h2 class="title">الأنشطة الرياضية</h2><div class="toolbar"><button class="btn" onclick="toggle('activityForm')">+ نشاط</button></div><div id="activityForm" class="form hide"><div class="grid"><div class="field"><label>نمط التوقيت</label><select id="aScheduleMode" onchange="toggleActivityScheduleMode()"><option value="specific">يوم واحد — وقت محدد</option><option value="fullday">يوم كامل</option><option value="range">من تاريخ إلى تاريخ</option></select></div><div class="field" id="aSpecificDateBox"><label>تاريخ النشاط</label><input id="aDate" type="date"></div><div class="field" id="aSpecificTimeBox"><label>من الساعة</label><input id="aTime" type="time"></div><div class="field" id="aSpecificEndTimeBox"><label>إلى الساعة</label><input id="aEndTime" type="time"></div><div class="field hide" id="aRangeStartBox"><label>تاريخ البداية</label><input id="aStartDate" type="date"></div><div class="field hide" id="aRangeStartTimeBox"><label>وقت البداية <small>(اختياري)</small></label><input id="aStartTime" type="time"></div><div class="field hide" id="aRangeEndBox"><label>تاريخ النهاية</label><input id="aEndDate" type="date"></div><div class="field hide" id="aRangeEndTimeBox"><label>وقت النهاية <small>(اختياري)</small></label><input id="aEndTime" type="time"></div><div class="field hide" id="aDurationBox"><label>المدة</label><input id="aDuration" readonly></div><div class="field"><label>نوع النشاط</label><select id="aType"><option>الطيران الشراعي</option><option>الطيران الشراعي بمحرك</option><option>النماذج الجوية</option><option>المشي الجبلي</option><option>التخييم</option><option>التسلق</option><option>نشاط آخر</option></select></div><div class="field"><label>نوع الفعالية</label><select id="aEvent"><option>تدريب</option><option>خرجة جبلية</option><option>تخييم</option><option>فعالية/تظاهرة</option><option>منافسة</option><option>نشاط ترفيهي</option><option>اجتماع/تنسيق</option><option>أخرى</option></select></div><div class="field"><label>الحالة</label><select id="aStatus"><option>مبرمج</option><option>قيد التنفيذ</option><option>منجز</option><option>ملغى</option><option>مؤجل</option></select></div><div class="field"><label>اسم النشاط</label><input id="aTitle" placeholder="مثال: خرجة جبلية إلى ..."></div><div class="field"><label>المكان</label><input id="aLocation"></div><div class="field"><label>الولاية / البلدية</label><input id="aArea"></div><div class="field"><label>المسؤول/المنظم</label><input id="aOrganizer"></div><div class="field"><label>الميزانية التقديرية</label><input id="aBudget" type="number" min="0"></div><div class="field full"><label>البيان / الملاحظات</label><textarea id="aDesc"></textarea></div></div><div class="toolbar"><button class="btn" onclick="saveActivity()">حفظ النشاط</button><button class="btn alt" onclick="toggle('activityForm')">إلغاء</button></div></div><div id="activityTable"></div><div id="activityDetail" class="form hide"></div>
+<div id="activityFundingForm" class="form hide"><h3>+ تمويل شخصي خارج أموال الجمعية</h3><div class="grid"><div class="field"><label>النشاط</label><select id="afActivity"></select></div><div class="field"><label>المساهم</label><select id="afMember"></select></div><div class="field"><label>المبلغ</label><input id="afAmount" type="number" min="0"></div><div class="field full"><label>تاريخ التمويل</label><div id="afDateBox" class="notice">يُؤخذ تلقائيًا من تاريخ النشاط.</div></div><div class="field full"><label>البيان</label><input id="afDesc" placeholder="مثال: تحمل شخصي لمصاريف النشاط — لا يدخل في أموال الجمعية"></div></div><div class="toolbar"><button class="btn" onclick="saveActivityFunding()">حفظ التمويل الشخصي</button><button class="btn alt" onclick="toggle('activityFundingForm')">إلغاء</button></div></div>
+<div class="toolbar"><button class="btn alt" onclick="toggle('activityFundingForm');opts()">+ تسجيل تمويل شخصي لنشاط</button></div></section>
+<section id="training" class="section"><h2 class="title">التكوين والمؤطرون</h2><div class="toolbar"><button class="btn" onclick="toggle('trainingForm')">+ تسجيل تكوين</button></div><div id="trainingForm" class="form hide"><div class="grid"><div class="field"><label>العضو</label><input id="trMember" placeholder="رقم العضوية أو الاسم"></div><div class="field"><label>التاريخ</label><input id="trDate" type="date"></div><div class="field"><label>نوع التكوين</label><select id="trType"></select></div><div class="field"><label>المؤطر</label><select id="trInstructor"></select></div><div class="field"><label>الحالة</label><select id="trStatus"><option>مبرمج</option><option>منجز</option><option>ملغى</option></select></div><div class="field full"><label>عنوان / ملاحظات التكوين</label><input id="trTitle"></div></div><div class="toolbar"><button class="btn" onclick="saveTraining()">حفظ</button></div></div><div id="trainingTable"></div></section>
+
+<section id="activityProfile" class="section">
+<h2 class="title">ملف النشاط</h2>
+<div id="activityProfileBox"></div>
+</section>
+<section id="participation" class="section"><h2 class="title">المشاركة في الأنشطة</h2><div class="toolbar"><button class="btn" onclick="toggle('participationForm')">+ تسجيل مشاركة</button></div><div id="participationForm" class="form hide"><div class="grid"><div class="field"><label>العضو</label><select id="partMember"></select></div><div class="field"><label>النشاط</label><select id="partActivity" onchange="syncParticipationDate()"></select></div><div class="field"><label>الدور</label><select id="partRole"></select></div><div class="field full"><label>ملاحظات</label><input id="partNote"></div></div><div class="field full"><div class="notice" id="partActivityDateBox">التاريخ يُؤخذ تلقائيًا من ملف النشاط.</div></div><div class="toolbar"><button class="btn" onclick="saveParticipation()">حفظ</button></div></div><div id="participationTable"></div></section>
+<section id="attendance" class="section"><h2 class="title">سجل الحضور</h2><div class="toolbar"><button class="btn" onclick="toggle('attendanceForm')">+ تسجيل حضور</button></div><div id="attendanceForm" class="form hide"><div class="grid"><div class="field"><label>العضو</label><input id="attMember" placeholder="رقم العضوية أو الاسم"></div><div class="field"><label>التاريخ</label><input id="attDate" type="date"></div><div class="field"><label>النشاط / الفعالية</label><select id="attEvent"></select></div><div class="field"><label>الحالة</label><select id="attStatus"></select></div></div><div class="toolbar"><button class="btn" onclick="saveAttendance()">حفظ الحضور</button><button class="btn alt" onclick="toggle('attendanceForm')">إلغاء</button></div></div><div id="attendanceTable"></div></section>
+<section id="certificates" class="section"><h2 class="title">سجل الشهادات</h2><div class="toolbar"><button class="btn" onclick="toggle('certificateForm')">+ شهادة</button></div><div id="certificateForm" class="form hide"><div class="grid"><div class="field"><label>العضو</label><input id="certMember" placeholder="رقم العضوية أو الاسم"></div><div class="field"><label>التاريخ</label><input id="certDate" type="date"></div><div class="field"><label>نوع الشهادة</label><select id="certType"></select></div><div class="field"><label>رقم الشهادة</label><input id="certNumber"></div><div class="field full"><label>العنوان / البيان</label><input id="certTitle"></div></div><div class="toolbar"><button class="btn" onclick="saveCertificate()">حفظ الشهادة</button><button class="btn alt" onclick="toggle('certificateForm')">إلغاء</button></div></div><div id="certificateTable"></div></section>
+<section id="governance" class="section"><h2 class="title">الحوكمة وجودة البيانات</h2>
+<div class="notice">هذه الصفحة هي مركز ضبط المنصة: تميّز بين البيانات التأسيسية المؤكدة وبيانات التشغيل المستقبلية، وتعرض سلامة الروابط دون اعتبار بيانات الاختبار بيانات رسمية.</div>
+<div id="govSummary" class="cards"></div>
+<div class="form"><h3>حالة السنوات</h3><div id="govYears"></div></div>
+<div class="form"><h3>مصادر البيانات الرسمية</h3><div id="govSources"></div></div>
+<div class="form"><h3>فحص الاتساق</h3><div id="govHealth"></div><div class="toolbar"><button class="btn" onclick="renderGovernance()">إعادة الفحص</button><button class="btn alt" onclick="exportJSON()">نسخة احتياطية موثقة</button></div></div>
+</section>
+<section id="settings" class="section"><h2 class="title">الإعدادات</h2><div class="form"><h3>القوائم القابلة للتعديل</h3><p class="muted">أي إضافة أو حذف هنا ينعكس مباشرة في خانات الإدخال المرتبطة بها.</p><div class="grid"><div class="field"><label>القائمة</label><select id="setList" onchange="renderSettings()"></select></div><div class="field"><label>عنصر جديد</label><input id="setNew" placeholder="أدخل قيمة جديدة"></div></div><div class="toolbar"><button class="btn" onclick="addSettingItem()">+ إضافة</button></div><div id="settingItems"></div></div><div class="form"><h3>📅 السنوات الإدارية والمالية</h3><p class="muted">تحدد السنوات المتاحة في العضويات والتقارير والسجل المالي. السنة 2025 مثبتة لأنها سنة تأسيس الجمعية.</p><div class="grid"><div class="field"><label>سنة جديدة</label><input id="newYear" type="number" min="2020" max="2100" placeholder="مثال: 2027"></div></div><div class="toolbar"><button class="btn" onclick="addYear()">+ إضافة سنة</button></div><div id="yearItems"></div></div><div class="form"><h3>الباقات A–F</h3><div id="packageEditor"></div></div><div class="form"><h3>المؤطرون</h3><div class="grid"><div class="field"><label>اسم المؤطر</label><input id="instName"></div><div class="field"><label>التخصص</label><input id="instSpec"></div><div class="field"><label>رقم الاعتماد</label><input id="instAcc"></div><div class="field"><label>الهاتف</label><input id="instPhone"></div></div><div class="toolbar"><button class="btn" onclick="addInstructor()">+ إضافة مؤطر</button></div><div id="instructorsTable"></div></div><div class="form"><h3>🛡️ سلامة السجلات والتهيئة</h3><p class="muted">هذه المنصة محلية: بياناتها محفوظة في متصفح الجهاز. استخدم النسخ الاحتياطي دوريًا، خصوصًا قبل تغيير الهاتف أو المتصفح.</p><div id="dataHealth"></div><div class="toolbar"><button class="btn alt" onclick="runDataHealth()">فحص سلامة البيانات</button><button class="btn alt" onclick="showFoundationReset()">إعادة تأسيس السجل الرسمي</button></div><div id="foundationResetBox" class="hide"></div></div><div class="form"><h3>النسخ الاحتياطي</h3><div class="toolbar"><button class="btn" onclick="exportJSON()">تصدير نسخة احتياطية</button><button class="btn" onclick="loadOfficialData()">اعتماد بيانات المؤسسين الرسمية</button><label class="btn alt">استيراد نسخة<input type="file" accept="application/json" onchange="importJSON(event)" hidden></label><button class="btn danger" onclick="clearAll()">مسح كل البيانات</button></div></div></section>
+</main><nav class="bottom"><button onclick="show('home')">⌂<br>الرئيسية</button><button onclick="show('members')">👥<br>الأعضاء</button><button onclick="show('memberships')">🪪<br>العضويات</button><button onclick="show('finance')">💰<br>المالية</button></nav></div>
+<section id="admin-mail-section" class="section">
+  <div class="card">
+    <h2>📁 السجل الإداري والمراسلات</h2>
+    <div class="tabs">
+      <button onclick="showAdminTab('admin')">السجل الإداري</button>
+      <button onclick="showAdminTab('in')">البريد الوارد</button>
+      <button onclick="showAdminTab('out')">البريد الصادر</button>
+    </div>
+
+    <div id="admin-tab" class="admin-tab">
+      <h3>السجل الإداري</h3>
+      <form id="adminForm">
+        <input id="adRef" placeholder="رقم المرجع">
+        <input id="adDate" type="date">
+        <select id="adType"><option value="">نوع المستند</option><option>محضر اجتماع</option><option>قرار</option><option>اتفاقية</option><option>تقرير</option><option>مراسلة</option><option>وثيقة أخرى</option></select>
+        <input id="adTitle" placeholder="العنوان / الموضوع">
+        <select id="adStatus"><option>ساري</option><option>قيد المعالجة</option><option>منتهي</option><option>مؤرشف</option></select>
+        <textarea id="adNotes" placeholder="ملاحظات"></textarea>
+        <button type="submit">حفظ السجل الإداري</button>
+      </form>
+      <div id="adminList"></div>
+    </div>
+
+    <div id="in-tab" class="admin-tab" style="display:none">
+      <h3>البريد الوارد</h3>
+      <form id="inForm">
+        <input id="inRef" placeholder="رقم المراسلة">
+        <input id="inDate" type="date">
+        <input id="inFrom" placeholder="الجهة المرسلة">
+        <select id="inType"><option>مراسلة رسمية</option><option>طلب</option><option>دعوة</option><option>إشعار</option><option>استدعاء</option><option>تقرير</option><option>أخرى</option></select>
+        <input id="inSubject" placeholder="الموضوع">
+        <select id="inUrgency"><option>عادي</option><option>مهم</option><option>مستعجل</option><option>عاجل جدًا</option></select>
+        <select id="inStatus"><option>جديدة</option><option>قيد المعالجة</option><option>أحيلت</option><option>تم الرد</option><option>مغلقة</option><option>مؤرشفة</option></select>
+        <textarea id="inNotes" placeholder="ملاحظات"></textarea>
+        <button type="submit">حفظ البريد الوارد</button>
+      </form>
+      <div id="inList"></div>
+    </div>
+
+    <div id="out-tab" class="admin-tab" style="display:none">
+      <h3>البريد الصادر</h3>
+      <form id="outForm">
+        <input id="outRef" placeholder="رقم المراسلة">
+        <input id="outDate" type="date">
+        <input id="outTo" placeholder="الجهة المرسل إليها">
+        <select id="outType"><option>مراسلة رسمية</option><option>طلب</option><option>رد</option><option>دعوة</option><option>إشعار</option><option>إحالة</option><option>مذكرة</option><option>أخرى</option></select>
+        <input id="outSubject" placeholder="الموضوع">
+        <select id="outMethod"><option>يدًا بيد</option><option>البريد</option><option>بريد إلكتروني</option><option>فاكس</option><option>منصة إلكترونية</option><option>شركة توصيل</option><option>أخرى</option></select>
+        <select id="outStatus"><option>جديدة</option><option>قيد المعالجة</option><option>أحيلت</option><option>تم الرد</option><option>مغلقة</option><option>مؤرشفة</option></select>
+        <textarea id="outNotes" placeholder="ملاحظات"></textarea>
+        <button type="submit">حفظ البريد الصادر</button>
+      </form>
+      <div id="outList"></div>
+    </div>
+  </div>
+</section>
+
+
+<script>
+(function(){
+  const K = {
+    admin:'afak_admin_records_v19',
+    incoming:'afak_incoming_mail_v19',
+    outgoing:'afak_outgoing_mail_v19'
+  };
+  const get=(k)=>JSON.parse(localStorage.getItem(k)||'[]');
+  const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  const esc=(v)=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  window.showAdminTab=function(tab){
+    ['admin','in','out'].forEach(x=>{
+      const el=document.getElementById(x+'-tab'); if(el) el.style.display=x===tab?'block':'none';
+    });
+  };
+  
+function openActivity(id){
+ const a=db.activities.find(x=>x.id===id); if(!a)return;
+ const parts=db.participation.filter(x=>x.activity===id);
+ const att=db.attendance.filter(x=>x.activity===id);
+ const tr=db.training.filter(x=>x.activity===id);
+ const fin=db.finance.filter(x=>x.activity===id);
+ const members=[...new Set([...parts.map(x=>x.member),...att.map(x=>x.member)])].map(no=>db.members.find(m=>m.no===no)).filter(Boolean);
+ const income=fin.filter(x=>x.type!=='مصروف').reduce((s,x)=>s+(+x.amount||0),0);
+ const expense=fin.filter(x=>x.type==='مصروف').reduce((s,x)=>s+(+x.amount||0),0);
+ activityProfileBox.innerHTML=`
+ <div class="profileHead"><div class="avatar">🏃</div><div><h3 style="margin:0">${a.name||a.title||'نشاط'}</h3><div class="muted mini">${a.id} — ${a.date||''}</div></div></div>
+ <div class="profileActions">
+   <button class="btn alt" onclick="show('activities')">العودة للأنشطة</button>
+   <button class="btn" onclick="quickActivityMember('${id}')">+ إضافة مشارك</button>
+ </div>
+ <div class="cards">
+  <div class="card"><small>المشاركون</small><div class="n">${members.length}</div></div>
+  <div class="card"><small>الحضور</small><div class="n">${att.length}</div></div>
+  <div class="card"><small>التكوينات</small><div class="n">${tr.length}</div></div>
+  <div class="card"><small>المقبوضات</small><div class="n">${money(income)}</div></div>
+  <div class="card"><small>المصروفات</small><div class="n">${money(expense)}</div></div>
+  <div class="card"><small>الصافي</small><div class="n">${money(income-expense)}</div></div>
+ </div>
+ <div class="form"><h3>بيانات النشاط</h3>
+ <div class="kv">
+  <div><small>التاريخ</small><b>${a.date||'—'}</b></div>
+  <div><small>النوع</small><b>${a.type||'—'}</b></div>
+  <div><small>المكان</small><b>${a.place||'—'}</b></div>
+  <div><small>المسؤول</small><b>${a.responsible||'—'}</b></div>
+  <div><small>الحالة</small><b>${a.status||'—'}</b></div>
+ </div><p>${a.notes||''}</p></div>
+
+ <div class="form"><h3>المشاركون (${members.length})</h3>
+ ${members.length?`<div class="tablewrap"><table class="table"><thead><tr><th>الرقم</th><th>العضو</th><th>الدور</th></tr></thead><tbody>${members.map(m=>{let p=parts.find(x=>x.member===m.no);return `<tr><td>${m.no}</td><td><button class="btn alt" onclick="openMember('${m.no}')">${m.name}</button></td><td>${p?.role||'مشارك'}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">لا يوجد مشاركون مسجلون.</div>'}</div>
+
+ <div class="form"><h3>الحضور (${att.length})</h3>
+ ${att.length?`<div class="tablewrap"><table class="table"><thead><tr><th>العضو</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody>${att.map(x=>{let m=db.members.find(q=>q.no===x.member);return `<tr><td>${m?m.name:x.member}</td><td>${x.date||''}</td><td>${x.status||''}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">لا يوجد حضور مسجل.</div>'}</div>
+
+ <div class="form"><h3>الحركات المالية (${fin.length})</h3>
+ ${fin.length?`<div class="tablewrap"><table class="table"><thead><tr><th>التاريخ</th><th>الحركة</th><th>المبلغ</th><th>البيان</th></tr></thead><tbody>${fin.map(x=>`<tr><td>${x.date||''}</td><td>${x.type}</td><td>${money(x.amount)}</td><td>${x.desc||''}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">لا توجد حركة مالية مرتبطة بهذا النشاط.</div>'}</div>
+
+ <div class="form"><h3>التكوين المرتبط (${tr.length})</h3>
+ ${tr.length?tr.map(x=>`<div class="card"><b>${x.title||x.type||''}</b><div>${x.date||''} — ${x.instructor||''}</div></div>`).join(''):'<div class="empty">لا يوجد تكوين مرتبط.</div>'}</div>
+ `;
+ show('activityProfile');
+}
+
+function quickActivityMember(activityId){
+ const names=db.members.map(m=>`${m.no} — ${m.name}`).join('\n');
+ const no=prompt('أدخل رقم العضو لإضافته إلى النشاط:\n'+names);
+ if(!no)return;
+ const m=db.members.find(x=>x.no===no.trim());
+ if(!m)return alert('رقم العضو غير موجود.');
+ const exists=db.participation.some(x=>x.activity===activityId&&x.member===m.no);
+ if(exists)return alert('العضو مسجل مسبقًا في هذا النشاط.');
+ db.participation.push({id:nextId('PART-',db.participation),activity:activityId,member:m.no,date:new Date().toISOString().slice(0,10),role:'مشارك',note:''});
+ save(); render(); openActivity(activityId);
+}
+
+function render(){
+    const a=get(K.admin), i=get(K.incoming), o=get(K.outgoing);
+    const card=(r,del)=>`<div class="list-row"><b>${esc(r.ref||'')}</b> — ${esc(r.subject||r.title||'')}<br><small>${esc(r.date||'')} | ${esc(r.status||'')} ${r.urgency?'| '+esc(r.urgency):''}</small><button onclick="${del}('${r.id}')">حذف</button></div>`;
+    const al=document.getElementById('adminList'), il=document.getElementById('inList'), ol=document.getElementById('outList');
+    if(al) al.innerHTML=a.length?a.map(r=>card(r,'window.delAdmin')).join(''):'<p>لا توجد سجلات.</p>';
+    if(il) il.innerHTML=i.length?i.map(r=>card(r,'window.delIncoming')).join(''):'<p>لا توجد مراسلات واردة.</p>';
+    if(ol) ol.innerHTML=o.length?o.map(r=>card(r,'window.delOutgoing')).join(''):'<p>لا توجد مراسلات صادرة.</p>';
+  }
+  const formData=(ids)=>Object.fromEntries(ids.map(id=>[id,document.getElementById(id)?.value||'']));
+  function clearForm(id){const f=document.getElementById(id); if(f) f.reset();}
+  document.getElementById('adminForm')?.addEventListener('submit',e=>{
+    e.preventDefault(); const d=formData(['adRef','adDate','adType','adTitle','adStatus','adNotes']);
+    d.id=crypto.randomUUID(); set(K.admin,[...get(K.admin),d]); clearForm('adminForm'); render();
+  });
+  document.getElementById('inForm')?.addEventListener('submit',e=>{
+    e.preventDefault(); const d=formData(['inRef','inDate','inFrom','inType','inSubject','inUrgency','inStatus','inNotes']);
+    d.id=crypto.randomUUID(); set(K.incoming,[...get(K.incoming),d]); clearForm('inForm'); render();
+  });
+  document.getElementById('outForm')?.addEventListener('submit',e=>{
+    e.preventDefault(); const d=formData(['outRef','outDate','outTo','outType','outSubject','outMethod','outStatus','outNotes']);
+    d.id=crypto.randomUUID(); set(K.outgoing,[...get(K.outgoing),d]); clearForm('outForm'); render();
+  });
+  window.delAdmin=id=>{set(K.admin,get(K.admin).filter(x=>x.id!==id));render()};
+  window.delIncoming=id=>{set(K.incoming,get(K.incoming).filter(x=>x.id!==id));render()};
+  window.delOutgoing=id=>{set(K.outgoing,get(K.outgoing).filter(x=>x.id!==id));render()};
+  window.renderAdminMail=render;
+  render();
+})();
+</script>
+
+
+<section id="equipment-tech-section" class="section">
+  <div class="card">
+    <h2>🪂 المعدات والمراقبة التقنية</h2>
+    <div class="tabs">
+      <button onclick="showEquipTab('assets')">المعدات</button>
+      <button onclick="showEquipTab('inspections')">المراقبة التقنية</button>
+      <button onclick="showEquipTab('loans')">الإعارات</button>
+      <button onclick="showEquipTab('maintenance')">الصيانة</button>
+    </div>
+
+    <div id="assets-tab" class="equip-tab">
+      <h3>سجل المعدات</h3>
+      <form id="assetForm">
+        <input id="eqCode" placeholder="رقم/رمز المعدة">
+        <input id="eqName" placeholder="اسم المعدة">
+        <select id="eqCategory"><option>معدات طيران</option><option>معدات رياضية</option><option>معدات سلامة</option><option>معدات إدارية</option><option>أخرى</option></select>
+        <input id="eqBrand" placeholder="الصانع / العلامة">
+        <input id="eqModel" placeholder="الطراز">
+        <input id="eqSerial" placeholder="الرقم التسلسلي">
+        <input id="eqDate" type="date" title="تاريخ الاقتناء">
+        <input id="eqHours" type="number" min="0" step="0.1" placeholder="ساعات/استخدامات الطيران">
+        <select id="eqStatus"><option>متاح</option><option>مستعمل</option><option>معار</option><option>تحت المراقبة</option><option>تحت الصيانة</option><option>ممنوع من الاستعمال</option><option>تالف</option><option>مفقود</option></select>
+        <textarea id="eqNotes" placeholder="ملاحظات"></textarea>
+        <button type="submit">حفظ المعدة</button>
+      </form>
+      <div id="assetList"></div>
+    </div>
+
+    <div id="inspections-tab" class="equip-tab" style="display:none">
+      <h3>سجل المراقبة التقنية</h3>
+      <form id="inspectionForm">
+        <select id="inspAsset"></select>
+        <input id="inspDate" type="date">
+        <select id="inspType"><option>فحص قبل الاستعمال</option><option>فحص دوري</option><option>فحص بعد حادث/واقعة</option><option>فحص بعد صيانة</option><option>فحص موسمي</option><option>فحص خاص</option></select>
+        <input id="inspHours" type="number" min="0" step="0.1" placeholder="ساعات/استخدامات العتاد عند الفحص">
+        <select id="inspResult"><option>سليم</option><option>سليم مع ملاحظات</option><option>يحتاج متابعة</option><option>يحتاج صيانة</option><option>ممنوع من الاستعمال</option></select>
+        <input id="inspInspector" placeholder="اسم الفاحص/المؤطر">
+        <textarea id="inspFindings" placeholder="نتائج الفحص والملاحظات التقنية"></textarea>
+        <textarea id="inspActions" placeholder="الإجراء المتخذ"></textarea>
+        <input id="inspNext" type="date" title="موعد المراقبة القادمة">
+        <button type="submit">تسجيل المراقبة</button>
+      </form>
+      <div id="inspectionList"></div>
+    </div>
+
+    <div id="loans-tab" class="equip-tab" style="display:none">
+      <h3>سجل الإعارات</h3>
+      <form id="loanForm">
+        <select id="loanAsset"></select>
+        <input id="loanMember" placeholder="رقم العضو / اسم المستفيد">
+        <input id="loanDate" type="date">
+        <input id="loanReturn" type="date">
+        <select id="loanStatus"><option>معار</option><option>أعيد</option><option>متأخر</option><option>تحت المتابعة</option></select>
+        <textarea id="loanNotes" placeholder="ملاحظات"></textarea>
+        <button type="submit">حفظ الإعارة</button>
+      </form>
+      <div id="loanList"></div>
+    </div>
+
+    <div id="maintenance-tab" class="equip-tab" style="display:none">
+      <h3>سجل الصيانة</h3>
+      <form id="maintenanceForm">
+        <select id="maintAsset"></select>
+        <input id="maintDate" type="date">
+        <input id="maintProvider" placeholder="الفني / الجهة">
+        <input id="maintCost" type="number" min="0" step="0.01" placeholder="التكلفة">
+        <select id="maintStatus"><option>قيد التنفيذ</option><option>منجزة</option><option>مؤجلة</option></select>
+        <textarea id="maintWork" placeholder="الأعمال المنجزة / قطع الغيار / الملاحظات"></textarea>
+        <button type="submit">حفظ الصيانة</button>
+      </form>
+      <div id="maintenanceList"></div>
+    </div>
+  </div>
+</section>
+
+
+<script>
+(function(){
+  const K={assets:'afak_assets_v20',insp:'afak_tech_inspections_v20',loans:'afak_equipment_loans_v20',maint:'afak_maintenance_v20'};
+  const get=k=>JSON.parse(localStorage.getItem(k)||'[]');
+  const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  const fd=ids=>Object.fromEntries(ids.map(id=>[id,document.getElementById(id)?.value||'']));
+  const reset=id=>document.getElementById(id)?.reset();
+  window.showEquipTab=function(tab){
+    ['assets','inspections','loans','maintenance'].forEach(x=>{let e=document.getElementById(x+'-tab');if(e)e.style.display=x===tab?'block':'none';});
+  };
+  function fillAssetSelects(){
+    ['inspAsset','loanAsset','maintAsset'].forEach(id=>{
+      const e=document.getElementById(id); if(!e)return;
+      const old=e.value;
+      e.innerHTML='<option value="">اختر المعدة</option>'+get(K.assets).map(a=>`<option value="${esc(a.id)}">${esc(a.code)} — ${esc(a.name)}${a.serial?' — '+esc(a.serial):''}</option>`).join('');
+      e.value=old;
+    });
+  }
+  function render(){
+    const a=get(K.assets), i=get(K.insp), l=get(K.loans), m=get(K.maint);
+    const name=id=>{let x=a.find(q=>q.id===id);return x?`${x.code} — ${x.name}`:'—'};
+    document.getElementById('assetList').innerHTML=a.length?a.map(x=>`<div class="list-row"><b>${esc(x.code)}</b> — ${esc(x.name)}<br><small>${esc(x.category)} | ${esc(x.serial)} | ${esc(x.status)} | ${esc(x.hours||0)} ساعة/استخدام</small></div>`).join(''):'<p>لا توجد معدات.</p>';
+    document.getElementById('inspectionList').innerHTML=i.length?i.slice().reverse().map(x=>`<div class="list-row"><b>${esc(name(x.assetId))}</b><br><small>${esc(x.date)} | ${esc(x.type)} | ${esc(x.result)} | الفاحص: ${esc(x.inspector)}</small><br>${esc(x.findings)}</div>`).join(''):'<p>لا توجد عمليات مراقبة.</p>';
+    document.getElementById('loanList').innerHTML=l.length?l.slice().reverse().map(x=>`<div class="list-row"><b>${esc(name(x.assetId))}</b> — ${esc(x.member)}<br><small>${esc(x.date)} → ${esc(x.returnDate)} | ${esc(x.status)}</small></div>`).join(''):'<p>لا توجد إعارات.</p>';
+    document.getElementById('maintenanceList').innerHTML=m.length?m.slice().reverse().map(x=>`<div class="list-row"><b>${esc(name(x.assetId))}</b><br><small>${esc(x.date)} | ${esc(x.status)} | ${esc(x.provider)} | ${esc(x.cost||0)}</small><br>${esc(x.work)}</div>`).join(''):'<p>لا توجد عمليات صيانة.</p>';
+    fillAssetSelects();
+  }
+  document.getElementById('assetForm')?.addEventListener('submit',e=>{
+    e.preventDefault();let d=fd(['eqCode','eqName','eqCategory','eqBrand','eqModel','eqSerial','eqDate','eqHours','eqStatus','eqNotes']);
+    d.id=crypto.randomUUID();set(K.assets,[...get(K.assets),d]);reset('assetForm');render();
+  });
+  document.getElementById('inspectionForm')?.addEventListener('submit',e=>{
+    e.preventDefault();let d=fd(['inspAsset','inspDate','inspType','inspHours','inspResult','inspInspector','inspFindings','inspActions','inspNext']);
+    if(!d.inspAsset){alert('اختر المعدة أولًا');return;}
+    d.id=crypto.randomUUID();set(K.insp,[...get(K.insp),d]);
+    if(d.inspResult==='ممنوع من الاستعمال'||d.inspResult==='يحتاج صيانة'){
+      let a=get(K.assets),x=a.find(q=>q.id===d.inspAsset);if(x)x.status=d.inspResult==='ممنوع من الاستعمال'?'ممنوع من الاستعمال':'تحت الصيانة';set(K.assets,a);
+    }
+    reset('inspectionForm');render();
+  });
+  document.getElementById('loanForm')?.addEventListener('submit',e=>{
+    e.preventDefault();let d=fd(['loanAsset','loanMember','loanDate','loanReturn','loanStatus','loanNotes']);
+    if(!d.loanAsset){alert('اختر المعدة أولًا');return;}
+    d.id=crypto.randomUUID();set(K.loans,[...get(K.loans),d]);
+    let a=get(K.assets),x=a.find(q=>q.id===d.loanAsset);if(x&&d.loanStatus==='معار')x.status='معار';set(K.assets,a);
+    reset('loanForm');render();
+  });
+  document.getElementById('maintenanceForm')?.addEventListener('submit',e=>{
+    e.preventDefault();let d=fd(['maintAsset','maintDate','maintProvider','maintCost','maintStatus','maintWork']);
+    if(!d.maintAsset){alert('اختر المعدة أولًا');return;}
+    d.id=crypto.randomUUID();set(K.maint,[...get(K.maint),d]);
+    let a=get(K.assets),x=a.find(q=>q.id===d.maintAsset);if(x)x.status=d.maintStatus==='منجزة'?'متاح':'تحت الصيانة';set(K.assets,a);
+    reset('maintenanceForm');render();
+  });
+  window.renderEquipment=render; render();
+})();
+</script>
+
+
+<section id="tech-card-section" class="section">
+<div class="card">
+<h2>🪂 البطاقة التقنية للعتاد</h2>
+<p>بطاقة تاريخية لكل قطعة عتاد، تجمع الهوية والاستخدام والمراقبة والصيانة والإعارة.</p>
+<select id="techCardAsset"></select>
+<div id="techCardView"></div>
+</div>
+</section>
+
+
+<script>
+(function(){
+const A='afak_assets_v20',I='afak_tech_inspections_v20',L='afak_equipment_loans_v20',M='afak_maintenance_v20',U='afak_equipment_usage_v21';
+const get=k=>JSON.parse(localStorage.getItem(k)||'[]');
+const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function fill(){
+ let e=document.getElementById('techCardAsset'); if(!e)return;
+ let old=e.value,a=get(A);
+ e.innerHTML='<option value="">اختر قطعة العتاد</option>'+a.map(x=>`<option value="${x.id}">${esc(x.code)} — ${esc(x.name)}</option>`).join('');
+ e.value=old; show(e.value);
+}
+function show(id){
+ let v=document.getElementById('techCardView'); if(!v)return;
+ if(!id){v.innerHTML='<p>اختر قطعة لعرض بطاقتها التقنية.</p>';return;}
+ let a=get(A),x=a.find(q=>q.id===id); if(!x)return;
+ let ins=get(I).filter(q=>q.assetId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ let loans=get(L).filter(q=>q.assetId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ let maint=get(M).filter(q=>q.assetId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ let use=get(U).filter(q=>q.assetId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ let last=ins[0],next=last?.next||'';
+ let alert='';
+ if(x.status==='ممنوع من الاستعمال') alert='<div class="warning">⛔ ممنوع من الاستعمال — لا يجوز تسجيله كمعدة متاحة قبل معالجة سبب المنع.</div>';
+ else if(x.status==='تحت الصيانة') alert='<div class="warning">🔧 تحت الصيانة — يتطلب إغلاق عملية الصيانة قبل إعادته للاستعمال.</div>';
+ else if(next && new Date(next)<new Date()) alert='<div class="warning">⚠️ موعد المراقبة التقنية القادمة متجاوز.</div>';
+ v.innerHTML=`${alert}
+ <div class="tech-summary">
+ <h3>${esc(x.name)} — ${esc(x.code)}</h3>
+ <p><b>الرقم التسلسلي:</b> ${esc(x.serial)} | <b>الطراز:</b> ${esc(x.model)} | <b>الصانع:</b> ${esc(x.brand)}</p>
+ <p><b>تاريخ الاقتناء:</b> ${esc(x.date)} | <b>ساعات/استخدامات:</b> ${esc(x.hours||0)} | <b>الحالة:</b> ${esc(x.status)}</p>
+ </div>
+ <h3>🔍 آخر المراقبة التقنية</h3>
+ ${last?`<p>${esc(last.date)} — ${esc(last.type)} — <b>${esc(last.result)}</b><br>${esc(last.findings)}<br>الفاحص: ${esc(last.inspector)} | القادم: ${esc(last.next)}</p>`:'<p>لا توجد مراقبة مسجلة.</p>'}
+ <h3>📈 سجل الاستخدام</h3>
+ ${use.length?use.map(q=>`<div class="list-row">${esc(q.date)} | ${esc(q.kind)} | +${esc(q.amount)} | ${esc(q.notes)}</div>`).join(''):'<p>لا يوجد سجل استخدام إضافي.</p>'}
+ <h3>📦 الإعارات</h3>
+ ${loans.length?loans.map(q=>`<div class="list-row">${esc(q.date)} → ${esc(q.returnDate)} | ${esc(q.member)} | ${esc(q.status)}</div>`).join(''):'<p>لا توجد إعارات.</p>'}
+ <h3>🔧 الصيانة</h3>
+ ${maint.length?maint.map(q=>`<div class="list-row">${esc(q.date)} | ${esc(q.status)} | ${esc(q.provider)} | ${esc(q.cost)}<br>${esc(q.work)}</div>`).join(''):'<p>لا توجد صيانة.</p>'}
+ <h3>🧾 المراقبات السابقة</h3>
+ ${ins.length?ins.map(q=>`<div class="list-row">${esc(q.date)} | ${esc(q.type)} | ${esc(q.result)} | ${esc(q.inspector)}<br>${esc(q.findings)}<br><small>الإجراء: ${esc(q.actions)} | القادم: ${esc(q.next)}</small></div>`).join(''):'<p>لا توجد سجلات.</p>'}`;
+}
+document.getElementById('techCardAsset')?.addEventListener('change',e=>show(e.target.value));
+window.renderTechCards=fill;
+fill();
+})();
+</script>
+
+<script>
+const KEY='afak_mobile_v12';
+const defaultPacks={A:{d:'الاشتراك القانوني لغير الممارس',v:1000,p1:100,p2:0},B:{d:'اشتراك ممارس النماذج الجوية',v:4000,p1:50,p2:50},C:{d:'اشتراك ممارس المشي الجبلي والتخييم',v:5000,p1:50,p2:50},D:{d:'اشتراك ممارس الطيران الشراعي',v:15000,p1:50,p2:50},E:{d:'اشتراك ممارس الطائرات النموذجية والطائرات بدون طيار',v:30000,p1:50,p2:50},F:{d:'اشتراك ممارس الطيران الشراعي بمحرك',v:35000,p1:50,p2:50}};
+let settings=JSON.parse(localStorage.getItem('afak_settings_v15')||'null')||{membershipTypes:['عضو مؤسس','عضو عامل','عضو منخرط','عضو شرفي','متطوع','رياضي','مدرب/مؤطر','حكم'],paymentMethods:['نقدًا','صك/شيك','تحويل CCP','تحويل بنكي','BaridiMob','الدفع الإلكتروني','أخرى'],accounts:['الصندوق','CCP','البنك','الحساب الإلكتروني','أخرى'],activityTypes:['الطيران الشراعي','الطيران الشراعي بمحرك','النماذج الجوية','المشي الجبلي','التخييم','التسلق','نشاط آخر'],eventTypes:['تدريب','خرجة جبلية','تخييم','فعالية/تظاهرة','منافسة','نشاط ترفيهي','اجتماع/تنسيق','أخرى'],statuses:['مبرمج','قيد التنفيذ','منجز','ملغى','مؤجل'],roles:['مشارك','متدرب','رياضي','مؤطر','منظم','متطوع','مسؤول','أخرى'],trainingTypes:['تدريب عملي','تدريب نظري','تكوين تقني','تأهيل','دورة','ورشة','ندوة','إسعافات أولية','أخرى'],attendanceStatuses:['حاضر','غائب','متأخر','معذور'],certificateTypes:['شهادة مشاركة','شهادة إتمام','شهادة تكوين','شهادة تأهيل','شهادة أخرى'],financeCategories:['اشتراكات','تكوين','مداخيل أنشطة','دعم/إعانة','تبرع','نقل','معدات','صيانة','إدارة','اتصالات','مصاريف بنكية','أخرى'],years:['2025','2026'],instructors:[]};
+let packs=JSON.parse(localStorage.getItem('afak_packs_v14')||'null')||defaultPacks;
+settings.years=Array.from(new Set([...(settings.years||[]),'2025','2026'])).filter(x=>/^\d{4}$/.test(String(x))).sort();
+let db=JSON.parse(localStorage.getItem(KEY)||'{"members":[],"finance":[],"mail":[],"activities":[],"participation":[],"training":[],"attendance":[],"certificates":[]}');
+db.activities=db.activities||[];db.activityFunding=db.activityFunding||[];db.participation=db.participation||[];db.training=db.training||[];db.attendance=db.attendance||[];db.certificates=db.certificates||[];db.memberships=db.memberships||[];
+
+function migrateFinance(){
+ let max=(db.finance||[]).map(x=>parseInt(String(x.id||'').replace(/\\D/g,''),10)).filter(Number.isFinite).reduce((a,b)=>Math.max(a,b),0);
+ db.finance=(db.finance||[]).map(x=>{
+   if(!x.id){max++;x.id='OP-'+String(max).padStart(4,'0');}
+   x.category=x.category|| (x.type==='مصروف'?'أخرى':x.type==='دخل اشتراكات'?'اشتراكات':'أخرى');
+   x.member=x.member||'';
+   x.membershipId=x.membershipId||'';
+   x.membershipYear=String(x.membershipYear||'');
+   x.financialYear=String(x.financialYear||String(x.date||'').slice(0,4)||'');
+   x.activityId=x.activityId||x.activity||'';
+   x.party=x.party||'';
+   x.ref=x.ref||'';
+   x.nature=x.nature|| (x.category==='تبرع'?'هبة/تبرع':x.type==='دخل اشتراكات'?'اشتراك':x.type==='مصروف'?'مصروف الجمعية':'دخل غير اشتراكات');
+   return x;
+ });
+}
+migrateFinance();
+function financialYears(){let ys=new Set(settings.years||['2025','2026']);(db.finance||[]).forEach(x=>{let y=String(x.financialYear||String(x.date||'').slice(0,4)||'');if(/^\d{4}$/.test(y))ys.add(y)});return Array.from(ys).sort((a,b)=>+a-+b)}
+function ensureHistorical2025Finance(){
+ db.finance=db.finance||[];
+ let h=db.finance.find(x=>x.ref==='HIST-2025-BANK-1000');
+ if(!h)db.finance.push({id:'OP-H2025-01',type:'دخل غير اشتراكات',category:'تبرع',nature:'هبة/تبرع',member:'0001',membershipId:'',membershipYear:'',activityId:'',party:'محمد رحماني قوادري',amount:1000,date:'',financialYear:'2025',method:'تحويل بنكي',account:'البنك',desc:'فتح الرصيد البنكي — هبة نقدية من رئيس الجمعية منذ البداية',ref:'HIST-2025-BANK-1000',source:'التقرير المالي لسنة 2025',recordStatus:'رسمي'}); else {h.financialYear='2025';h.category='تبرع';h.nature='هبة/تبرع';h.amount=1000;h.member='0001';h.party='محمد رحماني قوادري';h.account='البنك';h.type='دخل غير اشتراكات';}
+ let e=db.finance.find(x=>x.ref==='HIST-2025-BANK-595');
+ if(!e)db.finance.push({id:'OP-H2025-02',type:'مصروف',category:'مصاريف بنكية',nature:'مصروف الجمعية',member:'',membershipId:'',membershipYear:'',activityId:'',party:'البنك',amount:595,date:'',financialYear:'2025',method:'اقتطاع بنكي',account:'البنك',desc:'مصاريف بنكية حسب التقرير المالي لسنة 2025',ref:'HIST-2025-BANK-595',source:'التقرير المالي لسنة 2025',recordStatus:'رسمي'}); else {e.financialYear='2025';e.amount=595;e.category='مصاريف بنكية';e.account='البنك';e.type='مصروف';}
+ save();
+}
+
+JSON.parse(localStorage.getItem(KEY)||'{"members":[],"finance":[],"mail":[],"activities":[]}');
+function save(){localStorage.setItem(KEY,JSON.stringify(db));localStorage.setItem('afak_settings_v15',JSON.stringify(settings));localStorage.setItem('afak_packs_v14',JSON.stringify(packs));}
+function clearForm(ids){ids.forEach(id=>{let e=document.getElementById(id);if(!e)return;if(e.type==='file')e.value='';else if(e.tagName==='SELECT')e.selectedIndex=0;else e.value='';});}
+function nextId(prefix,arr){let nums=arr.map(x=>parseInt(String(x.id||'').replace(/\D/g,''),10)).filter(Number.isFinite);return prefix+String((nums.length?Math.max(...nums):0)+1).padStart(4,'0');}
+function show(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');render();scrollTo(0,0)}
+function toggle(id){document.getElementById(id).classList.toggle('hide')}
+function fillSelect(id,arr){let el=document.getElementById(id);if(el)el.innerHTML=arr.map(x=>`<option>${x}</option>`).join('')}
+function opts(){
+ fillSelect('mType',settings.membershipTypes);
+ mPack.innerHTML='<option value="">— غير محددة —</option>'+Object.keys(packs).map(k=>`<option value="${k}">${k} — ${packs[k].d}</option>`).join('');
+ mYear.innerHTML=settings.years.map(y=>`<option>${y}</option>`).join('');
+ fillSelect('mMethod',settings.paymentMethods);
+ fillSelect('fMethod',settings.paymentMethods);
+ fillSelect('fAccount',settings.accounts);
+ fillSelect('fFinancialYear',financialYears());
+ fillSelect('finYearFilter',[''].concat(financialYears()));
+ fillSelect('finAccountFilter',[''].concat(settings.accounts||[]));
+ fillSelect('reportMember',db.members.map(x=>x.no+' — '+x.name));
+ fillSelect('reportActivity',db.activities.map(x=>x.id+' — '+(x.title||x.type)));
+ fillSelect('reportAccount',settings.accounts||[]);
+ fillSelect('reportYear',Array.from(new Set(db.finance.map(x=>String(x.date||'').slice(0,4)).filter(Boolean).concat(['2025',String(new Date().getFullYear())]))).sort());
+
+ fillSelect('finActivityFilter',[''].concat(db.activities.map(x=>x.id+' — '+(x.title||x.type))));
+ fillSelect('finCategoryFilter',[''].concat(settings.financeCategories||[]));
+ let fmo=document.getElementById('finMemberOptions');if(fmo)fmo.innerHTML=db.members.map(x=>`<option value="${x.no}">${x.name}</option>`).join('');
+ fillSelect('fActivity',[''].concat(db.activities.map(x=>x.id+' — '+(x.title||x.type))));
+ fillSelect('fMembership',[''].concat((db.memberships||[]).map(x=>{
+   let m=db.members.find(m=>m.no===x.member);
+   return `${x.id} — ${m?.name||x.member} — ${x.year}`;
+ })));
+ let catEl=document.getElementById('financeCategoryOptions');
+ if(catEl)catEl.innerHTML=(settings.financeCategories||[]).map(x=>`<option value="${x}">`).join('');
+ fillSelect('aType',settings.activityTypes);
+ fillSelect('aEvent',settings.eventTypes);
+ fillSelect('trType',settings.trainingTypes);
+ fillSelect('trInstructor',(settings.instructors||[]).map(x=>x.name));
+ fillSelect('partRole',settings.roles);
+ fillSelect('attStatus',settings.attendanceStatuses);
+ fillSelect('certType',settings.certificateTypes);
+ fillSelect('partActivity',db.activities.map(x=>`${x.id} — ${x.title||x.type}`));
+ fillSelect('afActivity',db.activities.map(x=>`${x.id} — ${x.title||x.type}`));
+ fillSelect('attEvent',db.activities.map(x=>`${x.id} — ${x.title||x.type}`));
+ renderSettings()
+}
+function money(n){return Number(n||0).toLocaleString('ar-DZ')+' دج'}
+function memberCalc(m){
+  if(!m.pack || !packs[m.pack]) { let paid=+m.paid||0; return {p:{d:'غير محددة',v:0,p1:0,p2:0},total:paid,due:0,debt:0,credit:paid,status:paid>0?'غير مرتبط بباقة':'لم يسدد',activity:'غير محددة',second:0}; }
+  let p=packs[m.pack], first=+m.paid||0;
+  let extras=db.finance.filter(f=>f.type==='دخل اشتراكات'&&f.kind!=='first'&&(f.member==m.no||f.member==m.name)).reduce((s,f)=>s+(+f.amount||0),0);
+  let total=first+extras, due=Math.max(0,p.v-total), debt=Math.max(0,p.v-total), credit=Math.max(0,total-p.v);
+  let status=total===p.v?'مسدد':total<p.v?'مدين':'دائن';
+  let secondDue=Math.max(0,p.v-first-extras);
+  let activity=(p.p1===100)?(total>=p.v?'سارية':'غير مفعلة'):(total>=p.v?'سارية':total>=p.v*.5?'مجمّدة بعد 30/06':'غير مفعلة');
+  return {p,total,due,debt,credit,status,activity,second:secondDue};
+}
+function normalizeMemberPayment(m){
+  if(!m.pack || !packs[m.pack]){m.paid=0;m.method='';m.date='';return m;}
+  let p=packs[m.pack];
+  if(m.paid<0)m.paid=0;
+  if(p.p1===100 && m.paid!==p.v)m.paid=p.v;
+  if(p.p1===50 && m.paid!==p.v && m.paid!==p.v/2)m.paid=0;
+  return m;
+}
+function nextMemberNo(){let nums=db.members.map(m=>parseInt(String(m.no).replace(/\D/g,''),10)).filter(Number.isFinite);let n=(nums.length?Math.max(...nums):0)+1;mNo.value=String(n).padStart(4,'0')}
+function updateMemberPackage(){
+  let p=packs[mPack.value];
+  if(!p){mDue.value='\\';mPaid.removeAttribute('max');mPaid.placeholder='لا توجد دفعة مسجلة';return;}
+  mDue.value=p.v;mPaid.max=p.p1===100?p.v:p.v/2;mPaid.placeholder=p.p1===100?'الدفع الكامل':'50% أو 100%';
+}
+function saveMember(){
+ let file=document.getElementById('mPhoto').files[0];
+ const finish=(photo)=>{
+  let m={no:mNo.value.trim(),name:mName.value.trim(),dob:mDob.value,phone:mPhone.value,email:mEmail.value,birthPlace:mBirthPlace.value,gender:mGender.value,address:mAddress.value,joinDate:mJoinDate.value||new Date().toISOString().slice(0,10),adminStatus:mAdminStatus.value,officeRole:mOfficeRole.value,occupation:mOccupation.value,type:mType.value,pack:mPack.value,year:mYear.value,paid:+mPaid.value||0,method:mMethod.value,date:mDate.value,photo:photo||'',notes:mNotes.value};
+  if(!m.no)nextMemberNo(),m.no=mNo.value;
+  if(!m.name)return alert('أدخل الاسم واللقب');
+  if(!m.pack && (+m.paid||0)>0)return alert('لا يمكن تسجيل مبلغ قبل تحديد الباقة/الاشتراك.');
+  m=normalizeMemberPayment(m);
+  let i=db.members.findIndex(x=>x.no===m.no);
+  if(i>=0){if(!m.photo)m.photo=db.members[i].photo||'';db.members[i]=m}else db.members.push(m);
+
+  let first=db.finance.find(x=>x.member===m.no&&x.kind==='first'&&x.type==='دخل اشتراكات'&&String(x.membershipYear||m.year)===String(m.year));
+  if(m.paid>0){
+   if(!first){
+    first={id:nextId('OP-',db.finance),kind:'first',type:'دخل اشتراكات',category:'اشتراكات',member:m.no,membershipId:'',membershipYear:String(m.year||''),activityId:'',party:'',amount:m.paid,date:m.date,method:m.method,account:m.method==='تحويل CCP'?'CCP':'الصندوق',desc:'الشطر الأول لاشتراك '+m.no+' — '+m.name,ref:''};
+    db.finance.push(first)
+   }else{
+    first.amount=m.paid;first.date=m.date;first.method=m.method;first.category=first.category||'اشتراكات';first.membershipYear=String(m.year||'');first.desc='الشطر الأول لاشتراك '+m.no+' — '+m.name
+   }
+  }else if(first){db.finance=db.finance.filter(x=>x!==first)}
+
+  ensureMemberships();
+  let mr=membershipRecord(m,String(m.year||new Date().getFullYear()));
+  if(mr){mr.pack=m.pack||'';mr.updatedAt=new Date().toISOString().slice(0,10);if(first)first.membershipId=mr.id}
+
+  save();clearForm(['mNo','mName','mDob','mPhone','mEmail','mBirthPlace','mAddress','mPaid','mDate','mNotes','mJoinDate','mGender','mAdminStatus','mOfficeRole','mOccupation','mType','mPack','mYear','mMethod','mPhoto']);updateMemberPackage();document.getElementById('memberForm').classList.add('hide');render();openMember(m.no);
+ };
+ if(file){let r=new FileReader();r.onload=()=>finish(r.result);r.readAsDataURL(file)}else finish('')
+}
+function loadSecondDue(){let q=fMember.value.trim();let m=db.members.find(x=>x.no===q||x.name===q);if(!m)return secondDueBox.textContent='لم يتم العثور على العضو.';let c=memberCalc(m);fType.value='دخل اشتراكات';fAmount.value=c.second;fDesc.value='الشطر الثاني لاشتراك '+m.no+' — '+m.name;secondDueBox.innerHTML='المستحق للشطر الثاني: <b>'+money(c.second)+'</b>';}
+function selectedMembership(){
+ let id=(document.getElementById('fMembership')?.value||'').split(' — ')[0];
+ return (db.memberships||[]).find(x=>x.id===id)||null;
+}
+function saveFinance(){
+ let memberInput=fMember.value.trim();
+ let membership=selectedMembership();
+ let member=db.members.find(x=>x.no===memberInput||x.name===memberInput);
+ if(membership){
+   member=db.members.find(x=>x.no===membership.member)||member;
+   if(!member)return alert('العضو المرتبط بالعضوية غير موجود.');
+   fMember.value=member.no;
+ }
+ let amount=+fAmount.value||0;
+ if(!amount)return alert('أدخل مبلغ الحركة');
+ if(!fDate.value&&!document.getElementById('fHistorical')?.checked)return alert('أدخل تاريخ الحركة، أو فعّل خيار الحركة التاريخية.');
+
+ let f={
+   id:document.getElementById('fOpId').value.trim()||nextId('OP-',db.finance),
+   type:fType.value,
+   category:(fCategory.value||'').trim()||(fType.value==='مصروف'?'أخرى':fType.value==='دخل اشتراكات'?'اشتراكات':'أخرى'),
+   nature:fNature.value||'',
+   member:member?.no||'',
+   membershipId:membership?.id||'',
+   membershipYear:membership?.year?String(membership.year):String(member?.year||''),
+   activityId:(fActivity.value||'').split(' — ')[0]||'',
+   party:(fParty.value||'').trim(),
+   amount,
+   date:fDate.value,
+   method:fMethod.value,
+   account:fAccount.value,
+   desc:fDesc.value,
+   ref:fRef.value
+ };
+
+ if(f.type==='دخل اشتراكات'){
+   if(!member)return alert('دخل الاشتراكات يجب أن يرتبط بعضو موجود.');
+   if(!membership){
+     let year=String(member.year||new Date().getFullYear());
+     membership=membershipRecord(member,year);
+     if(!membership)return alert('اختر العضوية السنوية المرتبطة بالحركة.');
+     f.membershipId=membership.id;f.membershipYear=year;
+   }
+   let c=membershipCalc(member,f.membershipYear,membership.pack||member.pack||'');
+   let already=db.finance.filter(x=>x.id!==f.id&&x.type==='دخل اشتراكات'&&x.member===member.no&&String(x.membershipYear||'')===String(f.membershipYear)).reduce((a,x)=>a+(+x.amount||0),0);
+   if(already+amount>(+c.due||0))return alert('المبلغ يتجاوز المستحق للعضوية. المتبقي: '+money(Math.max(0,(+c.due||0)-already)));
+   f.kind='second';
+   f.desc=f.desc||('دفعة اشتراك '+member.no+' — '+member.name);
+ }else{
+   f.kind='';
+ }
+ let idx=db.finance.findIndex(x=>x.id===f.id);
+ if(idx>=0)db.finance[idx]=f;else db.finance.push(f);
+
+ save();clearForm(['fMember','fAmount','fDate','fDesc','fRef','fCategory','fParty','fMembership','fType','fNature','fMethod','fAccount','fActivity','fOpId']);document.getElementById('fMembership').innerHTML='<option value="">— غير محددة —</option>';secondDueBox.textContent='';financeForm.classList.add('hide');render();
+}
+function printReceipt(id){
+ let f=db.finance.find(x=>x.id===id);if(!f)return;
+ let m=db.members.find(x=>x.no===f.member);
+ let a=db.activities.find(x=>x.id===f.activityId);
+ let w=window.open('','_blank');if(!w)return alert('اسمح بفتح نافذة الوصل من المتصفح');
+ w.document.write('<html dir=rtl><head><meta charset=utf-8><title>وصل '+f.id+'</title><style>body{font-family:Arial;padding:30px;max-width:760px;margin:auto}h1{text-align:center}table{width:100%;border-collapse:collapse;margin-top:20px}td{border:1px solid #999;padding:10px}.muted{color:#666}</style></head><body><h1>جمعية الأفق للرياضات الجوية والجبلية</h1><h2 style=text-align:center>وصل مالي</h2><table><tr><td>رقم العملية</td><td>'+f.id+'</td></tr><tr><td>التاريخ</td><td>'+f.date+'</td></tr><tr><td>الحركة</td><td>'+f.type+'</td></tr><tr><td>التصنيف</td><td>'+f.category+'</td></tr><tr><td>طبيعة الحركة</td><td>'+ (f.nature||'—') +'</td></tr><tr><td>العضو</td><td>'+ (m?.name||f.member||'—') +'</td></tr><tr><td>العضوية السنوية</td><td>'+ (f.membershipId||'—') +'</td></tr><tr><td>النشاط</td><td>'+ (a?.title||a?.type||'—') +'</td></tr><tr><td>الجهة</td><td>'+ (f.party||'—') +'</td></tr><tr><td>المبلغ</td><td>'+money(f.amount)+'</td></tr><tr><td>طريقة الدفع</td><td>'+f.method+'</td></tr><tr><td>الحساب</td><td>'+f.account+'</td></tr><tr><td>البيان</td><td>'+f.desc+'</td></tr><tr><td>المرجع</td><td>'+f.ref+'</td></tr></table><p style=text-align:center;margin-top:50px>توقيع أمين المال: ....................</p><scr'+'ipt>window.print()<\/scr'+'ipt>');
+ w.document.close()
+}
+function toggleActivityScheduleMode(){let mode=document.getElementById('aScheduleMode')?.value||'specific';let ids=['aSpecificDateBox','aSpecificTimeBox','aSpecificEndTimeBox','aRangeStartBox','aRangeStartTimeBox','aRangeEndBox','aRangeEndTimeBox','aDurationBox'];ids.forEach(id=>document.getElementById(id)?.classList.add('hide'));if(mode==='specific'){['aSpecificDateBox','aSpecificTimeBox','aSpecificEndTimeBox'].forEach(id=>document.getElementById(id)?.classList.remove('hide'))}else if(mode==='fullday'){document.getElementById('aSpecificDateBox')?.classList.remove('hide')}else{['aRangeStartBox','aRangeStartTimeBox','aRangeEndBox','aRangeEndTimeBox','aDurationBox'].forEach(id=>document.getElementById(id)?.classList.remove('hide'))}updateActivityDuration()}function updateActivityDuration(){let a=document.getElementById('aStartDate')?.value,b=document.getElementById('aEndDate')?.value,o=document.getElementById('aDuration');if(o)o.value=a&&b?(Math.floor((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000)+1)+' يوم':''}function getActivitySchedule(){let mode=document.getElementById('aScheduleMode')?.value||'specific';if(mode==='range'){let sd=aStartDate.value,ed=aEndDate.value;if(!sd||!ed)return null;return {scheduleMode:mode,startDate:sd,endDate:ed,startTime:aStartTime.value,endTime:aEndTime.value,durationDays:Math.floor((new Date(ed+'T00:00:00')-new Date(sd+'T00:00:00'))/86400000)+1}}let d=aDate.value;if(!d)return null;return {scheduleMode:mode,startDate:d,endDate:d,startTime:mode==='specific'?aTime.value:'',endTime:mode==='specific'?aEndTime.value:'',durationDays:1}}function formatActivitySchedule(a){let mode=a.scheduleMode||'specific';if(mode==='fullday')return (a.startDate||a.date||'')+' — يوم كامل';if(mode==='range'){let l=(a.startDate||'')+(a.startTime?' '+a.startTime:''),r=(a.endDate||a.startDate||'')+(a.endTime?' '+a.endTime:'');return 'من '+l+' إلى '+r+(a.durationDays?' — '+a.durationDays+' يوم':'')}return (a.startDate||a.date||'')+(a.startTime?' من '+a.startTime:'')+(a.endTime?' إلى '+a.endTime:'')}function saveActivity(){let sc=getActivitySchedule();if(!sc)return alert('أدخل تاريخ النشاط وبداية ونهاية الفترة بشكل صحيح');if(!aTitle.value.trim())return alert('أدخل اسم النشاط');let x={id:nextId('ACT-',db.activities),date:sc.startDate,time:sc.startTime,type:aType.value,event:aEvent.value,status:aStatus.value,title:aTitle.value.trim(),location:aLocation.value.trim(),area:aArea.value.trim(),organizer:aOrganizer.value.trim(),budget:+aBudget.value||0,desc:aDesc.value.trim(),...sc};db.activities.push(x);save();clearForm(['aDate','aTime','aEndTime','aStartDate','aStartTime','aEndDate','aEndTime','aDuration','aTitle','aLocation','aArea','aOrganizer','aBudget','aDesc','aType','aEvent','aStatus']);aScheduleMode.value='specific';toggleActivityScheduleMode();activityForm.classList.add('hide');render();openActivity(x.id)}
+function openActivity(id){let a=db.activities.find(x=>x.id===id);if(!a)return;let parts=db.participation.filter(x=>x.activityId===id||(!x.activityId&&x.activity===id));let atts=db.attendance.filter(x=>x.activityId===id||(!x.activityId&&x.event===id));let fins=db.finance.filter(x=>x.activityId===id);let personal=db.activityFunding.filter(x=>x.activityId===id);let personalTotal=personal.reduce((s,x)=>s+(+x.amount||0),0);let mname=no=>db.members.find(m=>m.no===no)?.name||no;activityDetail.classList.remove('hide');activityDetail.innerHTML=`<div class="profileHead"><div class="avatar">🏔️</div><div><h3 style="margin:0">${a.title}</h3><div class="muted mini">${a.id} — ${formatActivitySchedule(a)}</div><div class="statusline"><span class="badge ${a.status==='منجز'?'ok':a.status==='ملغى'?'debt':'credit'}">${a.status}</span><span class="badge">${a.type}</span><span class="badge">${a.event}</span></div></div></div><div class="kv"><div><small>المكان</small><b>${a.location||'—'}</b></div><div><small>الولاية / البلدية</small><b>${a.area||'—'}</b></div><div><small>المسؤول</small><b>${a.organizer||'—'}</b></div><div><small>الميزانية التقديرية</small><b>${money(a.budget)}</b></div><div><small>المشاركون</small><b>${parts.length}</b></div><div><small>الحضور</small><b>${atts.length}</b></div><div><small>الحركات المالية</small><b>${fins.length}</b></div><div><small>تمويل شخصي خارج الجمعية</small><b>${money(personalTotal)}</b></div></div><p>${a.desc||''}</p><div class="profileActions"><button class="btn" onclick="quickParticipantForActivity('${a.id}')">+ إضافة مشارك</button><button class="btn alt" onclick="quickAttendanceForActivity('${a.id}')">+ تسجيل حضور</button><button class="btn alt" onclick="show('activities');setTimeout(()=>{opts();afActivity.value='${a.id}';toggle('activityFundingForm')},50)">+ تمويل شخصي</button><button class="btn" onclick="printActivityReport('${a.id}')">📄 تقرير النشاط</button><button class="btn alt" onclick="show('activities')">العودة للأنشطة</button></div><div class="form"><h3>المشاركون</h3>${parts.length?parts.map(x=>`<div class="card"><b>${mname(x.member)}</b><div class="mini muted">${x.role||'مشارك'} — ${formatActivitySchedule(a)}</div><div>${x.note||''}</div></div>`).join(''):'<div class="empty">لا يوجد مشاركون.</div>'}</div><div class="form"><h3>الحضور</h3>${atts.length?atts.map(x=>`<div class="card"><b>${mname(x.member)}</b><div class="mini">${x.date||a.date} — <span class="badge ${x.status==='حاضر'?'ok':'debt'}">${x.status}</span></div></div>`).join(''):'<div class="empty">لا توجد سجلات حضور.</div>'}</div><div class="form"><h3>التمويل الشخصي خارج أموال الجمعية (${money(personalTotal)})</h3>${personal.length?personal.map(x=>`<div class="card"><b>${mname(x.member)}</b><div class="mini">${x.date||formatActivitySchedule(a)} — ${money(x.amount)}</div><div>${x.desc||''}</div><div class="toolbar"><button class="btn danger" onclick="deleteActivityFunding('${x.id}','${id}')">حذف</button></div></div>`).join(''):'<div class="empty">لا يوجد تمويل شخصي مسجل.</div>'}</div><div class="form"><h3>الحركات المالية المرتبطة</h3>${fins.length?fins.map(x=>`<div class="card"><b>${x.type}</b><div class="mini">${x.date||''} — ${money(x.amount)}</div><div>${x.desc||''}</div></div>`).join(''):'<div class="empty">لا توجد حركات مرتبطة.</div>'}</div>`}
+function printActivityReport(id){
+ let a=db.activities.find(x=>x.id===id); if(!a)return;
+ let parts=db.participation.filter(x=>x.activityId===id||(!x.activityId&&x.activity===(a.title||a.type)));
+ let atts=db.attendance.filter(x=>x.activityId===id||(!x.activityId&&x.event===(a.title||a.type)));
+ let fins=db.finance.filter(x=>x.activityId===id);
+ let income=fins.filter(x=>x.type!=='مصروف').reduce((s,x)=>s+(+x.amount||0),0);
+ let out=fins.filter(x=>x.type==='مصروف').reduce((s,x)=>s+(+x.amount||0),0);
+ let mname=no=>db.members.find(m=>m.no===no)?.name||no;
+ let present=atts.filter(x=>x.status==='حاضر').length;
+ let training=db.training.filter(x=>x.activityId===id);
+ let rowsParts=parts.length?parts.map((x,i)=>`<tr><td>${i+1}</td><td>${mname(x.member)}</td><td>${x.role||'مشارك'}</td><td>${formatActivitySchedule(a)}</td><td>${x.note||''}</td></tr>`).join(''):`<tr><td colspan=5>لا توجد مشاركات مسجلة.</td></tr>`;
+ let rowsAtt=atts.length?atts.map((x,i)=>`<tr><td>${i+1}</td><td>${mname(x.member)}</td><td>${x.status||''}</td><td>${formatActivitySchedule(a)}</td></tr>`).join(''):`<tr><td colspan=4>لا توجد سجلات حضور.</td></tr>`;
+ let rowsFin=fins.length?fins.map((x,i)=>`<tr><td>${i+1}</td><td>${x.date||''}</td><td>${x.type||''}</td><td>${money(x.amount)}</td><td>${x.desc||''}</td></tr>`).join(''):`<tr><td colspan=5>لا توجد حركات مالية مرتبطة.</td></tr>`;
+ let rowsTr=training.length?training.map((x,i)=>`<tr><td>${i+1}</td><td>${mname(x.member)}</td><td>${x.type||''}</td><td>${x.instructor||''}</td><td>${x.status||''}</td></tr>`).join(''):`<tr><td colspan=5>لا توجد سجلات تكوين مرتبطة.</td></tr>`;
+ let w=window.open('','_blank'); if(!w)return alert('اسمح بفتح نافذة التقرير من المتصفح');
+ w.document.write(`<!doctype html><html dir="rtl"><head><meta charset="utf-8"><title>تقرير ${a.title||a.id}</title><style>body{font-family:Arial,Tahoma,sans-serif;padding:28px;max-width:900px;margin:auto;color:#222}h1,h2{text-align:center}h1{font-size:22px;margin-bottom:4px}h2{font-size:18px;margin-top:4px}.head{border:1px solid #aaa;padding:14px;margin:18px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.item{border-bottom:1px solid #ddd;padding:6px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:15px 0}.stat{border:1px solid #aaa;padding:10px;text-align:center}.stat b{display:block;font-size:18px;margin-top:5px}table{width:100%;border-collapse:collapse;margin:10px 0 22px}th,td{border:1px solid #999;padding:7px;text-align:right;font-size:12px}th{font-weight:bold}p{line-height:1.7}.sign{display:flex;justify-content:space-between;margin-top:55px}.muted{color:#666;font-size:12px}@media print{body{padding:10px}.no-print{display:none}.stats{grid-template-columns:repeat(4,1fr)}}@media(max-width:600px){.grid,.stats{grid-template-columns:1fr 1fr}}</style></head><body>
+<h1>جمعية الأفق للرياضات الجوية والجبلية</h1><h2>تقرير نشاط</h2>
+<div class="head"><div class="grid"><div class="item"><b>رقم النشاط:</b> ${a.id}</div><div class="item"><b>اسم النشاط:</b> ${a.title||''}</div><div class="item"><b>التاريخ:</b> ${a.date||''}</div><div class="item"><b>الوقت:</b> ${a.time||''}</div><div class="item"><b>نوع النشاط:</b> ${a.type||''}</div><div class="item"><b>نوع الفعالية:</b> ${a.event||''}</div><div class="item"><b>المكان:</b> ${a.location||''}</div><div class="item"><b>المسؤول/المنظم:</b> ${a.organizer||''}</div><div class="item"><b>الحالة:</b> ${a.status||''}</div><div class="item"><b>الميزانية التقديرية:</b> ${money(a.budget)}</div></div><p><b>الوصف والملاحظات:</b> ${a.desc||'—'}</p></div>
+<div class="stats"><div class="stat">المشاركون<b>${parts.length}</b></div><div class="stat">الحاضرون<b>${present}</b></div><div class="stat">المداخيل<b>${money(income)}</b></div><div class="stat">المصاريف<b>${money(out)}</b></div></div>
+<h2>أولًا: المشاركون</h2><table><thead><tr><th>#</th><th>العضو</th><th>الدور</th><th>التاريخ</th><th>ملاحظات</th></tr></thead><tbody>${rowsParts}</tbody></table>
+<h2>ثانيًا: الحضور</h2><table><thead><tr><th>#</th><th>العضو</th><th>الحالة</th><th>التاريخ</th></tr></thead><tbody>${rowsAtt}</tbody></table>
+<h2>ثالثًا: المؤطرون/التكوين المرتبط</h2><table><thead><tr><th>#</th><th>العضو</th><th>نوع التكوين</th><th>المؤطر</th><th>الحالة</th></tr></thead><tbody>${rowsTr}</tbody></table>
+<h2>رابعًا: الحركات المالية</h2><table><thead><tr><th>#</th><th>التاريخ</th><th>الحركة</th><th>المبلغ</th><th>البيان</th></tr></thead><tbody>${rowsFin}</tbody></table>
+<p><b>الصافي المالي للنشاط:</b> ${money(income-out)}</p><div class="sign"><span>إعداد التقرير: ....................</span><span>الإمضاء والختم: ....................</span></div><p class="muted">تم إنشاء التقرير آليًا من منصة تسيير جمعية الأفق.</p><button class="no-print" onclick="window.print()">طباعة / حفظ PDF</button><scr'+'ipt>window.focus()<\/scr'+'ipt>
+</body></html>`); w.document.close();
+} 
+function quickParticipantForActivity(id){show('participation');setTimeout(()=>{partActivity.value=id;toggle('participationForm')},50)}
+function quickAttendanceForActivity(id){show('attendance');setTimeout(()=>{attEvent.value=id;toggle('attendanceForm')},50)}
+document.getElementById('aStartDate')?.addEventListener('change',updateActivityDuration);document.getElementById('aEndDate')?.addEventListener('change',updateActivityDuration);toggleActivityScheduleMode();
+function renderActivities(){let rows=db.activities.map(x=>`<tr><td>${x.id}</td><td>${formatActivitySchedule(x)}</td><td>${x.title||''}</td><td>${x.type}</td><td>${x.event}</td><td>${x.location||''}</td><td>${x.status}</td><td><button class="btn alt" onclick="openActivity('${x.id}')">فتح الملف</button></td></tr>`).join('');activityTable.innerHTML=rows?`<div class="tablewrap"><table class="table"><thead><tr><th>الرقم</th><th>التاريخ</th><th>اسم النشاط</th><th>النشاط الرياضي</th><th>الفعالية</th><th>المكان</th><th>الحالة</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">لا توجد أنشطة.</div>'}
+function renderDash(){let income=db.finance.filter(x=>x.type!=='مصروف').reduce((s,x)=>s+(+x.amount||0),0),out=db.finance.filter(x=>x.type==='مصروف').reduce((s,x)=>s+(+x.amount||0),0);dash.innerHTML=`<div class="card"><small>الأعضاء</small><div class="n">${db.members.length}</div></div><div class="card"><small>المداخيل</small><div class="n">${money(income)}</div></div><div class="card"><small>المصاريف</small><div class="n">${money(out)}</div></div><div class="card"><small>الرصيد</small><div class="n">${money(income-out)}</div></div>`}
+function getFinanceFilters(){
+ return {from:finFrom?.value||'',to:finTo?.value||'',year:finYearFilter?.value||'',kind:finKind?.value||'',account:finAccountFilter?.value||'',member:(finMemberFilter?.value||'').trim(),activity:finActivityFilter?.value||'',category:finCategoryFilter?.value||'',search:(finSearch?.value||'').trim().toLowerCase()}
+}
+function financeFiltered(){
+ const q=getFinanceFilters();
+ return db.finance.filter(x=>{
+  const inc=x.type!=='مصروف',m=db.members.find(m=>m.no===x.member||m.name===x.member);
+  const hay=[x.id,x.desc,x.ref,x.party,x.category,x.member,m?.name,x.type,x.activityId].join(' ').toLowerCase();
+  if(q.year&&String(x.financialYear||String(x.date||'').slice(0,4))!==q.year)return false;if(q.from&&String(x.date)<q.from)return false;if(q.to&&String(x.date)>q.to)return false;
+  if(q.kind==='income'&&!inc)return false;if(q.kind==='expense'&&inc)return false;
+  if(q.account&&x.account!==q.account)return false;
+  if(q.member&&!(x.member===q.member||m?.name===q.member||String(x.member).includes(q.member)))return false;
+  if(q.activity&&x.activityId!==q.activity)return false;if(q.category&&x.category!==q.category)return false;
+  if(q.search&&!hay.includes(q.search))return false;return true;
+ }).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||String(a.id||'').localeCompare(String(b.id||'')));
+}
+function accountBalances(){
+ const map={};(settings.accounts||[]).forEach(a=>map[a]=0);
+ db.finance.forEach(x=>{let a=x.account||'غير محدد';if(map[a]===undefined)map[a]=0;map[a]+=(x.type==='مصروف'?-1:1)*(+x.amount||0)});
+ return map
+}
+function renderFinance(){
+ const data=financeFiltered(),income=data.filter(x=>x.type!=='مصروف').reduce((a,x)=>a+(+x.amount||0),0),out=data.filter(x=>x.type==='مصروف').reduce((a,x)=>a+(+x.amount||0),0);
+ const allIn=db.finance.filter(x=>x.type!=='مصروف').reduce((a,x)=>a+(+x.amount||0),0),allOut=db.finance.filter(x=>x.type==='مصروف').reduce((a,x)=>a+(+x.amount||0),0);
+ let running=0;
+ const rows=data.map(x=>{
+  const m=db.members.find(m=>m.no===x.member||m.name===x.member),a=db.activities.find(a=>a.id===x.activityId),ms=(db.memberships||[]).find(r=>r.id===x.membershipId);
+  running+=(x.type==='مصروف'?-1:1)*(+x.amount||0);
+  return `<tr><td>${x.id||''}</td><td>${x.date||''}</td><td>${x.type==='مصروف'?'دفع':'قبض'}</td><td>${x.type||''}</td><td>${x.category||'—'}</td><td>${x.nature||'—'}</td><td>${m?.name||x.member||'—'}</td><td>${x.financialYear||ms?.year||x.membershipYear||String(x.date||'').slice(0,4)||'—'}</td><td>${a?.title||a?.type||x.activityId||'—'}</td><td>${x.party||'—'}</td><td>${money(x.amount)}</td><td>${money(running)}</td><td>${x.method||'—'}</td><td>${x.account||'—'}</td><td>${x.desc||'—'}</td><td>${x.ref||'—'}</td><td><button class="btn alt" onclick="printReceipt('${x.id}')">وصل</button></td></tr>`
+ }).join('');
+ const cards=Object.entries(accountBalances()).map(([k,v])=>`<div class="card"><small>${k}</small><div class="n">${money(v)}</div></div>`).join('');
+ financeTable.innerHTML=`<div class="cards"><div class="card"><small>القبض</small><div class="n">${money(income)}</div></div><div class="card"><small>الدفع</small><div class="n">${money(out)}</div></div><div class="card"><small>الصافي</small><div class="n">${money(income-out)}</div></div><div class="card"><small>العمليات</small><div class="n">${data.length}</div></div></div><h3>أرصدة الحسابات الحالية</h3><div class="cards">${cards}</div><div class="notice">الرصيد العام: ${money(allIn-allOut)}</div>`+(rows?`<div class="tablewrap"><table class="table"><thead><tr><th>رقم العملية</th><th>التاريخ</th><th>الحركة</th><th>النوع</th><th>التصنيف</th><th>طبيعة الحركة</th><th>العضو</th><th>السنة</th><th>النشاط</th><th>المورد/الشريك</th><th>المبلغ</th><th>الرصيد الجاري</th><th>الطريقة</th><th>الحساب</th><th>البيان</th><th>المرجع</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">لا توجد حركات مطابقة.</div>')
+}
+function applyFinanceFilters(){renderFinance()}
+function resetFinanceFilters(){['finFrom','finTo','finMemberFilter','finSearch'].forEach(id=>document.getElementById(id).value='');['finKind','finAccountFilter','finActivityFilter','finCategoryFilter'].forEach(id=>document.getElementById(id).value='');renderFinance()}
+function exportFinanceCSV(){
+ const data=financeFiltered(),esc=v=>`"${String(v??'').replace(/"/g,'""')}"`,lines=[['رقم العملية','التاريخ','الحركة','النوع','التصنيف','طبيعة الحركة','العضو','العضوية','النشاط','المورد/الشريك','المبلغ','طريقة الدفع','الحساب','البيان','المرجع']];
+ data.forEach(x=>{let m=db.members.find(m=>m.no===x.member||m.name===x.member),ms=(db.memberships||[]).find(r=>r.id===x.membershipId),a=db.activities.find(a=>a.id===x.activityId);lines.push([x.id,x.date,x.type==='مصروف'?'دفع':'قبض',x.type,x.category,x.nature||'',m?.name||x.member,ms?.year||x.membershipYear,a?.title||a?.type||x.activityId,x.party,x.amount,x.method,x.account,x.desc,x.ref])});
+ const blob=new Blob(['\ufeff'+lines.map(r=>r.map(esc).join(',')).join('\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='السجل_المالي.csv';a.click();URL.revokeObjectURL(url)
+}
+
+function reportRows(data){
+ let bal=0;
+ return data.slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).map(x=>{
+  let inc=x.type!=='مصروف';bal+=(inc?1:-1)*(+x.amount||0);
+  let m=db.members.find(m=>m.no===x.member||m.name===x.member),a=db.activities.find(a=>a.id===x.activityId);
+  return {date:x.date||'',id:x.id||'',type:inc?'قبض':'دفع',desc:x.desc||x.category||'',amount:+x.amount||0,member:m?.name||x.member||'',activity:a?.title||a?.type||x.activityId||'',balance:bal,method:x.method||'',account:x.account||'',ref:x.ref||''};
+ });
+}
+function reportHtml(title,subtitle,data){
+ const rows=reportRows(data),inc=data.filter(x=>x.type!=='مصروف').reduce((a,x)=>a+(+x.amount||0),0),out=data.filter(x=>x.type==='مصروف').reduce((a,x)=>a+(+x.amount||0),0);
+ return `<div id="printableFinanceReport" class="form"><h2 style="text-align:center">${title}</h2><p style="text-align:center">${subtitle||''}</p>
+ <div class="cards"><div class="card"><small>إجمالي القبض</small><div class="n">${money(inc)}</div></div><div class="card"><small>إجمالي الدفع</small><div class="n">${money(out)}</div></div><div class="card"><small>الصافي</small><div class="n">${money(inc-out)}</div></div><div class="card"><small>عدد العمليات</small><div class="n">${data.length}</div></div></div>
+ <div class="tablewrap"><table class="table"><thead><tr><th>التاريخ</th><th>رقم العملية</th><th>الحركة</th><th>البيان</th><th>المبلغ</th><th>طريقة الدفع</th><th>الحساب</th><th>المرجع</th><th>الرصيد</th></tr></thead><tbody>
+ ${rows.map(r=>`<tr><td>${r.date}</td><td>${r.id}</td><td>${r.type}</td><td>${r.desc}</td><td>${money(r.amount)}</td><td>${r.method}</td><td>${r.account}</td><td>${r.ref||'—'}</td><td>${money(r.balance)}</td></tr>`).join('')||'<tr><td colspan="9">لا توجد حركات</td></tr>'}
+ </tbody></table></div></div>`
+}
+function generateFinanceReport(){
+ const type=reportType.value,year=reportYear.value;
+ let data=[],title='',sub='';
+ if(type==='member'){
+  let no=(reportMember.value||'').split(' — ')[0],m=db.members.find(x=>x.no===no);
+  data=db.finance.filter(x=>x.member===no && (!year||String(x.financialYear||x.date||'').startsWith(year)));
+  title='كشف حساب العضو';sub=(m?.name||no)+' — السنة '+year;
+ }else if(type==='activity'){
+  let id=(reportActivity.value||'').split(' — ')[0],a=db.activities.find(x=>x.id===id);
+  data=db.finance.filter(x=>x.activityId===id && (!year||String(x.financialYear||x.date||'').startsWith(year)));
+  title='كشف حساب النشاط';sub=(a?.title||a?.type||id)+' — السنة '+year;
+ }else if(type==='account'){
+  let acc=reportAccount.value;
+  data=db.finance.filter(x=>x.account===acc && (!year||String(x.financialYear||x.date||'').startsWith(year)));
+  title='كشف حساب مالي';sub=acc+' — السنة '+year;
+ }else{
+  data=db.finance.filter(x=>!year||String(x.financialYear||x.date||'').startsWith(year));
+  title='التقرير المالي السنوي';sub='جمعية الأفق للرياضات الجوية والجبلية — السنة '+year;
+ }
+ let extra=''; if(type==='annual'){let acts=db.activities.filter(a=>String(a.startDate||a.date||'').startsWith(year));let pf=db.activityFunding.filter(x=>String(x.financialYear||x.date||'').startsWith(year));let pft=pf.reduce((s,x)=>s+(+x.amount||0),0);let pc=new Set(pf.map(x=>x.activityId));extra=`<div class="notice">أنشطة السنة المسجلة: <b>${acts.length}</b> — تمويل شخصي خارج أموال الجمعية: <b>${money(pft)}</b> — الأنشطة التي لها تمويل شخصي: <b>${pc.size}</b></div>`;} financeReportOutput.innerHTML=extra+reportHtml(title,sub,data);
+}
+function printFinanceReport(){
+ if(!document.getElementById('printableFinanceReport'))generateFinanceReport();
+ let el=document.getElementById('printableFinanceReport');if(!el)return;
+ let w=window.open('','_blank');if(!w)return alert('اسمح بفتح نافذة الطباعة');
+ w.document.write(`<html dir="rtl"><head><meta charset="utf-8"><title>تقرير مالي</title><style>body{font-family:Arial;padding:25px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #777;padding:7px}th{background:#eee}.cards{display:flex;gap:10px;margin:15px 0}.card{border:1px solid #aaa;padding:10px;flex:1;text-align:center}.n{font-size:20px;font-weight:bold}</style></head><body>${el.innerHTML}<p style="margin-top:50px">أمين المال: .................... &nbsp;&nbsp;&nbsp; رئيس الجمعية: ....................</p><script>window.print()<\/script></body></html>`);
+ w.document.close()
+}
+function updateReportFields(){
+ reportMemberBox.classList.toggle('hide',reportType.value!=='member');
+ reportActivityBox.classList.toggle('hide',reportType.value!=='activity');
+ reportAccountBox.classList.toggle('hide',reportType.value!=='account');
+}
+
+function renderMail(){
+ const rows=db.mail.map(x=>`<tr><td>${x.id||''}</td><td>${x.dir||''}</td><td>${x.date||''}</td><td>${x.type||''}</td><td>${x.party||''}</td><td>${x.subject||''}</td><td>${x.urgency||''}</td><td>${x.status||''}</td></tr>`).join('');
+ mailTable.innerHTML=rows?`<div class="tablewrap"><table class="table"><thead><tr><th>الرقم</th><th>الصنف</th><th>التاريخ</th><th>النوع</th><th>الجهة</th><th>الموضوع</th><th>الاستعجال</th><th>الحالة</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">لا توجد مراسلات.</div>';
+}
+function renderSettings(){let labels={years:'السنوات الإدارية والمالية',membershipTypes:'أنواع العضوية',paymentMethods:'طرق الدفع',accounts:'الحسابات المالية',activityTypes:'أنواع النشاط الرياضي',eventTypes:'أنواع الفعاليات',statuses:'حالات الأنشطة',roles:'الأدوار',trainingTypes:'أنواع التكوين',attendanceStatuses:'حالات الحضور',certificateTypes:'أنواع الشهادات',financeCategories:'تصنيفات الحركات المالية'};let k=document.getElementById('setList')?.value||'membershipTypes';let sl=document.getElementById('setList');if(sl){sl.innerHTML=Object.entries(labels).map(([a,b])=>`<option value="${a}">${b}</option>`).join('');sl.value=k}let arr=settings[k]||[];if(settingItems)settingItems.innerHTML=arr.map((x,i)=>`<div class="card" style="display:flex;justify-content:space-between;align-items:center;margin:6px 0"><span>${x}</span><button class="btn alt" onclick="removeSettingItem(${i})">حذف</button></div>`).join('')||'<div class="empty">لا توجد عناصر.</div>';if(packageEditor)packageEditor.innerHTML=Object.entries(packs).map(([k,p])=>`<div class="form"><b>الباقة ${k}</b><div class="grid"><div class="field"><label>الوصف</label><input id="pd_${k}" value="${p.d.replace(/"/g,'&quot;')}"></div><div class="field"><label>المبلغ السنوي</label><input id="pv_${k}" type="number" value="${p.v}"></div><div class="field"><label>الشطر الأول %</label><input id="p1_${k}" type="number" value="${p.p1}"></div><div class="field"><label>الشطر الثاني %</label><input id="p2_${k}" type="number" value="${p.p2}"></div></div><button class="btn" onclick="savePack('${k}')">حفظ الباقة</button></div>`).join('');let ins=settings.instructors||[];instructorsTable.innerHTML=ins.length?`<div class="tablewrap"><table class="table"><thead><tr><th>الاسم</th><th>التخصص</th><th>الاعتماد</th><th>الهاتف</th><th></th></tr></thead><tbody>${ins.map((x,i)=>`<tr><td>${x.name}</td><td>${x.spec}</td><td>${x.acc}</td><td>${x.phone}</td><td><button class="btn danger" onclick="removeInstructor(${i})">حذف</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">لا يوجد مؤطرون.</div>'};renderYears()
+function renderYears(){let el=document.getElementById('yearItems');if(!el)return;el.innerHTML=(settings.years||[]).map((y,i)=>`<div class="card" style="display:flex;justify-content:space-between;align-items:center;margin:6px 0"><b>${y}</b>${String(y)==='2025'?'<span class="badge ok">سنة التأسيس — لا تحذف</span>':`<button class="btn alt" onclick="removeYear(${i})">حذف</button>`}</div>`).join('')}
+function addYear(){let y=String(document.getElementById('newYear')?.value||'').trim();if(!/^\d{4}$/.test(y))return alert('أدخل سنة صحيحة من 4 أرقام');settings.years=Array.from(new Set([...(settings.years||[]),y])).sort();document.getElementById('newYear').value='';save();opts();renderSettings()}
+function removeYear(i){let y=String(settings.years[i]);if(y==='2025')return alert('لا يمكن حذف سنة 2025 لأنها سنة التأسيس المعتمدة في النظام');if(confirm('حذف السنة '+y+' من قائمة السنوات؟')){settings.years.splice(i,1);save();opts();renderSettings()}}
+function addSettingItem(){let k=setList.value,v=setNew.value.trim();if(!v)return alert('أدخل قيمة جديدة');if(k==='years'&&!/^\d{4}$/.test(v))return alert('أدخل سنة صحيحة من 4 أرقام');if(!settings[k].includes(v))settings[k].push(v);if(k==='years')settings[k].sort();setNew.value='';save();opts();render()}
+function removeSettingItem(i){let k=setList.value;if(k==='years'&&String(settings[k][i])==='2025')return alert('لا يمكن حذف سنة 2025 لأنها سنة التأسيس');if(confirm('حذف هذا العنصر؟')){settings[k].splice(i,1);save();opts();render()}}
+function savePack(k){let d=document.getElementById('pd_'+k).value.trim(),v=+document.getElementById('pv_'+k).value,p1=+document.getElementById('p1_'+k).value,p2=+document.getElementById('p2_'+k).value;if(!d||v<0||p1<0||p2<0||p1+p2!==100)return alert('يجب أن يكون مجموع الشطرين 100%.');packs[k]={d,v,p1,p2};save();opts();ensureMemberships();render();document.getElementById('msMember')?.addEventListener('change',loadMembershipForMember);
+['finFrom','finTo','finKind','finAccountFilter','finMemberFilter','finActivityFilter','finCategoryFilter','finSearch'].forEach(id=>{let e=document.getElementById(id);if(e)e.addEventListener(id==='finMemberFilter'||id==='finSearch'?'keyup':'change',renderFinance)});
+reportType?.addEventListener('change',updateReportFields);updateReportFields();
+document.getElementById('fMember')?.addEventListener('input',()=>{
+ let q=fMember.value.trim(),m=db.members.find(x=>x.no===q||x.name===q);
+ if(!m)return;
+ let opts='<option value="">— غير محددة —</option>'+(db.memberships||[]).filter(r=>r.member===m.no).map(r=>`<option value="${r.id}">${r.id} — ${m.name} — ${r.year}</option>`).join('');
+ fMembership.innerHTML=opts;
+});
+document.getElementById('fMembership')?.addEventListener('change',()=>{
+ let r=selectedMembership();
+ if(r){let m=db.members.find(x=>x.no===r.member);if(m)fMember.value=m.no;}
+});
+document.getElementById('msYear')?.addEventListener('input',updateMembershipFields);document.getElementById('msPack')?.addEventListener('change',updateMembershipFields);alert('تم حفظ الباقة')}
+function addInstructor(){let name=instName.value.trim();if(!name)return alert('أدخل اسم المؤطر');settings.instructors.push({name,spec:instSpec.value.trim(),acc:instAcc.value.trim(),phone:instPhone.value.trim()});['instName','instSpec','instAcc','instPhone'].forEach(id=>document.getElementById(id).value='');save();renderSettings()}
+function removeInstructor(i){if(confirm('حذف المؤطر؟')){settings.instructors.splice(i,1);save();renderSettings()}}
+function openMember(no){
+ let m=db.members.find(x=>x.no===no);if(!m)return;
+ let c=memberCalc(m);
+ let payments=db.finance.filter(f=>f.member===m.no||f.member===m.name);
+ let parts=db.participation.filter(x=>x.member===m.no);
+ let train=db.training.filter(x=>x.member===m.no);
+ let att=db.attendance.filter(x=>x.member===m.no);
+ let cert=db.certificates.filter(x=>x.member===m.no);
+ let memberships=(db.memberships||[]).filter(x=>x.member===m.no).sort((a,b)=>(+b.year)-(+a.year));
+ let years=[...new Set([String(m.year||new Date().getFullYear()),...memberships.map(x=>String(x.year))])].sort((a,b)=>b-a);
+ let totalIn=payments.filter(f=>f.type!=='مصروف').reduce((s,f)=>s+(+f.amount||0),0);
+ let totalOut=payments.filter(f=>f.type==='مصروف').reduce((s,f)=>s+(+f.amount||0),0);
+
+ profileBox.innerHTML=`
+ <div class="profileHead">
+  ${m.photo?`<img class="photo" src="${m.photo}" alt="صورة العضو">`:`<div class="avatar">${(m.name||'?').trim().charAt(0)}</div>`}
+  <div><h3 style="margin:0">${m.name}</h3>
+   <div class="muted mini">عضوية رقم ${m.no} — ${m.type||'عضو'}</div>
+   <div class="statusline"><span class="badge ${c.status==='مسدد'?'ok':c.status==='مدين'?'debt':'credit'}">${c.status}</span>
+   <span class="badge ${m.adminStatus==='فعالة إداريا'?'ok':'debt'}">${m.adminStatus||'فعالة إداريا'}</span></div>
+  </div>
+ </div>
+
+ <div class="profileActions">
+  <button class="btn" onclick="editMember('${m.no}')">تعديل البيانات</button>
+  <button class="btn alt" onclick="show('memberships');setTimeout(()=>{msMember.value='${m.no}';loadMembershipForMember()},50)">العضوية السنوية</button>
+  <button class="btn alt" onclick="show('finance');setTimeout(()=>{fMember.value='${m.no}';loadSecondDue()},50)">المالية</button>
+  <button class="btn alt" onclick="quickParticipant('${m.no}')">+ مشاركة</button>
+  <button class="btn alt" onclick="quickTraining('${m.no}')">+ تكوين</button>
+  <button class="btn alt" onclick="show('members')">العودة للأعضاء</button>
+ </div>
+
+ <div class="cards">
+  <div class="card"><small>إجمالي المقبوضات</small><div class="n">${money(totalIn)}</div></div>
+  <div class="card"><small>إجمالي المدفوعات</small><div class="n">${money(totalOut)}</div></div>
+  <div class="card"><small>عدد العضويات</small><div class="n">${memberships.length}</div></div>
+  <div class="card"><small>المشاركات</small><div class="n">${parts.length}</div></div>
+  <div class="card"><small>التكوينات</small><div class="n">${train.length}</div></div>
+  <div class="card"><small>الحضور</small><div class="n">${att.length}</div></div>
+ </div>
+
+ <div class="form"><h3>البيانات الأساسية</h3>
+  <div class="kv">
+   <div><small>تاريخ الميلاد</small><b>${m.dob||'—'}</b></div>
+   <div><small>مكان الميلاد</small><b>${m.birthPlace||'—'}</b></div>
+   <div><small>الجنس</small><b>${m.gender||'—'}</b></div>
+   <div><small>الهاتف</small><b>${m.phone||'—'}</b></div>
+   <div><small>البريد</small><b>${m.email||'—'}</b></div>
+   <div><small>العنوان</small><b>${m.address||'—'}</b></div>
+   <div><small>تاريخ الانضمام</small><b>${m.joinDate||'—'}</b></div>
+   <div><small>صفة المكتب</small><b>${m.officeRole||'—'}</b></div>
+   <div><small>المهنة</small><b>${m.occupation||'—'}</b></div>
+   <div><small>سنة الاشتراك الحالية</small><b>${m.year||'—'}</b></div>
+   <div><small>الباقة الحالية</small><b>${m.pack?m.pack+' — '+(c.p?.d||''):'—'}</b></div>
+   <div><small>المستحق</small><b>${c.p?money(c.p.v):'\\'}</b></div>
+   <div><small>إجمالي المدفوع</small><b>${money(c.total)}</b></div>
+   <div><small>المتبقي</small><b>${c.debt?money(c.debt):'\\'}</b></div>
+   <div><small>الدائن</small><b>${c.credit?money(c.credit):'\\'}</b></div>
+   <div><small>مزاولة النشاط</small><b>${c.activity||'—'}</b></div>
+  </div><p class="muted mini">${m.notes||''}</p>
+ </div>
+
+ <div class="tabs">
+  <button class="tab active" onclick="profileTab('pmem',this)">العضويات (${memberships.length})</button>
+  <button class="tab" onclick="profileTab('pfin',this)">المالية (${payments.length})</button>
+  <button class="tab" onclick="profileTab('pact',this)">المشاركة (${parts.length})</button>
+  <button class="tab" onclick="profileTab('ptrain',this)">التكوين (${train.length})</button>
+  <button class="tab" onclick="profileTab('patt',this)">الحضور (${att.length})</button>
+  <button class="tab" onclick="profileTab('pcert',this)">الشهادات (${cert.length})</button>
+ </div>
+
+ <div id="pmem" class="form">
+  <h3>تاريخ العضويات السنوية</h3>
+  ${memberships.length?`<div class="tablewrap"><table class="table"><thead><tr><th>السنة</th><th>الباقة</th><th>المستحق</th><th>المدفوع</th><th>المتبقي</th><th>الدائن</th><th>الحالة</th><th>المزاولة</th></tr></thead><tbody>
+  ${memberships.map(r=>{let mc=membershipCalc(m,r.year,r.pack||'');return `<tr><td>${r.year}</td><td>${r.pack||'—'}</td><td>${money(mc.due)}</td><td>${money(mc.total)}</td><td>${mc.balance?money(mc.balance):'\\'}</td><td>${mc.credit?money(mc.credit):'\\'}</td><td>${mc.status}</td><td>${mc.activity}</td></tr>`}).join('')}
+  </tbody></table></div>`:'<div class="empty">لا توجد عضويات سنوية مسجلة بعد.</div>'}
+  <div class="toolbar"><button class="btn" onclick="show('memberships');setTimeout(()=>{msMember.value='${m.no}';loadMembershipForMember()},50)">فتح سجل العضوية</button></div>
+ </div>
+
+ <div id="pfin" class="form hide"><h3>كشف الحساب المالي للعضو</h3><div class="cards"><div class="card"><small>إجمالي القبض</small><div class="n">${money(payments.filter(x=>x.type!=='مصروف').reduce((a,x)=>a+(+x.amount||0),0))}</div></div><div class="card"><small>إجمالي الدفع</small><div class="n">${money(payments.filter(x=>x.type==='مصروف').reduce((a,x)=>a+(+x.amount||0),0))}</div></div><div class="card"><small>الصافي</small><div class="n">${money(payments.filter(x=>x.type!=='مصروف').reduce((a,x)=>a+(+x.amount||0),0)-payments.filter(x=>x.type==='مصروف').reduce((a,x)=>a+(+x.amount||0),0))}</div></div></div>
+ ${payments.length?`<div class="tablewrap"><table class="table"><thead><tr><th>العملية</th><th>التاريخ</th><th>الحركة</th><th>المبلغ</th><th>البيان</th><th>الوصل</th></tr></thead><tbody>
+ ${payments.map(f=>`<tr><td>${f.id}</td><td>${f.date||''}</td><td>${f.type}</td><td>${money(f.amount)}</td><td>${f.desc||''}</td><td><button class="btn alt" onclick="printReceipt('${f.id}')">طباعة</button></td></tr>`).join('')}
+ </tbody></table></div>`:'<div class="empty">لا توجد حركات مالية مرتبطة.</div>'}
+ <div class="toolbar"><button class="btn" onclick="show('finance');setTimeout(()=>{fMember.value='${m.no}'},50)">فتح السجل المالي</button></div></div>
+
+ <div id="pact" class="form hide">${parts.length?parts.map(x=>`<div class="card"><b>${x.activity}</b><div class="mini muted">${x.date||''} — ${x.role||'مشارك'}</div><div>${x.note||''}</div></div>`).join(''):'<div class="empty">لا توجد مشاركات مسجلة.</div>'}
+ <div class="toolbar"><button class="btn" onclick="quickParticipant('${m.no}')">إضافة مشاركة</button></div></div>
+
+ <div id="ptrain" class="form hide">${train.length?train.map(x=>`<div class="card"><b>${x.type||''}</b><div class="mini muted">${x.date||''} — ${x.instructor||''}</div><div>${x.title||''} ${x.status?`— ${x.status}`:''}</div></div>`).join(''):'<div class="empty">لا توجد تكوينات مسجلة.</div>'}
+ <div class="toolbar"><button class="btn" onclick="quickTraining('${m.no}')">إضافة تكوين</button></div></div>
+
+ <div id="patt" class="form hide">${att.length?att.map(x=>`<div class="card"><b>${x.date||''}</b><div>${x.event||''} — <span class="badge ${x.status==='حاضر'?'ok':'debt'}">${x.status}</span></div></div>`).join(''):'<div class="empty">لا توجد سجلات حضور.</div>'}</div>
+
+ <div id="pcert" class="form hide">${cert.length?cert.map(x=>`<div class="card"><b>${x.type||''}</b><div class="mini muted">${x.date||''} — ${x.number||''}</div><div>${x.title||''}</div></div>`).join(''):'<div class="empty">لا توجد شهادات مسجلة.</div>'}</div>
+ `;
+ show('profile');
+}
+
+function profileTab(id,btn){['pfin','pact','ptrain','patt','pcert'].forEach(x=>document.getElementById(x)?.classList.add('hide'));document.getElementById(id)?.classList.remove('hide');btn.parentElement.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+function quickParticipant(no){show('activities');setTimeout(()=>{document.getElementById('partMember').value=no;toggle('participationForm')},50)}
+function quickTraining(no){show('training');setTimeout(()=>{document.getElementById('trMember').value=no;toggle('trainingForm')},50)}
+
+function memberByInput(v){v=(v||'').trim();return db.members.find(m=>m.no===v)||db.members.find(m=>m.name===v)}
+function deleteActivityFunding(fid,aid){if(!confirm('حذف سجل التمويل الشخصي؟'))return;db.activityFunding=db.activityFunding.filter(x=>x.id!==fid);save();render();openActivity(aid)}
+function saveActivityFunding(){let aid=(document.getElementById('afActivity')?.value||'').split(' — ')[0];let m=memberByInput(document.getElementById('afMember')?.value||'');let amount=+(document.getElementById('afAmount')?.value||0);let desc=document.getElementById('afDesc')?.value||'';let act=db.activities.find(x=>x.id===aid);if(!aid)return alert('اختر النشاط');if(!act)return alert('النشاط غير موجود');if(!m)return alert('اختر عضوًا مسجلًا كمساهم');if(!amount)return alert('أدخل المبلغ');let date=act.startDate||act.date||'';let financialYear=String(date).slice(0,4);if(db.activityFunding.some(x=>x.activityId===aid&&x.member===m.no))return alert('هذا العضو مسجل بالفعل كمساهم في تمويل هذا النشاط');db.activityFunding.push({id:nextId('AF-',db.activityFunding),activityId:aid,member:m.no,amount,date,financialYear,desc});save();clearForm(['afActivity','afMember','afAmount','afDesc']);activityFundingForm.classList.add('hide');render();openActivity(aid)}
+function saveParticipation(){let m=memberByInput(partMember.value);if(!m)return alert('العضو غير موجود');if(!partActivity.value.trim())return alert('أدخل النشاط');let aid=partActivity.value;let act=db.activities.find(x=>x.id===aid);if(!act)return alert('اختر نشاطًا مسجلًا');if(db.participation.some(x=>x.activityId===aid&&x.member===m.no))return alert('هذا العضو مسجل بالفعل ضمن المشاركين في هذا النشاط');db.participation.push({id:nextId('P-',db.participation),member:m.no,activityId:aid,activity:act.title||act.type,role:partRole.value,note:partNote.value});save();clearForm(['partMember','partActivity','partNote','partRole']);participationForm.classList.add('hide');render();openMember(m.no)}
+function saveTraining(){let m=memberByInput(trMember.value);if(!m)return alert('العضو غير موجود');db.training.push({id:nextId('TR-',db.training),member:m.no,date:trDate.value,type:trType.value,instructor:trInstructor.value,status:trStatus.value,title:trTitle.value});save();clearForm(['trMember','trDate','trTitle','trType','trInstructor','trStatus']);trainingForm.classList.add('hide');render();openMember(m.no)}
+function renderParticipation(){let rows=db.participation.map(x=>{let m=db.members.find(m=>m.no===x.member),a=db.activities.find(a=>a.id===x.activityId);return `<tr><td>${x.id}</td><td>${m?.name||x.member}</td><td>${a?formatActivitySchedule(a):''}</td><td>${a?.title||x.activity||''}</td><td>${x.role}</td><td>${x.note||''}</td></tr>`}).join('');participationTable.innerHTML=rows?`<div class="tablewrap"><table class="table"><thead><tr><th>الرقم</th><th>العضو</th><th>التاريخ</th><th>النشاط</th><th>الدور</th><th>ملاحظات</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">لا توجد مشاركات.</div>'}
+function renderTraining(){let rows=db.training.map(x=>{let m=db.members.find(m=>m.no===x.member);return `<tr><td>${x.id}</td><td>${m?.name||x.member}</td><td>${x.date||''}</td><td>${x.type}</td><td>${x.instructor||''}</td><td>${x.status||''}</td><td>${x.title||''}</td></tr>`}).join('');trainingTable.innerHTML=rows?`<div class="tablewrap"><table class="table"><thead><tr><th>الرقم</th><th>العضو</th><th>التاريخ</th><th>النوع</th><th>المؤطر</th><th>الحالة</th><th>العنوان</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">لا توجد تكوينات.</div>'}
+
+function saveAttendance(){let m=memberByInput(attMember.value);if(!m)return alert('العضو غير موجود');if(!attDate.value)return alert('أدخل التاريخ');let aid=attEvent.value;let act=db.activities.find(x=>x.id===aid);if(!act)return alert('اختر نشاطًا مسجلًا');db.attendance.push({id:nextId('AT-',db.attendance),member:m.no,date:attDate.value||act.date,activityId:aid,event:act.title||act.type,status:attStatus.value});save();clearForm(['attMember','attDate','attEvent','attStatus']);attendanceForm.classList.add('hide');render();openMember(m.no)}
+function saveCertificate(){let m=memberByInput(certMember.value);if(!m)return alert('العضو غير موجود');if(!certDate.value)return alert('أدخل التاريخ');db.certificates.push({id:nextId('C-',db.certificates),member:m.no,date:certDate.value,type:certType.value,number:certNumber.value,title:certTitle.value});save();clearForm(['certMember','certDate','certType','certNumber','certTitle']);certificateForm.classList.add('hide');render();openMember(m.no)}
+function renderAttendance(){let rows=db.attendance.map(x=>{let m=db.members.find(m=>m.no===x.member);return `<tr><td>${x.id}</td><td>${m?.name||x.member}</td><td>${x.date||''}</td><td>${x.event||''}</td><td>${x.status||''}</td></tr>`}).join('');attendanceTable.innerHTML=rows?`<div class="tablewrap"><table class="table"><thead><tr><th>الرقم</th><th>العضو</th><th>التاريخ</th><th>النشاط</th><th>الحالة</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">لا توجد سجلات حضور.</div>'}
+function renderCertificates(){let rows=db.certificates.map(x=>{let m=db.members.find(m=>m.no===x.member);return `<tr><td>${x.id}</td><td>${m?.name||x.member}</td><td>${x.date||''}</td><td>${x.type||''}</td><td>${x.number||''}</td><td>${x.title||''}</td></tr>`}).join('');certificateTable.innerHTML=rows?`<div class="tablewrap"><table class="table"><thead><tr><th>الرقم</th><th>العضو</th><th>التاريخ</th><th>النوع</th><th>رقم الشهادة</th><th>البيان</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">لا توجد شهادات.</div>'}
+
+function renderMemberOptions(){
+ const dl=document.getElementById('memberOptions'); if(!dl)return;
+ dl.innerHTML=db.members.map(m=>`<option value="${m.no}">${m.name}</option>`).join('');
+}
+function renderMembers(){
+ const q=(memberSearch?.value||'').trim().toLowerCase();
+ const rows=db.members.filter(m=>!q || String(m.no).toLowerCase().includes(q) || String(m.name||'').toLowerCase().includes(q)).map(m=>{
+  const c=memberCalc(m);
+  return `<tr><td>${m.no}</td><td><button class="btn alt" onclick="openMember('${m.no}')">${m.name}</button></td><td>${m.type||'—'}</td><td>${m.officeRole||'—'}</td><td>${m.joinDate||'—'}</td><td>${m.occupation||'—'}</td><td>${c.status}</td><td>${money(c.total)}</td></tr>`;
+ }).join('');
+ membersTable.innerHTML=rows?`<div class="tablewrap"><table class="table"><thead><tr><th>الرقم</th><th>الاسم واللقب</th><th>العضوية</th><th>صفة المكتب</th><th>الانخراط</th><th>المهنة</th><th>حالة التسديد</th><th>المدفوع</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">لا توجد أعضاء.</div>';
+}
+function editMember(no){
+ const m=db.members.find(x=>x.no===no);if(!m)return;show('members');document.getElementById('memberForm').classList.remove('hide');
+ mNo.value=m.no;mName.value=m.name||'';mDob.value=m.dob||'';mPhone.value=m.phone||'';mEmail.value=m.email||'';mBirthPlace.value=m.birthPlace||'';mGender.value=m.gender||'ذكر';mAddress.value=m.address||'';mJoinDate.value=m.joinDate||'';mAdminStatus.value=m.adminStatus||'فعالة إداريا';mOfficeRole.value=m.officeRole||'';mOccupation.value=m.occupation||'';mType.value=m.type||'';mPack.value=m.pack||'';mYear.value=m.year||'2025';mPaid.value=m.paid||'';mMethod.value=m.method||'';mDate.value=m.date||'';mNotes.value=m.notes||'';updateMemberPackage();
+}
+
+function membershipCalc(m,year,pack){
+  year=String(year||m.year||new Date().getFullYear()); pack=pack||'';
+  const p=pack&&packs[pack]?packs[pack]:{d:'غير محددة',v:0,p1:0,p2:0};
+  const fs=db.finance.filter(f=>f.member===m.no&&f.type==='دخل اشتراكات'&&String(f.membershipYear||m.year||'')===year);
+  const total=fs.reduce((s,f)=>s+(+f.amount||0),0);
+  const due=+p.v||0, balance=Math.max(0,due-total), credit=Math.max(0,total-due);
+  let status=!pack?(total>0?'غير مرتبط بباقة':'لم يسدد'):(total===due?'مسدد':total<due?'مدين':'دائن');
+  let activity=!pack?'غير محددة':(p.p1===100?(total>=due?'سارية':'غير مفعلة'):(total>=due?'سارية':total>=due*.5?'مجمّدة بعد 30/06':'غير مفعلة'));
+  return {year,pack,p,total,due,balance,credit,status,activity};
+}
+function membershipRecord(m,year){return db.memberships.find(x=>x.member===m.no&&String(x.year)===String(year));}
+function ensureMemberships(){
+ db.memberships=db.memberships||[];
+ db.members.forEach(m=>{let year=String(m.year||new Date().getFullYear()),r=membershipRecord(m,year);
+  if(!r)db.memberships.push({id:nextId('MS-',db.memberships),member:m.no,year:+year,pack:m.pack||'',createdAt:m.joinDate||'',updatedAt:new Date().toISOString().slice(0,10)});
+  else if(m.pack&&!r.pack)r.pack=m.pack;
+ });
+}
+function renderMembershipSelects(){
+ if(!document.getElementById('msMember'))return;
+ let old=msMember.value;msMember.innerHTML='<option value="">اختر العضو</option>'+db.members.map(m=>`<option value="${m.no}">${m.no} — ${m.name}</option>`).join('');msMember.value=old;
+ msPack.innerHTML='<option value="">— غير محددة —</option>'+Object.keys(packs).map(k=>`<option value="${k}">${k} — ${packs[k].d}</option>`).join('');
+ renderMembershipPage();
+}
+function loadMembershipForMember(){let m=db.members.find(x=>x.no===msMember.value);if(!m)return;msYear.value=m.year||new Date().getFullYear();let r=membershipRecord(m,msYear.value);msPack.value=r?.pack||m.pack||'';updateMembershipFields();}
+function updateMembershipFields(){
+ let m=db.members.find(x=>x.no===msMember.value);if(!m){['msDue','msPaid','msBalance','msStatus','msActivity'].forEach(id=>document.getElementById(id).value='');return;}
+ let c=membershipCalc(m,msYear.value,msPack.value);msDue.value=c.due?money(c.due):'\\';msPaid.value=money(c.total);msBalance.value=c.balance?money(c.balance):'\\';msStatus.value=c.status;msActivity.value=c.activity;
+}
+function saveMembership(){
+ let m=db.members.find(x=>x.no===msMember.value);if(!m)return alert('اختر العضو');
+ let year=String(msYear.value||m.year||new Date().getFullYear()),pack=msPack.value||'',r=membershipRecord(m,year);
+ if(!r){r={id:nextId('MS-',db.memberships),member:m.no,year:+year,pack,createdAt:m.joinDate||'',updatedAt:new Date().toISOString().slice(0,10)};db.memberships.push(r)}else{r.pack=pack;r.updatedAt=new Date().toISOString().slice(0,10)}
+ if(String(m.year||'')===year||!m.year){m.year=year;m.pack=pack}
+ save();render();msMember.value=m.no;msYear.value=year;msPack.value=pack;updateMembershipFields();alert('تم حفظ ملف العضوية السنوية وربطه بالعضو.');
+}
+function openSelectedMember(){if(msMember.value)openMember(msMember.value);else alert('اختر العضو أولًا')}
+function selectMembership(no,year){msMember.value=no;msYear.value=year;loadMembershipForMember();show('memberships')}
+function renderMembershipPage(){
+ if(!document.getElementById('membershipTable'))return;
+ let selected=msMember.value,year=String(msYear.value||'');
+ if(selected){let m=db.members.find(x=>x.no===selected);if(m){let c=membershipCalc(m,year,membershipRecord(m,year)?.pack||m.pack||'');membershipSummary.innerHTML=`<div class="cards"><div class="card"><small>العضو</small><div><b>${m.name}</b></div></div><div class="card"><small>السنة</small><div><b>${year}</b></div></div><div class="card"><small>المستحق</small><div class="n">${money(c.due)}</div></div><div class="card"><small>المدفوع</small><div class="n">${money(c.total)}</div></div><div class="card"><small>الحالة</small><div><b>${c.status}</b></div></div><div class="card"><small>المزاولة</small><div><b>${c.activity}</b></div></div></div>`;}}else membershipSummary.innerHTML='';
+ let rows=db.memberships.map(r=>{let m=db.members.find(x=>x.no===r.member);if(!m)return '';let c=membershipCalc(m,r.year,r.pack||m.pack||'');return `<tr><td>${r.year}</td><td>${m.no}</td><td><button class="btn alt" onclick="selectMembership('${m.no}',${r.year})">${m.name}</button></td><td>${r.pack||'—'}</td><td>${money(c.due)}</td><td>${money(c.total)}</td><td>${c.balance?money(c.balance):'\\'}</td><td>${c.credit?money(c.credit):'\\'}</td><td>${c.status}</td><td>${c.activity}</td></tr>`;}).join('');
+ membershipTable.innerHTML=rows?`<div class="tablewrap"><table class="table"><thead><tr><th>السنة</th><th>الرقم</th><th>العضو</th><th>الباقة</th><th>المستحق</th><th>المدفوع</th><th>المتبقي</th><th>الدائن</th><th>الحالة</th><th>المزاولة</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">لا توجد ملفات عضوية سنوية.</div>';
+}
+
+
+function memberStatement(no){
+ const m=db.members.find(x=>x.no===no);if(!m)return;
+ return db.finance.filter(x=>x.member===no||x.member===m.name).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+}
+function activityStatement(id){
+ return db.finance.filter(x=>x.activityId===id).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+}
+function financeLinkFromMember(no){
+ show('finance');
+ setTimeout(()=>{
+   fMember.value=no;
+   fActivity.value='';
+   renderFinance();
+ },50);
+}
+function financeLinkFromActivity(id){
+ show('finance');
+ setTimeout(()=>{
+   fActivity.value=id;
+   renderFinance();
+ },50);
+}
+
+function render(){ensureMemberships();renderDash();renderMembers();renderMemberOptions();renderMembershipSelects();renderFinance();renderMail();renderActivities();renderParticipation();renderTraining();renderAttendance();renderCertificates();renderSettings()}
+function exportJSON(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({db,settings,packs},null,2)],{type:'application/json'}));a.download='نسخة_احتياطية_جمعية_الأفق.json';a.click()}
+function importJSON(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(x.db){db=x.db;settings=x.settings||settings;packs=x.packs||packs}else{if(!x.members||!x.finance)throw 0;db=x}save();render();alert('تم الاستيراد بنجاح')}catch{alert('ملف النسخة الاحتياطية غير صالح')}};r.readAsText(f)}
+function clearAll(){if(confirm('سيتم حذف جميع بيانات التطبيق من هذا الجهاز. هل أنت متأكد؟')){db={members:[],finance:[],mail:[],activities:[],participation:[],training:[],attendance:[],certificates:[]};save();render()}}
+
+const OFFICIAL_MEMBERS=[
+ {no:'0001',name:'محمد رحماني قوادري',dob:'1988-08-15',birthPlace:'مجاجة',occupation:'مشرف تربية',officeRole:'الرئيس'},
+ {no:'0002',name:'صابر عبد العزيز',dob:'1985-01-22',birthPlace:'بوقادير',occupation:'أستاذ تعليم ثانوي فرنسية',officeRole:'نائب الرئيس'},
+ {no:'0003',name:'محمد قايت الأمين',dob:'1983-08-28',birthPlace:'الشلف',occupation:'أستاذ تعليم ثانوي',officeRole:'الأمين العام'},
+ {no:'0004',name:'محمد عبد الكريم',dob:'1988-03-18',birthPlace:'الشلف',occupation:'مستشار في الرياضة',officeRole:'أمين المال'},
+ {no:'0005',name:'أحمد رزق',dob:'1985-03-02',birthPlace:'أربعاء تسمسيلت',occupation:'أستاذ تعليم ثانوي بيداغوجية',officeRole:'نائب أمين المال'},
+ {no:'0006',name:'لعرابة زين بلقاسم',dob:'1982-03-26',birthPlace:'سنجاس',occupation:'عسكري متقاعد'},
+ {no:'0007',name:'زباد العربي',dob:'1978-05-09',birthPlace:'شلف',occupation:'مشرف تربية'},
+ {no:'0008',name:'لعرابة زين عبد الله',dob:'1986-02-10',birthPlace:'شلف',occupation:'عسكري متقاعد'},
+ {no:'0009',name:'مجاهد عبد الرحمن',dob:'1978-08-07',birthPlace:'أولاد بن عبد القادر',occupation:'أستاذ تعليم ثانوي بيداغوجي'},
+ {no:'0010',name:'بوجذية بونافة',dob:'1980-01-12',birthPlace:'الصبحة',occupation:'أستاذ تعليم ثانوي بيداغوجي'},
+ {no:'0011',name:'شوال عبد القادر',dob:'1986-04-02',birthPlace:'تاوجنة',occupation:'أستاذ تعليم ثانوي'},
+ {no:'0012',name:'قايت عبد المجيد',dob:'1995-08-17',birthPlace:'الشلف',occupation:'طالب جامعي'},
+ {no:'0013',name:'رقاد عبد القادر',dob:'2002-02-19',birthPlace:'الشلف',occupation:'طالب جامعي'},
+ {no:'0014',name:'دحمان جمال الدين',dob:'1989-10-30',birthPlace:'أولاد فارس',occupation:'أستاذ تعليم ثانوي فرنسية'},
+ {no:'0015',name:'مهدي نصر الدين',dob:'1978-03-25',birthPlace:'وادي الفضة',occupation:'عسكري متقاعد مدرب وحكم دولي قفز حر'},
+ {no:'0016',name:'حاج خير مراد',dob:'1975-07-12',birthPlace:'الشلف',occupation:'موظف مديرية البيئة'}
+];
+function buildOfficialMembers(){return OFFICIAL_MEMBERS.map(x=>({no:x.no,name:x.name,dob:'',phone:'',email:'',birthPlace:'',gender:'',address:'',joinDate:'2025-08-31',adminStatus:'فعالة إداريا',officeRole:x.officeRole||'',occupation:'',type:'عضو مؤسس',pack:'',year:'2025',paid:0,method:'',date:'',photo:'',notes:'عضو مؤسس — تاريخ الانخراط والاعتماد: 31 أوت 2025 — لم يسدد أي مبلغ حتى الآن.',source:'بيانات تأسيسية مؤكدة',recordStatus:'رسمي'}));}
+function migrateOfficialMemberOrder(){
+ const byName=Object.fromEntries(OFFICIAL_MEMBERS.map(x=>[x.name,x.no]));
+ const oldNames=['لعرابة زين بلقاسم','محمد رحماني قوادري','زباد العربي','لعرابة زين عبد الله','مجاهد عبد الرحمن','بوجذية بونافة','شوال عبد القادر','قايت عبد المجيد','رقاد عبد القادر','دحمان جمال الدين','محمد عبد الكريم','أحمد رزق','صابر عبد العزيز','مهدي نصر الدين','حاج خير مراد','محمد قايت الأمين'];
+ const officialSet=new Set(oldNames);
+ const isOfficial= db.members.length===16 && db.members.every(m=>officialSet.has(m.name));
+ if(!isOfficial || localStorage.getItem('afak_member_order_v1')==='2') return;
+ const map={};
+ db.members.forEach(m=>{const n=byName[m.name]; if(n){map[m.no]=n; m.no=n; m.officeRole=OFFICIAL_MEMBERS.find(x=>x.name===m.name)?.officeRole||'';}});
+ ['finance','participation','training','attendance','certificates'].forEach(k=>{(db[k]||[]).forEach(x=>{if(x.member && map[x.member]) x.member=map[x.member];});});
+ localStorage.setItem('afak_member_order_v1','2');
+ save();
+}
+function loadOfficialData(){
+ if(!confirm('سيتم استبدال سجل الأعضاء الحالي وسجل الحركات المالية بالبيانات التأسيسية الرسمية. هذه الخطوة مخصصة لإزالة بيانات الاختبار فقط. هل تريد المتابعة؟')) return;
+ db.members=buildOfficialMembers();db.finance=[];ensureHistorical2025Finance();save();render();show('members');alert('تم اعتماد قائمة الأعضاء المؤسسين الـ16 بنجاح.');
+}
+if(db.members.length===0){db.members=buildOfficialMembers();save();}
+migrateOfficialMemberOrder();ensureHistorical2025Finance();opts();updateMemberPackage();render();
+</script>
+<script>
+/* ===== الإصدار المهني 5.0 — طبقة الحوكمة والبيانات ===== */
+const SYSTEM_KEY='afak_system_v1';
+let systemState=JSON.parse(localStorage.getItem(SYSTEM_KEY)||'null')||{association:'جمعية الأفق للرياضات الجوية والجبلية',foundationDate:'2025-08-31',foundationYear:'2025',activeYear:String(new Date().getFullYear()),currency:'DZD',schema:'5.1',dataPolicy:'البيانات التجريبية لا تعتمد كسجل رسمي',officialFoundationVerified:true};
+systemState.schema='5.1';systemState.dataPolicy=systemState.dataPolicy||'البيانات التجريبية لا تعتمد كسجل رسمي';systemState.officialFoundationVerified=true;
+if(!/^[0-9]{4}$/.test(systemState.activeYear)||!settings.years.includes(String(systemState.activeYear)))systemState.activeYear=settings.years.includes('2026')?'2026':'2025';
+function saveSystem(){localStorage.setItem(SYSTEM_KEY,JSON.stringify(systemState));}
+function setActiveYear(y){y=String(y);if(!settings.years.includes(y))return;systemState.activeYear=y;saveSystem();render();}
+function activeYear(){return String(systemState.activeYear||'2025');}
+function yearOfFinance(x){return String(x.financialYear||String(x.date||'').slice(0,4)||'');}
+function financeForYear(y){return db.finance.filter(function(x){return yearOfFinance(x)===String(y);});}
+function yearTotals(y){var d=financeForYear(y);return {income:d.filter(function(x){return x.type!=='مصروف'&&!x.voided;}).reduce(function(s,x){return s+(+x.amount||0);},0),expense:d.filter(function(x){return x.type==='مصروف'&&!x.voided;}).reduce(function(s,x){return s+(+x.amount||0);},0)};}
+function dataHealthReport(){
+ var issues=[],seen=new Set();
+ db.members.forEach(function(m){if(seen.has(m.no))issues.push('رقم عضوية مكرر: '+m.no);seen.add(m.no);if(!m.name)issues.push('عضو بلا اسم: '+m.no);});
+ db.finance.forEach(function(f){if(f.voided)return;if(!f.financialYear)issues.push('حركة مالية بلا سنة: '+(f.id||'—'));if(!f.account)issues.push('حركة مالية بلا حساب: '+(f.id||'—'));if((+f.amount||0)<=0)issues.push('مبلغ غير صالح: '+(f.id||'—'));if(f.type==='دخل اشتراكات'&&!f.member)issues.push('دخل اشتراكات بلا عضو: '+(f.id||'—'));});
+ db.participation.forEach(function(x){if(!db.members.some(function(m){return m.no===x.member;}))issues.push('مشاركة مرتبطة بعضو غير موجود: '+x.id);if(!db.activities.some(function(a){return a.id===x.activityId;}))issues.push('مشاركة مرتبطة بنشاط غير موجود: '+x.id);});
+ db.attendance.forEach(function(x){if(!db.members.some(function(m){return m.no===x.member;}))issues.push('حضور مرتبط بعضو غير موجود: '+x.id);if(!db.activities.some(function(a){return a.id===x.activityId;}))issues.push('حضور مرتبط بنشاط غير موجود: '+x.id);});
+ db.certificates.forEach(function(x){if(!db.members.some(function(m){return m.no===x.member;}))issues.push('شهادة مرتبطة بعضو غير موجود: '+x.id);});
+ return {issues:issues,members:db.members.length,finance:db.finance.filter(function(x){return !x.voided;}).length,activities:db.activities.length,memberships:(db.memberships||[]).length};
+}
+function runDataHealth(){
+ var r=dataHealthReport(),el=document.getElementById('dataHealth');if(!el)return;
+ var list=r.issues.slice(0,30).map(function(x){return '<li>'+esc(x)+'</li>';}).join('');
+ var issues=r.issues.length?'<div class="warning"><b>ملاحظات تحتاج مراجعة ('+r.issues.length+')</b><ul>'+list+'</ul>'+(r.issues.length>30?'<small>تم عرض أول 30 ملاحظة.</small>':'')+'</div>':'<div class="notice">✓ لم يجد الفحص تعارضات أساسية في الروابط أو الحقول الحرجة.</div>';
+ el.innerHTML='<div class="health-grid"><div class="health-item"><small>الأعضاء</small><b>'+r.members+'</b></div><div class="health-item"><small>الحركات المالية</small><b>'+r.finance+'</b></div><div class="health-item"><small>الأنشطة</small><b>'+r.activities+'</b></div><div class="health-item"><small>العضويات السنوية</small><b>'+r.memberships+'</b></div></div>'+issues;
+}
+function showFoundationReset(){
+ var box=document.getElementById('foundationResetBox');if(!box)return;box.classList.remove('hide');
+ box.innerHTML='<div class="warning"><b>إعادة التأسيس الرسمي لسجل الجمعية</b><p>هذه العملية تمسح من هذا المتصفح الأعضاء والعضويات والحركات المالية والأنشطة والمشاركات والحضور والتكوينات والشهادات، ثم تعيد فقط بيانات التأسيس المؤكدة: 16 عضوًا، تاريخ الانخراط 31/08/2025، وعدم وجود مدفوعات أعضاء، وحركة الهبة 1000 دج ومصاريف البنك 595 دج.</p><div class="toolbar"><button class="btn danger" onclick="foundationReset()">نعم، أعد التأسيس</button><button class="btn alt" onclick="document.getElementById(\'foundationResetBox\').classList.add(\'hide\')">إلغاء</button></div></div>';
+}
+function foundationReset(){
+ if(!confirm('تأكيد نهائي: حذف بيانات الاختبار الحالية من هذا الجهاز وإعادة السجل الرسمي؟'))return;
+ db={members:buildOfficialMembers(),finance:[],mail:[],activities:[],activityFunding:[],participation:[],training:[],attendance:[],certificates:[],memberships:[]};
+ ensureHistorical2025Finance();ensureMemberships();systemState.activeYear='2025';saveSystem();save();opts();render();show('home');runDataHealth();alert('تمت إعادة تأسيس السجل الرسمي للجمعية.');
+}
+function renderDash(){
+ var y=activeYear(),t=yearTotals(y),memberCount=db.members.length,acts=db.activities.filter(function(a){return String(a.startDate||a.date||'').startsWith(y);}).length;
+ var status=y==='2025'?'سنة التأسيس — توثيق تاريخي':'سنة تشغيلية';
+ var dueMembers=db.members.filter(function(m){return m.pack;}).filter(function(m){return membershipCalc(m,y,m.pack).status!=='مسدد';}).length;
+ var yearOptions=Array.from(new Set((settings.years||[]).concat([y]))).sort(function(a,b){return +a-+b;});
+ var dy=document.getElementById('dashYear');if(dy){dy.innerHTML=yearOptions.map(function(v){return '<option value="'+v+'">'+v+'</option>';}).join('');dy.value=y;}
+ var ys=document.getElementById('dashYearStatus');if(ys)ys.value=status;
+ var note=document.getElementById('dashNotice');if(note)note.innerHTML=y==='2025'?'السنة '+y+' مرتبطة بتأسيس الجمعية بتاريخ <b>31/08/2025</b>. يمكن استدراك الوثائق التاريخية دون خلطها مع بيانات السنوات اللاحقة.':'السنة النشطة حاليًا هي <b>'+y+'</b>.';
+ dash.innerHTML='<div class="card"><small>الأعضاء</small><div class="n">'+memberCount+'</div></div><div class="card"><small>قبض '+y+'</small><div class="n">'+money(t.income)+'</div></div><div class="card"><small>دفع '+y+'</small><div class="n">'+money(t.expense)+'</div></div><div class="card"><small>رصيد '+y+'</small><div class="n">'+money(t.income-t.expense)+'</div></div><div class="card"><small>أنشطة '+y+'</small><div class="n">'+acts+'</div></div><div class="card"><small>عضويات تحتاج متابعة</small><div class="n">'+dueMembers+'</div></div>';
+}
+function historicalLabel(f){return f.historical?' <span class="year-pill">تاريخية</span>':'';}
+function editFinance(id){
+ var f=db.finance.find(function(x){return x.id===id;});if(!f)return;show('finance');document.getElementById('financeForm').classList.remove('hide');opts();
+ fOpId.value=f.id;fType.value=f.type;fCategory.value=f.category||'';fNature.value=f.nature||'';fMember.value=f.member||'';fParty.value=f.party||'';fAmount.value=f.amount||'';fDate.value=f.date||'';fFinancialYear.value=yearOfFinance(f);fMethod.value=f.method||'';fAccount.value=f.account||'';fDesc.value=f.desc||'';fRef.value=f.ref||'';document.getElementById('fHistorical').checked=!!f.historical;fMembership.value=f.membershipId||'';fActivity.value=f.activityId||'';document.getElementById('fDate').disabled=!!f.historical;
+}
+function cancelFinance(id){
+ var f=db.finance.find(function(x){return x.id===id;});if(!f)return;if(f.historical&&String(f.ref||'').startsWith('HIST-2025-'))return alert('الحركة التاريخية الأساسية لسنة 2025 محمية من الحذف. استخدم تعديل البيانات إذا كان لديك تصحيح موثق.');
+ if(!confirm('سيتم إلغاء هذه الحركة من السجل دون حذفها من النسخة الاحتياطية. هل أنت متأكد؟'))return;f.voided=true;f.voidedAt=new Date().toISOString();save();render();
+}
+function renderFinance(){
+ var data=financeFiltered().filter(function(x){return !x.voided;}),income=data.filter(function(x){return x.type!=='مصروف';}).reduce(function(a,x){return a+(+x.amount||0);},0),out=data.filter(function(x){return x.type==='مصروف';}).reduce(function(a,x){return a+(+x.amount||0);},0);
+ var all=financeForYear(activeYear()).filter(function(x){return !x.voided;}),allIn=all.filter(function(x){return x.type!=='مصروف';}).reduce(function(a,x){return a+(+x.amount||0);},0),allOut=all.filter(function(x){return x.type==='مصروف';}).reduce(function(a,x){return a+(+x.amount||0);},0);
+ var running=0;
+ var rows=data.map(function(x){
+  var m=db.members.find(function(mm){return mm.no===x.member||mm.name===x.member;}),a=db.activities.find(function(aa){return aa.id===x.activityId;}),ms=(db.memberships||[]).find(function(r){return r.id===x.membershipId;});
+  running+=(x.type==='مصروف'?-1:1)*(+x.amount||0);
+  return '<tr><td>'+esc(x.id||'')+'</td><td>'+esc(x.date||'غير محدد')+historicalLabel(x)+'</td><td>'+(x.type==='مصروف'?'دفع':'قبض')+'</td><td>'+esc(x.type||'')+'</td><td>'+esc(x.category||'—')+'</td><td>'+esc(x.nature||'—')+'</td><td>'+esc(m?m.name:(x.member||'—'))+'</td><td>'+esc(x.financialYear|| (ms&&ms.year) || x.membershipYear || yearOfFinance(x) || '—')+'</td><td>'+esc(a?(a.title||a.type):(x.activityId||'—'))+'</td><td>'+esc(x.party||'—')+'</td><td>'+money(x.amount)+'</td><td>'+money(running)+'</td><td>'+esc(x.method||'—')+'</td><td>'+esc(x.account||'—')+'</td><td>'+esc(x.desc||'—')+'</td><td>'+esc(x.ref||'—')+'</td><td class="row-actions"><button class="btn alt sm" onclick="printReceipt(\''+x.id+'\')">وصل</button><button class="btn alt sm" onclick="editFinance(\''+x.id+'\')">تعديل</button><button class="btn danger sm" onclick="cancelFinance(\''+x.id+'\')">إلغاء</button></td></tr>';
+ }).join('');
+ var cards=Object.entries(accountBalances()).map(function(pair){return '<div class="card"><small>'+esc(pair[0])+'</small><div class="n">'+money(pair[1])+'</div></div>';}).join('');
+ financeTable.innerHTML='<div class="cards"><div class="card"><small>القبض المعروض</small><div class="n">'+money(income)+'</div></div><div class="card"><small>الدفع المعروض</small><div class="n">'+money(out)+'</div></div><div class="card"><small>الصافي المعروض</small><div class="n">'+money(income-out)+'</div></div><div class="card"><small>رصيد السنة '+activeYear()+'</small><div class="n">'+money(allIn-allOut)+'</div></div></div><h3>أرصدة الحسابات الحالية</h3><div class="cards">'+cards+'</div>'+(rows?'<div class="tablewrap"><table class="table"><thead><tr><th>رقم العملية</th><th>التاريخ</th><th>الحركة</th><th>النوع</th><th>التصنيف</th><th>طبيعة الحركة</th><th>العضو</th><th>السنة</th><th>النشاط</th><th>المورد/الشريك</th><th>المبلغ</th><th>الرصيد الجاري</th><th>الطريقة</th><th>الحساب</th><th>البيان</th><th>المرجع</th><th>إجراء</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="empty">لا توجد حركات مطابقة.</div>');
+}
+const _saveFinanceV5=saveFinance;
+saveFinance=function(){
+ var hist=document.getElementById('fHistorical')&&document.getElementById('fHistorical').checked;
+ var opId=document.getElementById('fOpId')&&document.getElementById('fOpId').value;
+ if(!document.getElementById('fDate').value&&!hist)return alert('أدخل تاريخ الحركة، أو فعّل خيار «حركة تاريخية» إذا كان التاريخ غير محدد في الوثيقة الأصلية.');
+ if(hist&&!document.getElementById('fFinancialYear').value)return alert('اختر السنة المالية للحركة التاريخية.');
+ _saveFinanceV5();
+ var id=opId||db.finance.slice(-1)[0]?.id;var f=id&&db.finance.find(function(x){return x.id===id;});if(f){f.historical=!!hist;f.financialYear=f.financialYear||document.getElementById('fFinancialYear').value;save();}
+};
+exportJSON=function(){var payload={schema:'5.1',exportedAt:new Date().toISOString(),system:systemState,db:db,settings:settings,packs:packs};var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));a.download='نسخة_احتياطية_جمعية_الأفق_5.1.json';a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);};
+function renderGovernance(){
+ var sum=document.getElementById('govSummary'),years=document.getElementById('govYears'),src=document.getElementById('govSources'),health=document.getElementById('govHealth');if(!sum)return;
+ var officialMembers=db.members.filter(function(m){return m.recordStatus==='رسمي'||m.source==='بيانات تأسيسية مؤكدة';}).length;
+ var officialFin=db.finance.filter(function(f){return f.recordStatus==='رسمي'||String(f.ref||'').startsWith('HIST-2025-');}).length;
+ var testLike=db.members.filter(function(m){return m.recordStatus==='تجريبي';}).length+db.finance.filter(function(f){return f.recordStatus==='تجريبي';}).length;
+ sum.innerHTML='<div class="card"><small>أعضاء السجل</small><div class="n">'+db.members.length+'</div></div><div class="card"><small>أعضاء رسميون</small><div class="n">'+officialMembers+'</div></div><div class="card"><small>حركات مالية رسمية</small><div class="n">'+officialFin+'</div></div><div class="card"><small>بيانات موسومة تجريبية</small><div class="n">'+testLike+'</div></div>';
+ var ys=Array.from(new Set((settings.years||[]).concat(['2025']))).sort(function(a,b){return +a-+b;});
+ years.innerHTML='<div class="tablewrap"><table class="table"><thead><tr><th>السنة</th><th>الوضع</th><th>ملاحظة</th></tr></thead><tbody>'+ys.map(function(y){var status=String(y)==='2025'?'سنة التأسيس':'سنة تشغيلية';var n=financeForYear(y).filter(function(x){return !x.voided;}).length;return '<tr><td>'+y+'</td><td><span class="badge '+(String(y)==='2025'?'credit':'ok')+'">'+status+'</span></td><td>'+n+' حركة مالية مسجلة</td></tr>';}).join('')+'</tbody></table></div>';
+ src.innerHTML='<div class="notice"><b>قاعدة التوثيق:</b> بيانات 2025 الرسمية مصدرها وثائق التأسيس والتقرير المالي المتاح. لا يتم تحويل أي بيانات اختبار إلى بيانات رسمية تلقائيًا.</div><div class="card"><b>المؤسسون الـ16</b><p class="muted">تاريخ الانخراط والاعتماد: 31/08/2025 — المدفوعات: 0 دج.</p></div><div class="card"><b>المالية التاريخية المؤكدة</b><p class="muted">هبة 1,000 دج + مصاريف بنكية 595 دج = رصيد 405 دج.</p></div>';
+ var r=dataHealthReport();health.innerHTML=r.issues.length?'<div class="warning">يوجد '+r.issues.length+' ملاحظة تحتاج مراجعة. راجع صفحة الإعدادات/سلامة السجلات.</div>':'<div class="notice">✓ لا توجد تعارضات أساسية في الروابط والحقول الحرجة.</div>';
+}
+function renderProfessionalLayer(){saveSystem();runDataHealth();renderGovernance();}
+function hardenOfficialMembers(){
+ if(db.members.length!==16)return;
+ var names=['محمد رحماني قوادري','صابر عبد العزيز','محمد قايت الأمين','محمد عبد الكريم','أحمد رزق','لعرابة زين بلقاسم','زباد العربي','لعرابة زين عبد الله','مجاهد عبد الرحمن','بوجذية بونافة','شوال عبد القادر','قايت عبد المجيد','رقاد عبد القادر','دحمان جمال الدين','مهدي نصر الدين','حاج خير مراد'];
+ if(!names.every(function(n,i){return db.members[i]&&db.members[i].name===n;}))return;
+ var roles={'محمد رحماني قوادري':'الرئيس','صابر عبد العزيز':'نائب الرئيس','محمد قايت الأمين':'الأمين العام','محمد عبد الكريم':'أمين المال','أحمد رزق':'نائب أمين المال'};
+ db.members.forEach(function(m,i){m.no=String(i+1).padStart(4,'0');m.joinDate='2025-08-31';m.year=m.year||'2025';m.type=m.type||'عضو مؤسس';if(roles[m.name]!==undefined)m.officeRole=roles[m.name];else m.officeRole=m.officeRole||'';});save();
+}
+hardenOfficialMembers();
+if(document.getElementById('fHistorical'))document.getElementById('fHistorical').addEventListener('change',function(e){document.getElementById('fDate').disabled=e.target.checked;});
+const _renderV5=render;render=function(){_renderV5();setTimeout(function(){renderProfessionalLayer();},0);};
+render();
+
+</script>
+</body></html>

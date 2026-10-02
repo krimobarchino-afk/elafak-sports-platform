@@ -1,0 +1,11 @@
+{
+  "name": "منصة تسيير جمعية الأفق",
+  "short_name": "الأفق",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7f8",
+  "theme_color": "#0f766e",
+  "description": "منصة تسيير جمعية الأفق للرياضات الجوية والجبلية"
+}

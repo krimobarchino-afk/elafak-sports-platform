@@ -1,0 +1,260 @@
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+
+(function(){
+  const K = {
+    admin:'afak_admin_records_v19',
+    incoming:'afak_incoming_mail_v19',
+    outgoing:'afak_outgoing_mail_v19'
+  };
+  const get=(k)=>JSON.parse(localStorage.getItem(k)||'[]');
+  const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  const esc=(v)=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  window.showAdminTab=function(tab){
+    ['admin','in','out'].forEach(x=>{
+      const el=document.getElementById(x+'-tab'); if(el) el.style.display=x===tab?'block':'none';
+    });
+  };
+  
+function openActivity(id){
+ const a=db.activities.find(x=>x.id===id); if(!a)return;
+ const parts=db.participation.filter(x=>x.activity===id);
+ const att=db.attendance.filter(x=>x.activity===id);
+ const tr=db.training.filter(x=>x.activity===id);
+ const fin=db.finance.filter(x=>x.activity===id);
+ const members=[...new Set([...parts.map(x=>x.member),...att.map(x=>x.member)])].map(no=>db.members.find(m=>m.no===no)).filter(Boolean);
+ const income=fin.filter(x=>x.type!=='مصروف').reduce((s,x)=>s+(+x.amount||0),0);
+ const expense=fin.filter(x=>x.type==='مصروف').reduce((s,x)=>s+(+x.amount||0),0);
+ activityProfileBox.innerHTML=`
+ <div class="profileHead"><div class="avatar">🏃</div><div><h3 style="margin:0">${a.name||a.title||'نشاط'}</h3><div class="muted mini">${a.id} — ${a.date||''}</div></div></div>
+ <div class="profileActions">
+   <button class="btn alt" onclick="show('activities')">العودة للأنشطة</button>
+   <button class="btn" onclick="quickActivityMember('${id}')">+ إضافة مشارك</button>
+ </div>
+ <div class="cards">
+  <div class="card"><small>المشاركون</small><div class="n">${members.length}</div></div>
+  <div class="card"><small>الحضور</small><div class="n">${att.length}</div></div>
+  <div class="card"><small>التكوينات</small><div class="n">${tr.length}</div></div>
+  <div class="card"><small>المقبوضات</small><div class="n">${money(income)}</div></div>
+  <div class="card"><small>المصروفات</small><div class="n">${money(expense)}</div></div>
+  <div class="card"><small>الصافي</small><div class="n">${money(income-expense)}</div></div>
+ </div>
+ <div class="form"><h3>بيانات النشاط</h3>
+ <div class="kv">
+  <div><small>التاريخ</small><b>${a.date||'—'}</b></div>
+  <div><small>النوع</small><b>${a.type||'—'}</b></div>
+  <div><small>المكان</small><b>${a.place||'—'}</b></div>
+  <div><small>المسؤول</small><b>${a.responsible||'—'}</b></div>
+  <div><small>الحالة</small><b>${a.status||'—'}</b></div>
+ </div><p>${a.notes||''}</p></div>
+
+ <div class="form"><h3>المشاركون (${members.length})</h3>
+ ${members.length?`<div class="tablewrap"><table class="table"><thead><tr><th>الرقم</th><th>العضو</th><th>الدور</th></tr></thead><tbody>${members.map(m=>{let p=parts.find(x=>x.member===m.no);return `<tr><td>${m.no}</td><td><button class="btn alt" onclick="openMember('${m.no}')">${m.name}</button></td><td>${p?.role||'مشارك'}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">لا يوجد مشاركون مسجلون.</div>'}</div>
+
+ <div class="form"><h3>الحضور (${att.length})</h3>
+ ${att.length?`<div class="tablewrap"><table class="table"><thead><tr><th>العضو</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody>${att.map(x=>{let m=db.members.find(q=>q.no===x.member);return `<tr><td>${m?m.name:x.member}</td><td>${x.date||''}</td><td>${x.status||''}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">لا يوجد حضور مسجل.</div>'}</div>
+
+ <div class="form"><h3>الحركات المالية (${fin.length})</h3>
+ ${fin.length?`<div class="tablewrap"><table class="table"><thead><tr><th>التاريخ</th><th>الحركة</th><th>المبلغ</th><th>البيان</th></tr></thead><tbody>${fin.map(x=>`<tr><td>${x.date||''}</td><td>${x.type}</td><td>${money(x.amount)}</td><td>${x.desc||''}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">لا توجد حركة مالية مرتبطة بهذا النشاط.</div>'}</div>
+
+ <div class="form"><h3>التكوين المرتبط (${tr.length})</h3>
+ ${tr.length?tr.map(x=>`<div class="card"><b>${x.title||x.type||''}</b><div>${x.date||''} — ${x.instructor||''}</div></div>`).join(''):'<div class="empty">لا يوجد تكوين مرتبط.</div>'}</div>
+ `;
+ show('activityProfile');
+}
+
+function quickActivityMember(activityId){
+ const names=db.members.map(m=>`${m.no} — ${m.name}`).join('\n');
+ const no=prompt('أدخل رقم العضو لإضافته إلى النشاط:\n'+names);
+ if(!no)return;
+ const m=db.members.find(x=>x.no===no.trim());
+ if(!m)return alert('رقم العضو غير موجود.');
+ const exists=db.participation.some(x=>x.activity===activityId&&x.member===m.no);
+ if(exists)return alert('العضو مسجل مسبقًا في هذا النشاط.');
+ db.participation.push({id:nextId('PART-',db.participation),activity:activityId,member:m.no,date:new Date().toISOString().slice(0,10),role:'مشارك',note:''});
+ save(); render(); openActivity(activityId);
+}
+
+function render(){
+    const a=get(K.admin), i=get(K.incoming), o=get(K.outgoing);
+    const card=(r,del)=>`<div class="list-row"><b>${esc(r.ref||'')}</b> — ${esc(r.subject||r.title||'')}<br><small>${esc(r.date||'')} | ${esc(r.status||'')} ${r.urgency?'| '+esc(r.urgency):''}</small><button onclick="${del}('${r.id}')">حذف</button></div>`;
+    const al=document.getElementById('adminList'), il=document.getElementById('inList'), ol=document.getElementById('outList');
+    if(al) al.innerHTML=a.length?a.map(r=>card(r,'window.delAdmin')).join(''):'<p>لا توجد سجلات.</p>';
+    if(il) il.innerHTML=i.length?i.map(r=>card(r,'window.delIncoming')).join(''):'<p>لا توجد مراسلات واردة.</p>';
+    if(ol) ol.innerHTML=o.length?o.map(r=>card(r,'window.delOutgoing')).join(''):'<p>لا توجد مراسلات صادرة.</p>';
+  }
+  const formData=(ids)=>Object.fromEntries(ids.map(id=>[id,document.getElementById(id)?.value||'']));
+  function clearForm(id){const f=document.getElementById(id); if(f) f.reset();}
+  document.getElementById('adminForm')?.addEventListener('submit',e=>{
+    e.preventDefault(); const d=formData(['adRef','adDate','adType','adTitle','adStatus','adNotes']);
+    d.id=crypto.randomUUID(); set(K.admin,[...get(K.admin),d]); clearForm('adminForm'); render();
+  });
+  document.getElementById('inForm')?.addEventListener('submit',e=>{
+    e.preventDefault(); const d=formData(['inRef','inDate','inFrom','inType','inSubject','inUrgency','inStatus','inNotes']);
+    d.id=crypto.randomUUID(); set(K.incoming,[...get(K.incoming),d]); clearForm('inForm'); render();
+  });
+  document.getElementById('outForm')?.addEventListener('submit',e=>{
+    e.preventDefault(); const d=formData(['outRef','outDate','outTo','outType','outSubject','outMethod','outStatus','outNotes']);
+    d.id=crypto.randomUUID(); set(K.outgoing,[...get(K.outgoing),d]); clearForm('outForm'); render();
+  });
+  window.delAdmin=id=>{set(K.admin,get(K.admin).filter(x=>x.id!==id));render()};
+  window.delIncoming=id=>{set(K.incoming,get(K.incoming).filter(x=>x.id!==id));render()};
+  window.delOutgoing=id=>{set(K.outgoing,get(K.outgoing).filter(x=>x.id!==id));render()};
+  window.renderAdminMail=render;
+  render();
+})();
+
+
+(function(){
+  const K={assets:'afak_assets_v20',insp:'afak_tech_inspections_v20',loans:'afak_equipment_loans_v20',maint:'afak_maintenance_v20'};
+  const get=k=>JSON.parse(localStorage.getItem(k)||'[]');
+  const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  const fd=ids=>Object.fromEntries(ids.map(id=>[id,document.getElementById(id)?.value||'']));
+  const reset=id=>document.getElementById(id)?.reset();
+  window.showEquipTab=function(tab){
+    ['assets','inspections','loans','maintenance'].forEach(x=>{let e=document.getElementById(x+'-tab');if(e)e.style.display=x===tab?'block':'none';});
+  };
+  function fillAssetSelects(){
+    ['inspAsset','loanAsset','maintAsset'].forEach(id=>{
+      const e=document.getElementById(id); if(!e)return;
+      const old=e.value;
+      e.innerHTML='<option value="">اختر المعدة</option>'+get(K.assets).map(a=>`<option value="${esc(a.id)}">${esc(a.code)} — ${esc(a.name)}${a.serial?' — '+esc(a.serial):''}</option>`).join('');
+      e.value=old;
+    });
+  }
+  function render(){
+    const a=get(K.assets), i=get(K.insp), l=get(K.loans), m=get(K.maint);
+    const name=id=>{let x=a.find(q=>q.id===id);return x?`${x.code} — ${x.name}`:'—'};
+    document.getElementById('assetList').innerHTML=a.length?a.map(x=>`<div class="list-row"><b>${esc(x.code)}</b> — ${esc(x.name)}<br><small>${esc(x.category)} | ${esc(x.serial)} | ${esc(x.status)} | ${esc(x.hours||0)} ساعة/استخدام</small></div>`).join(''):'<p>لا توجد معدات.</p>';
+    document.getElementById('inspectionList').innerHTML=i.length?i.slice().reverse().map(x=>`<div class="list-row"><b>${esc(name(x.assetId))}</b><br><small>${esc(x.date)} | ${esc(x.type)} | ${esc(x.result)} | الفاحص: ${esc(x.inspector)}</small><br>${esc(x.findings)}</div>`).join(''):'<p>لا توجد عمليات مراقبة.</p>';
+    document.getElementById('loanList').innerHTML=l.length?l.slice().reverse().map(x=>`<div class="list-row"><b>${esc(name(x.assetId))}</b> — ${esc(x.member)}<br><small>${esc(x.date)} → ${esc(x.returnDate)} | ${esc(x.status)}</small></div>`).join(''):'<p>لا توجد إعارات.</p>';
+    document.getElementById('maintenanceList').innerHTML=m.length?m.slice().reverse().map(x=>`<div class="list-row"><b>${esc(name(x.assetId))}</b><br><small>${esc(x.date)} | ${esc(x.status)} | ${esc(x.provider)} | ${esc(x.cost||0)}</small><br>${esc(x.work)}</div>`).join(''):'<p>لا توجد عمليات صيانة.</p>';
+    fillAssetSelects();
+  }
+  document.getElementById('assetForm')?.addEventListener('submit',e=>{
+    e.preventDefault();let d=fd(['eqCode','eqName','eqCategory','eqBrand','eqModel','eqSerial','eqDate','eqHours','eqStatus','eqNotes']);
+    d.id=crypto.randomUUID();set(K.assets,[...get(K.assets),d]);reset('assetForm');render();
+  });
+  document.getElementById('inspectionForm')?.addEventListener('submit',e=>{
+    e.preventDefault();let d=fd(['inspAsset','inspDate','inspType','inspHours','inspResult','inspInspector','inspFindings','inspActions','inspNext']);
+    if(!d.inspAsset){alert('اختر المعدة أولًا');return;}
+    d.id=crypto.randomUUID();set(K.insp,[...get(K.insp),d]);
+    if(d.inspResult==='ممنوع من الاستعمال'||d.inspResult==='يحتاج صيانة'){
+      let a=get(K.assets),x=a.find(q=>q.id===d.inspAsset);if(x)x.status=d.inspResult==='ممنوع من الاستعمال'?'ممنوع من الاستعمال':'تحت الصيانة';set(K.assets,a);
+    }
+    reset('inspectionForm');render();
+  });
+  document.getElementById('loanForm')?.addEventListener('submit',e=>{
+    e.preventDefault();let d=fd(['loanAsset','loanMember','loanDate','loanReturn','loanStatus','loanNotes']);
+    if(!d.loanAsset){alert('اختر المعدة أولًا');return;}
+    d.id=crypto.randomUUID();set(K.loans,[...get(K.loans),d]);
+    let a=get(K.assets),x=a.find(q=>q.id===d.loanAsset);if(x&&d.loanStatus==='معار')x.status='معار';set(K.assets,a);
+    reset('loanForm');render();
+  });
+  document.getElementById('maintenanceForm')?.addEventListener('submit',e=>{
+    e.preventDefault();let d=fd(['maintAsset','maintDate','maintProvider','maintCost','maintStatus','maintWork']);
+    if(!d.maintAsset){alert('اختر المعدة أولًا');return;}
+    d.id=crypto.randomUUID();set(K.maint,[...get(K.maint),d]);
+    let a=get(K.assets),x=a.find(q=>q.id===d.maintAsset);if(x)x.status=d.maintStatus==='منجزة'?'متاح':'تحت الصيانة';set(K.assets,a);
+    reset('maintenanceForm');render();
+  });
+  window.renderEquipment=render; render();
+})();
+
+
+(function(){
+const A='afak_assets_v20',I='afak_tech_inspections_v20',L='afak_equipment_loans_v20',M='afak_maintenance_v20',U='afak_equipment_usage_v21';
+const get=k=>JSON.parse(localStorage.getItem(k)||'[]');
+const set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function fill(){
+ let e=document.getElementById('techCardAsset'); if(!e)return;
+ let old=e.value,a=get(A);
+ e.innerHTML='<option value="">اختر قطعة العتاد</option>'+a.map(x=>`<option value="${x.id}">${esc(x.code)} — ${esc(x.name)}</option>`).join('');
+ e.value=old; show(e.value);
+}
+function show(id){
+ let v=document.getElementById('techCardView'); if(!v)return;
+ if(!id){v.innerHTML='<p>اختر قطعة لعرض بطاقتها التقنية.</p>';return;}
+ let a=get(A),x=a.find(q=>q.id===id); if(!x)return;
+ let ins=get(I).filter(q=>q.assetId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ let loans=get(L).filter(q=>q.assetId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ let maint=get(M).filter(q=>q.assetId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ let use=get(U).filter(q=>q.assetId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ let last=ins[0],next=last?.next||'';
+ let alert='';
+ if(x.status==='ممنوع من الاستعمال') alert='<div class="warning">⛔ ممنوع من الاستعمال — لا يجوز تسجيله كمعدة متاحة قبل معالجة سبب المنع.</div>';
+ else if(x.status==='تحت الصيانة') alert='<div class="warning">🔧 تحت الصيانة — يتطلب إغلاق عملية الصيانة قبل إعادته للاستعمال.</div>';
+ else if(next && new Date(next)<new Date()) alert='<div class="warning">⚠️ موعد المراقبة التقنية القادمة متجاوز.</div>';
+ v.innerHTML=`${alert}
+ <div class="tech-summary">
+ <h3>${esc(x.name)} — ${esc(x.code)}</h3>
+ <p><b>الرقم التسلسلي:</b> ${esc(x.serial)} | <b>الطراز:</b> ${esc(x.model)} | <b>الصانع:</b> ${esc(x.brand)}</p>
+ <p><b>تاريخ الاقتناء:</b> ${esc(x.date)} | <b>ساعات/استخدامات:</b> ${esc(x.hours||0)} | <b>الحالة:</b> ${esc(x.status)}</p>
+ </div>
+ <h3>🔍 آخر المراقبة التقنية</h3>
+ ${last?`<p>${esc(last.date)} — ${esc(last.type)} — <b>${esc(last.result)}</b><br>${esc(last.findings)}<br>الفاحص: ${esc(last.inspector)} | القادم: ${esc(last.next)}</p>`:'<p>لا توجد مراقبة مسجلة.</p>'}
+ <h3>📈 سجل الاستخدام</h3>
+ ${use.length?use.map(q=>`<div class="list-row">${esc(q.date)} | ${esc(q.kind)} | +${esc(q.amount)} | ${esc(q.notes)}</div>`).join(''):'<p>لا يوجد سجل استخدام إضافي.</p>'}
+ <h3>📦 الإعارات</h3>
+ ${loans.length?loans.map(q=>`<div class="list-row">${esc(q.date)} → ${esc(q.returnDate)} | ${esc(q.member)} | ${esc(q.status)}</div>`).join(''):'<p>لا توجد إعارات.</p>'}
+ <h3>🔧 الصيانة</h3>
+ ${maint.length?maint.map(q=>`<div class="list-row">${esc(q.date)} | ${esc(q.status)} | ${esc(q.provider)} | ${esc(q.cost)}<br>${esc(q.work)}</div>`).join(''):'<p>لا توجد صيانة.</p>'}
+ <h3>🧾 المراقبات السابقة</h3>
+ ${ins.length?ins.map(q=>`<div class="list-row">${esc(q.date)} | ${esc(q.type)} | ${esc(q.result)} | ${esc(q.inspector)}<br>${esc(q.findings)}<br><small>الإجراء: ${esc(q.actions)} | القادم: ${esc(q.next)}</small></div>`).join(''):'<p>لا توجد سجلات.</p>'}`;
+}
+document.getElementById('techCardAsset')?.addEventListener('change',e=>show(e.target.value));
+window.renderTechCards=fill;
+fill();
+})();
+
+
+const KEY='afak_mobile_v12';
+const defaultPacks={A:{d:'الاشتراك القانوني لغير الممارس',v:1000,p1:100,p2:0},B:{d:'اشتراك ممارس النماذج الجوية',v:4000,p1:50,p2:50},C:{d:'اشتراك ممارس المشي الجبلي والتخييم',v:5000,p1:50,p2:50},D:{d:'اشتراك ممارس الطيران الشراعي',v:15000,p1:50,p2:50},E:{d:'اشتراك ممارس الطائرات النموذجية والطائرات بدون طيار',v:30000,p1:50,p2:50},F:{d:'اشتراك ممارس الطيران الشراعي بمحرك',v:35000,p1:50,p2:50}};
+let settings=JSON.parse(localStorage.getItem('afak_settings_v15')||'null')||{membershipTypes:['عضو مؤسس','عضو عامل','عضو منخرط','عضو شرفي','متطوع','رياضي','مدرب/مؤطر','حكم'],paymentMethods:['نقدًا','صك/شيك','تحويل CCP','تحويل بنكي','BaridiMob','الدفع الإلكتروني','أخرى'],accounts:['الصندوق','CCP','البنك','الحساب الإلكتروني','أخرى'],activityTypes:['الطيران الشراعي','الطيران الشراعي بمحرك','النماذج الجوية','المشي الجبلي','التخييم','التسلق','نشاط آخر'],eventTypes:['تدريب','خرجة جبلية','تخييم','فعالية/تظاهرة','منافسة','نشاط ترفيهي','اجتماع/تنسيق','أخرى'],statuses:['مبرمج','قيد التنفيذ','منجز','ملغى','مؤجل'],roles:['مشارك','متدرب','رياضي','مؤطر','منظم','متطوع','مسؤول','أخرى'],trainingTypes:['تدريب عملي','تدريب نظري','تكوين تقني','تأهيل','دورة','ورشة','ندوة','إسعافات أولية','أخرى'],attendanceStatuses:['حاضر','غائب','متأخر','معذور'],certificateTypes:['شهادة مشاركة','شهادة إتمام','شهادة تكوين','شهادة تأهيل','شهادة أخرى'],financeCategories:['اشتراكات','تكوين','مداخيل أنشطة','دعم/إعانة','تبرع','نقل','معدات','صيانة','إدارة','اتصالات','مصاريف بنكية','أخرى'],instructors:[]};
+let packs=JSON.parse(localStorage.getItem('afak_packs_v14')||'null')||defaultPacks;
+let db=JSON.parse(localStorage.getItem(KEY)||'{"members":[],"finance":[],"mail":[],"activities":[],"participation":[],"training":[],"attendance":[],"certificates":[]}');
+db.activities=db.activities||[];db.activityFunding=db.activityFunding||[];db.participation=db.participation||[];db.training=db.training||[];db.attendance=db.attendance||[];db.certificates=db.certificates||[];db.memberships=db.memberships||[];
+
+function migrateFinance(){
+ let max=(db.finance||[]).map(x=>parseInt(String(x.id||'').replace(/\\D/g,''),10)).filter(Number.isFinite).reduce((a,b)=>Math.max(a,b),0);
+ db.finance=(db.finance||[]).map(x=>{
+   if(!x.id){max++;x.id='OP-'+String(max).padStart(4,'0');}
+   x.category=x.category|| (x.type==='مصروف'?'أخرى':x.type==='دخل اشتراكات'?'اشتراكات':'أخرى');
+   x.member=x.member||'';
+   x.membershipId=x.membershipId||'';
+   x.membershipYear=String(x.membershipYear||'');
+   x.financialYear=String(x.financialYear||String(x.date||'').slice(0,4)||'');
+   x.activityId=x.activityId||x.activity||'';
+   x.party=x.party||'';
+   x.ref=x.ref||'';
+   x.nature=x.nature|| (x.category==='تبرع'?'هبة/تبرع':x.type==='دخل اشتراكات'?'اشتراك':x.type==='مصروف'?'مصروف الجمعية':'دخل غير اشتراكات');
+   return x;
+ });
+}
+migrateFinance();
+
+JSON.parse(localStorage.getItem(KEY)||'{"members":[],"finance":[],"mail":[],"activities":[]}');
+function financialYears(){let ys=new Set(['2025',String(new Date().getFullYear())]);(db.finance||[]).forEach(x=>{let y=String(x.financialYear||String(x.date||'').slice(0,4)||'');if(/^\d{4}$/.test(y))ys.add(y)});return Array.from(ys).sort((a,b)=>+a-+b)}
+function syncFinanceYear(){let d=document.getElementById('fDate')?.value||'';let y=d.slice(0,4);if(y&&document.getElementById('fFinancialYear'))document.getElementById('fFinancialYear').value=y}
+function syncParticipationDate(){let aid=document.getElementById('partActivity')?.value||'';let a=db.activities.find(x=>x.id===aid);let b=document.getElementById('partActivityDateBox');if(b)b.textContent=a?'تاريخ المشاركة مرتبط بالنشاط: '+formatActivitySchedule(a):'التاريخ يُؤخذ تلقائيًا من ملف النشاط.'}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));localStorage.setItem('afak_settings_v15',JSON.stringify(settings));localStorage.setItem('afak_packs_v14',JSON.stringify(packs));}
+function clearForm(ids){ids.forEach(id=>{let e=document.getElementById(id);if(!e)return;if(e.type==='file')e.value='';else if(e.tagName==='SELECT')e.selectedIndex=0;else e.value='';});}
+function nextId(prefix,arr){let nums=arr.map(x=>parseInt(String(x.id||'').replace(/\D/g,''),10)).filter(Number.isFinite);return prefix+String((nums.length?Math.max(...nums):0)+1).padStart(4,'0');}
+function show(id){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');render();scrollTo(0,0)}
+function toggle(id){document.getElementById(id).classList.toggle('hide')}
+function fillSelect(id,arr){let el=document.getElementById(id);if(el)el.innerHTML=arr.map(x=>`<option>${x}</option>`).join('')}
+function opts(){
+ fillSelect('mType',settings.membershipTypes);
+ mPack.innerHTML='<option value="">— غير محددة —</option>'+Object.keys(packs).map(k=>`<option value="${k}">${k} — ${packs[k].d}</option>`).join('');
+ mYear.innerHTML=Array.from({length:10},(_,i)=>`<option>${2026+i}</option>`).join('');
+ fillSelect('mMethod',settings.paymentMethods);
+ fillSelect('fMethod',settings.paymentMethods);
+ fillSelect('fAccount',settings.accounts);
+ fillSelect('fFinancialYear',financialYears());
+ fillSelect('finYearFilter',[''].concat(financialYears()));
+ fillSelect('finAccountFilter',[''].concat(settings.accounts||[]));
+ fillSelect('reportMember',db.members.map(x=>x.no+' — '+x.name));
+ fillSelect('reportActivity',db.activities.map(x=>x.id+' — '+(x.title||x.type)));
+ fillSelect('reportAccount',settings.accounts||[]);
+ fillSelect('reportYear',Array.from(new Set(db.finance.map(x=>String(x.date||'').slice(0,4)).filter(Boolean).concat([String(new Date().getFullYear())]))).sort());
