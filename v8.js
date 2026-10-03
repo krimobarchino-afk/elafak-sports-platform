@@ -101,6 +101,21 @@ const oldRenderAll=renderAll; function renderAll2(){let main=document.getElement
 function bind(){document.getElementById('v8mq')?.addEventListener('input',renderMemberTable);document.getElementById('v8msyear')?.addEventListener('change',renderMemberships);document.getElementById('v8mspack')?.addEventListener('change',renderMemberships);document.getElementById('v8pyear')?.addEventListener('change',renderPlanning);document.getElementById('v8ayear')?.addEventListener('change',renderActivities);document.getElementById('v8astatus')?.addEventListener('change',renderActivities);document.getElementById('v8asource')?.addEventListener('change',renderActivities);['v8fyear','v8fkind','v8fmember','v8factivity'].forEach(id=>document.getElementById(id)?.addEventListener('change',renderFinance));document.getElementById('v8eqstatus')?.addEventListener('change',renderAssets);document.getElementById('v8ryear')?.addEventListener('change',renderReports);document.getElementById('v8setkey')?.addEventListener('change',renderSettings)}
 window.v8RenderFinance=renderFinance;window.v8RenderMemberships=renderMemberships;window.v8OpenMembership=v8OpenMembership;window.v8Backup=function(){let payload={schema:'8.1',exportedAt:new Date().toISOString(),db:window.db,settings:window.settings,packs:window.packs,integrated:S};let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));a.download='نسخة_احتياطية_جمعية_الأفق_8.1.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 window.v8PrintReport=function(){let y=document.getElementById('v8ryear')?.value||new Date().getFullYear();let w=window.open('','_blank');w.document.write('<html dir="rtl"><head><meta charset="utf-8"><title>التقرير السنوي '+y+'</title><style>body{font-family:Arial;padding:25px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #777;padding:7px}h1{font-size:22px}</style></head><body><h1>التقرير السنوي لجمعية الأفق — '+y+'</h1>'+document.getElementById('v8report').innerHTML+'<p style="margin-top:60px">رئيس الجمعية: .................... &nbsp;&nbsp; أمين المال: ....................</p><script>window.print()<\/script></body></html>');w.document.close()};
+
+// Public bridge for inline UI actions.
+// The V8 interface uses inline onclick handlers, so functions defined inside
+// this IIFE must be exposed explicitly on window for browser event handlers.
+Object.assign(window, {
+  v8Activity, v8ActivityForm, v8AddMember, v8AddParticipant, v8AddSetting,
+  v8AssetDetail, v8AssetForm, v8ChangeAssetStatus, v8CloseYear,
+  v8ConvertPlan, v8CreateOutgoingFromDoc, v8CreateYear, v8DecisionForm,
+  v8DocForm, v8FinanceForm, v8Loan, v8MailForm, v8Maintenance,
+  v8MeetingForm, v8Member, v8MemberEdit, v8OpenMembership, v8PlanForm,
+  v8RemoveSetting, v8SaveActivity, v8SaveAsset, v8SaveDoc, v8SaveFinance,
+  v8SaveMail, v8SaveNewMember, v8SavePlan, v8SaveSimple,
+  v8SetActivityStatus, v8TaskForm
+});
+
 // annual financial protection: block direct legacy save when year closed.
 const originalSaveFinance=window.saveFinance; window.saveFinance=function(){let y=document.getElementById('fFinancialYear')?.value||document.getElementById('fDate')?.value?.slice(0,4);if(y&&fy(y).status==='closed'){alert('السنة '+y+' مغلقة ولا يمكن تسجيل حركة مالية جديدة.');return;}return originalSaveFinance?.apply(this,arguments)};
 // initialize 2025 and 2026 opening automatically from 2025 closing, without inventing member payments.
