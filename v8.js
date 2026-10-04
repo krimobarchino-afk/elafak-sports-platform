@@ -38,7 +38,41 @@ function nextMemberNoValue(){let nums=members().map(m=>parseInt(String(m.no).rep
 function v8Member(no){let m=members().find(x=>x.no===no);if(!m)return;let c=typeof memberCalc==='function'?memberCalc(m):{};let lock=(m.adminStatus||'').includes('فعالة');let html=`<div class="v8modal"><div class="v8modalbox"><button class="v8close" onclick="this.parentElement.parentElement.remove()">×</button><h3>${esc(m.name)}</h3><p>${esc(m.officeRole||m.type||'عضو')}</p><div class="v8kv"><span>رقم العضوية<b>${esc(m.no)}</b></span><span>الانضمام<b>${esc(m.joinDate||'—')}</b></span><span>الحالة<b>${esc(m.adminStatus||'—')}</b></span><span>التسديد<b>${esc(c.status||'—')}</b></span><span>المدفوع<b>${money(c.total||0)}</b></span><span>التخصص<b>${esc(m.pack||'غير محدد')}</b></span></div><div class="v8bar"><button onclick="v8MemberEdit('${esc(m.no)}',${lock})">${lock?'🔒 العضوية مفعلة — تعديل بإجراء خاص':'✏️ تعديل البيانات'}</button><button onclick="v8go('memberships');v8OpenMembership('${esc(m.no)}')">العضويات</button><button onclick="v8go('finance');document.getElementById('v8fmember').value='${esc(m.no)}';v8RenderFinance()">المالية</button></div><hr><h4>السجل المرتبط</h4><p>أنشطة: ${S.activities.filter(a=>a.participants?.includes(m.no)).length} — دفعات: ${(window.db.finance||[]).filter(f=>f.member===m.no).length} — حضور: ${(window.db.attendance||[]).filter(x=>x.member===m.no).length} — شهادات: ${(window.db.certificates||[]).filter(x=>x.member===m.no).length}</p></div></div>`;document.body.insertAdjacentHTML('beforeend',html)}
 function v8MemberEdit(no,locked){if(locked){alert('هذه العضوية مفعلة. استخدم إجراء طلب تعديل/فتح اعتماد بدلاً من التعديل المباشر.');return;} if(typeof editMember==='function'){document.querySelector('.v8modal')?.remove();v8legacy('members');editMember(no)}}
 function v8memberships(){return page('memberships','العضويات السنوية',`<div class="v8bar"><label>السنة ${yearSelect('v8msyear',new Date().getFullYear(),true)}</label><select id="v8mspack"><option value="">كل الباقات</option>${Object.entries(window.packs).map(([k,p])=>`<option value="${k}">${k} — ${esc(p.d)}</option>`).join('')}</select></div><div id="v8mst"></div>`)}
-function v8OpenMembership(no){setTimeout(()=>{let s=document.getElementById('v8msmember');if(s)s.value=no;v8RenderMemberships()},50)}
+function v8OpenMembership(no){
+  let m=members().find(x=>x.no===no); if(!m)return;
+  let y=document.getElementById('v8msyear')?.value||String(new Date().getFullYear());
+  let r=membershipRecord(m,y)||{};
+  let pack=r.pack||m.pack||'';
+  let c=typeof membershipCalc==='function'?membershipCalc(m,y,pack):{due:0,total:0,balance:0,status:'—',activity:'—'};
+  let box=document.createElement('div'); box.className='v8modal';
+  box.innerHTML=`<div class="v8modalbox">
+    <button class="v8close" onclick="this.parentElement.parentElement.remove()">×</button>
+    <h3>ملف العضوية السنوية</h3>
+    <div class="v8kv">
+      <span>العضو<b>${esc(m.name)}</b></span>
+      <span>رقم العضوية<b>${esc(m.no)}</b></span>
+      <span>السنة<b>${esc(y)}</b></span>
+      <span>الباقة<b>${esc(pack||'غير محددة')}</b></span>
+      <span>المستحق<b>${money(c.due||0)}</b></span>
+      <span>المدفوع<b>${money(c.total||0)}</b></span>
+      <span>المتبقي<b>${c.balance?money(c.balance):'\\'}</b></span>
+      <span>الحالة<b>${esc(c.status||'—')}</b></span>
+      <span>المزاولة<b>${esc(c.activity||'—')}</b></span>
+    </div>
+    <div class="v8bar">
+      <button onclick="v8EditMembershipSelection('${esc(m.no)}','${esc(y)}');this.parentElement.parentElement.parentElement.remove()">تعديل/فتح العضوية</button>
+      <button class="v8sm" onclick="v8Member('${esc(m.no)}');this.parentElement.parentElement.parentElement.remove()">فتح ملف العضو الكامل</button>
+    </div>
+  </div></div>`;
+  document.body.appendChild(box);
+}
+function v8EditMembershipSelection(no,year){
+  let y=document.getElementById('v8msyear'),s=document.getElementById('v8mspack');
+  if(y)y.value=year;
+  let m=members().find(x=>x.no===no),r=m?membershipRecord(m,year):null;
+  if(s)s.value=r?.pack||m?.pack||'';
+  v8RenderMemberships();
+}
 function renderMemberships(){let y=document.getElementById('v8msyear')?.value||String(new Date().getFullYear()),pack=document.getElementById('v8mspack')?.value||'';let arr=members().map(m=>{let r=(window.db.memberships||[]).find(x=>x.member===m.no&&String(x.year)===String(y));let c=typeof membershipCalc==='function'?membershipCalc(m,y,r?.pack||m.pack||''):{due:0,total:0,balance:0,status:'—',activity:'—'};return {m,r,c}}).filter(x=>!pack||x.r?.pack===pack||x.m.pack===pack);document.getElementById('v8mst').innerHTML=`<div class="v8table"><table><thead><tr><th>العضو</th><th>الباقة</th><th>المستحق</th><th>المدفوع</th><th>الباقي</th><th>الحالة</th><th>المزاولة</th><th></th></tr></thead><tbody>${arr.map(x=>`<tr><td>${esc(x.m.name)}</td><td>${esc(x.r?.pack||x.m.pack||'—')}</td><td>${money(x.c.due||0)}</td><td>${money(x.c.total||0)}</td><td>${x.c.balance?money(x.c.balance):'\\'}</td><td>${esc(x.c.status)}</td><td>${esc(x.c.activity)}</td><td><button class="v8sm" onclick="v8OpenMembership('${esc(x.m.no)}')">فتح</button></td></tr>`).join('')}</tbody></table></div>`}
 function v8planning(){return page('planning','التخطيط السنوي',`<div class="v8bar"><button onclick="v8PlanForm()">+ إضافة نشاط إلى الخطة</button>${yearSelect('v8pyear',new Date().getFullYear(),true)}</div><div id="v8plant"></div>`)}
 function v8PlanForm(){let y=document.getElementById('v8pyear')?.value||new Date().getFullYear();let box=document.createElement('div');box.className='v8modal';box.innerHTML=`<div class="v8modalbox"><button class="v8close" onclick="this.parentElement.parentElement.remove()">×</button><h3>إضافة نشاط إلى البرنامج السنوي</h3><div class="v8form"><label>العنوان<input id="pf_title"></label><label>السنة<input id="pf_year" value="${y}" type="number"></label><label>التخصص<select id="pf_spec">${(window.settings.activityTypes||[]).map(x=>`<option>${esc(x)}</option>`).join('')}</select></label><label>التاريخ المتوقع<input id="pf_date" type="date"></label><label>التكلفة التقديرية<input id="pf_budget" type="number" min="0"></label><label>الأولوية<select id="pf_priority"><option>عادية</option><option>مرتفعة</option><option>عاجلة</option></select></label><label>المسؤول<select id="pf_owner"><option value="">— اختر عضواً —</option>${members().map(m=>`<option value="${m.no}">${esc(m.name)}</option>`).join("")}</select></label><label>ملاحظات<textarea id="pf_notes"></textarea></label></div><button onclick="v8SavePlan()">حفظ الخطة</button></div></div>`;document.body.appendChild(box)}
