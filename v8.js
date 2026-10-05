@@ -360,6 +360,56 @@ window.v8EditMembershipSelection=function(no,year){
 };
 Object.assign(window,{v8OpenMembership:v8OpenMembershipFixed});
 
+
+// ===== تجميد نظام الباقات والاشتراكات مؤقتاً =====
+// إلى غاية مصادقة الجمعية العامة على مبلغ الاشتراك وتصنيف العضويات.
+// لا نحذف الباقات القديمة ولا البيانات السابقة؛ فقط نمنع اعتمادها أو إنشاء دفعات جديدة بها.
+const AFakMembershipFrozenMessage =
+  'نظام الباقات والاشتراكات مجمّد مؤقتاً.\\n\\n' +
+  'لم يتم اعتماد مبلغ الاشتراك النهائي بعد. ستُحدد قيمة الاشتراك وتصنيف العضويات بقرار الجمعية العامة.\\n\\n' +
+  'إلى غاية صدور القرار، لا يمكن إنشاء أو تعديل عضوية مالية أو تسجيل دفعة اعتماداً على الباقات الحالية.';
+
+function v8OpenMembershipFrozen(no){
+  const m=members().find(x=>x.no===no);
+  if(!m)return alert('تعذر العثور على العضو.');
+  const y=document.getElementById('v8msyear')?.value||String(new Date().getFullYear());
+  const r=membershipRecord(m,y)||{};
+  const pack=r.pack||m.pack||'';
+  const paid=v8MembershipPaid(m.no,y);
+  const box=document.createElement('div');
+  box.className='v8modal';
+  box.innerHTML='<div class="v8modalbox" style="max-width:680px">'+
+    '<button class="v8close" onclick="this.parentElement.parentElement.remove()">×</button>'+
+    '<h3>العضوية السنوية — النظام مجمّد مؤقتاً</h3>'+
+    '<div class="v8notice" style="font-size:16px;line-height:1.9">'+
+      '<b>في انتظار قرار الجمعية العامة</b><br>'+
+      'لم يتم اعتماد مبلغ الاشتراك النهائي أو نظام الباقات بعد. لذلك لن تعتمد المنصة أي مبلغ أو دفعة جديدة على أساس الباقات الحالية.'+
+    '</div>'+
+    '<div class="v8kv">'+
+      '<span>العضو<b>'+esc(m.name)+'</b></span>'+
+      '<span>رقم العضو<b>'+esc(m.no)+'</b></span>'+
+      '<span>السنة<b>'+esc(y)+'</b></span>'+
+      '<span>الباقة الحالية<b>'+esc(pack||'غير محددة')+'</b></span>'+
+      '<span>المدفوع المسجل سابقاً<b>'+v8MembershipMoney(paid)+'</b></span>'+
+    '</div>'+
+    '<p class="v8notice">يمكن الاطلاع على البيانات السابقة فقط. لن يتم إنشاء حركة مالية أو تغيير الباقة من هذه النافذة.</p>'+
+    '<div class="v8bar">'+
+      '<button class="v8sm" onclick="v8Member(\''+esc(m.no)+'\');this.parentElement.parentElement.parentElement.remove()">فتح ملف العضو</button>'+
+      '<button onclick="this.parentElement.parentElement.parentElement.remove()">إغلاق</button>'+
+    '</div>'+
+  '</div></div>';
+  document.body.appendChild(box);
+}
+
+window.v8OpenMembership=v8OpenMembershipFrozen;
+window.v8EditMembershipSelection=function(no,year){
+  const y=document.getElementById('v8msyear');
+  if(y)y.value=String(year);
+  v8OpenMembershipFrozen(no);
+};
+Object.assign(window,{v8OpenMembership:v8OpenMembershipFrozen});
+
+
 // Build pages then show the new system.
 window.renderAllV8=renderAll2;
 setTimeout(()=>{try{shell();renderAll2();v8go('dash')}catch(e){console.error('Afak V8 startup error',e);document.body.insertAdjacentHTML('beforeend',`<div style=\"position:fixed;inset:0;background:#fff;padding:24px;z-index:99999;font-family:Arial;direction:rtl\"><h2>تعذر تشغيل المنصة</h2><p>حدث خطأ أثناء تهيئة الواجهة. البيانات المحلية لم تُحذف.</p><details><summary>تفاصيل تقنية</summary><pre style=\"white-space:pre-wrap\">${esc(e&&e.stack||e)}</pre></details></div>`)}},50);
