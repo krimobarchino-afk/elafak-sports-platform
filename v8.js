@@ -156,6 +156,210 @@ Object.assign(window, {
 const originalSaveFinance=window.saveFinance; window.saveFinance=function(){let y=document.getElementById('fFinancialYear')?.value||document.getElementById('fDate')?.value?.slice(0,4);if(y&&fy(y).status==='closed'){alert('السنة '+y+' مغلقة ولا يمكن تسجيل حركة مالية جديدة.');return;}return originalSaveFinance?.apply(this,arguments)};
 // initialize 2025 and 2026 opening automatically from 2025 closing, without inventing member payments.
 (function initYears(){if(!S.yearMeta['2025'])S.yearMeta['2025']={status:'closed',opening:0};let closing2025=closeBal('2025');if(!S.yearMeta['2026'])S.yearMeta['2026']={status:'open',opening:closing2025,createdAt:new Date().toISOString().slice(0,10)};else if(S.yearMeta['2026'].status!=='closed')S.yearMeta['2026'].opening=closing2025;saveV8()})();
+
+// ===== إصلاح العضويات 8.1.1 =====
+// هذا الإصلاح يجعل زر «فتح» يفتح بطاقة عضوية قابلة للتحرير فعلياً.
+// قاعدة الدفع: الباقة A = 100% فقط؛ الباقات B-F = 50% أو 100% فقط.
+// عند 50% تصبح العضوية مفعلة للموسم الأول فقط، وعند 100% تكون سارية للسنة كاملة.
+// كل دفعة صحيحة تُسجل تلقائياً في السجل المالي الموحد مرة واحدة.
+function v8MembershipToday(){
+  return new Date().toISOString().slice(0,10);
+}
+function v8MembershipMoney(n){
+  return Number(n||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' دج';
+}
+function v8MembershipParseAmount(v){
+  return Number(String(v??'').replace(/\s/g,'').replace(/,/g,'.'))||0;
+}
+function v8MembershipExistingPayments(no,year){
+  return (window.db.finance||[]).filter(x=>
+    x.type==='دخل اشتراكات' &&
+    x.member===no &&
+    String(x.membershipYear||'')===String(year)
+  );
+}
+function v8MembershipPaid(no,year){
+  return v8MembershipExistingPayments(no,year).reduce((s,x)=>s+(+x.amount||0),0);
+}
+function v8MembershipExpectedPayment(packKey){
+  const p=window.packs?.[packKey];
+  if(!p)return {valid:false,allowed:[],due:0};
+  const due=+p.v||0;
+  if(packKey==='A')return {valid:true,allowed:[due],due};
+  return {valid:true,allowed:[due/2,due],due};
+}
+function v8MembershipStatus(packKey,paid){
+  const p=window.packs?.[packKey];
+  if(!p)return {status:'غير محددة',activity:'غير محددة'};
+  const due=+p.v||0;
+  if(paid>=due)return {status:'مسدد',activity:'سارية — السنة كاملة'};
+  if(packKey!=='A' && paid>=due/2)return {status:'مدين — 50%',activity:'سارية — السداسي الأول فقط (حتى 30/06)'};
+  return {status:paid>0?'دفعة غير مكتملة':'غير مفعلة',activity:'غير مفعلة'};
+}
+function v8OpenMembershipFixed(no){
+  const m=members().find(x=>x.no===no);
+  if(!m)return alert('تعذر العثور على العضو.');
+  const y=document.getElementById('v8msyear')?.value||String(new Date().getFullYear());
+  const r=membershipRecord(m,y)||null;
+  const pack=r?.pack||'';
+  const paid=v8MembershipPaid(m.no,y);
+  const p=pack&&window.packs?.[pack]?window.packs[pack]:null;
+  const st=v8MembershipStatus(pack,paid);
+  const last=v8MembershipExistingPayments(m.no,y).slice(-1)[0];
+  const box=document.createElement('div');
+  box.className='v8modal';
+  box.innerHTML=
+    '<div class="v8modalbox" style="max-width:760px">'+
+      '<button class="v8close" onclick="this.parentElement.parentElement.remove()">×</button>'+
+      '<h3>فتح / تسيير العضوية السنوية</h3>'+
+      '<p class="v8notice">يتم تفعيل العضوية فقط بعد تسجيل دفعة صحيحة. الباقة A تقبل 100% فقط، أما الباقات الأخرى فتقبل 50% أو 100%. لا تُنشأ حركة مالية عند مجرد فتح الملف.</p>'+
+      '<div class="v8kv">'+
+        '<span>العضو<b>'+esc(m.name)+'</b></span>'+
+        '<span>رقم العضو<b>'+esc(m.no)+'</b></span>'+
+        '<span>السنة<b>'+esc(y)+'</b></span>'+
+        '<span>المستحق<b>'+v8MembershipMoney(p?.v||0)+'</b></span>'+
+        '<span>إجمالي المدفوع<b id="vmx_paid">'+v8MembershipMoney(paid)+'</b></span>'+
+        '<span>الحالة<b id="vmx_status">'+esc(st.status)+'</b></span>'+
+        '<span>المزاولة<b id="vmx_activity">'+esc(st.activity)+'</b></span>'+
+      '</div>'+
+      '<div class="v8form">'+
+        '<label>نوع الباقة<select id="vmx_pack">'+
+          '<option value="">— اختر الباقة —</option>'+
+          Object.entries(window.packs||{}).map(([k,x])=>'<option value="'+esc(k)+'" '+(k===pack?'selected':'')+'>'+esc(k)+' — '+esc(x.d||'')+' — '+v8MembershipMoney(x.v)+'</option>').join('')+
+        '</select></label>'+
+        '<label>مبلغ الدفعة الحالية<input id="vmx_amount" inputmode="decimal" type="number" min="0" step="0.01" value="" placeholder="50% أو 100% حسب الباقة"><small id="vmx_hint">اختر الباقة لمعرفة المبلغ المقبول.</small></label>'+
+        '<label>تاريخ الدفع<input id="vmx_date" type="date" value="'+esc(last?.date||v8MembershipToday())+'"></label>'+
+        '<label>طريقة الدفع<select id="vmx_method">'+
+          '<option value="">— اختر طريقة الدفع —</option>'+
+          (window.settings?.paymentMethods||[]).map(x=>'<option '+(x===(last?.method||'')?'selected':'')+'>'+esc(x)+'</option>').join('')+
+        '</select></label>'+
+        '<label>الحساب المستلم<select id="vmx_account">'+
+          '<option value="">— اختر الحساب —</option>'+
+          (window.settings?.accounts||[]).map(x=>'<option '+(x===(last?.account||'')?'selected':'')+'>'+esc(x)+'</option>').join('')+
+        '</select></label>'+
+      '</div>'+
+      '<div class="v8bar">'+
+        '<button id="vmx_save">حفظ العضوية والدفعة</button>'+
+        '<button class="v8sm" id="vmx_finance">عرض الحركات المالية للعضو</button>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(box);
+
+  const packEl=box.querySelector('#vmx_pack');
+  const amountEl=box.querySelector('#vmx_amount');
+  const hintEl=box.querySelector('#vmx_hint');
+  const dateEl=box.querySelector('#vmx_date');
+  const methodEl=box.querySelector('#vmx_method');
+  const accountEl=box.querySelector('#vmx_account');
+
+  function refreshHint(){
+    const key=packEl.value;
+    const info=v8MembershipExpectedPayment(key);
+    const already=v8MembershipPaid(m.no,y);
+    const remaining=Math.max(0,info.due-already);
+    if(!key){
+      hintEl.textContent='اختر الباقة لمعرفة المبلغ المقبول.';
+      return;
+    }
+    const vals=info.allowed.filter(v=>v>remaining+0.001);
+    const labels=info.allowed.map(v=>v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' دج');
+    hintEl.textContent='المقبول لهذه الدفعة: '+labels.join(' أو ')+' — المتبقي بعد الدفعات السابقة: '+v8MembershipMoney(remaining);
+  }
+  packEl.addEventListener('change',refreshHint);
+  refreshHint();
+
+  box.querySelector('#vmx_save').onclick=()=>{
+    const key=packEl.value;
+    if(!key)return alert('اختر نوع الباقة أولاً.');
+    const info=v8MembershipExpectedPayment(key);
+    const amount=v8MembershipParseAmount(amountEl.value);
+    const date=dateEl.value||v8MembershipToday();
+    const method=methodEl.value||'';
+    const account=accountEl.value||'';
+    const currentPaid=v8MembershipPaid(m.no,y);
+
+    if(fy(y).status==='closed')return alert('السنة '+y+' مغلقة، ولا يمكن إنشاء عضوية أو حركة مالية جديدة فيها.');
+    if(!amount)return alert('أدخل مبلغ الدفعة.');
+    if(!date)return alert('أدخل تاريخ الدفع.');
+    if(!method)return alert('اختر طريقة الدفع.');
+    if(!account)return alert('اختر الحساب المستلم.');
+
+    const exact=info.allowed.some(v=>Math.abs(v-amount)<0.005);
+    if(!exact){
+      const allowed=info.allowed.map(v=>v8MembershipMoney(v)).join(' أو ');
+      return alert('الدفعة غير مقبولة. يجب أن تكون بالضبط: '+allowed+'.');
+    }
+    if(currentPaid+amount>info.due+0.005)
+      return alert('المبلغ يتجاوز مستحق الباقة. المتبقي الحالي: '+v8MembershipMoney(Math.max(0,info.due-currentPaid))+'.');
+    if(key==='A' && currentPaid>0)
+      return alert('الباقة A تُسدد كاملة في دفعة واحدة ولا تحتاج إلى دفعة ثانية.');
+
+    db.memberships=db.memberships||[];
+    let rec=membershipRecord(m,y);
+    if(!rec){
+      rec={id:nextId('MS-',db.memberships),member:m.no,year:+y,pack:key,createdAt:m.joinDate||v8MembershipToday(),updatedAt:v8MembershipToday()};
+      db.memberships.push(rec);
+    }else{
+      if(rec.pack && rec.pack!==key)return alert('لا يمكن تغيير الباقة بعد وجود دفعات مالية. أنشئ عضوية سنة جديدة أو صحح السجل قبل الدفع.');
+      rec.pack=key;
+      rec.updatedAt=v8MembershipToday();
+    }
+
+    const afterPaid=currentPaid+amount;
+    const state=v8MembershipStatus(key,afterPaid);
+    const f={
+      id:nextId('OP-',db.finance||[]),
+      type:'دخل اشتراكات',
+      category:'اشتراكات',
+      nature:'اشتراك',
+      member:m.no,
+      membershipId:rec.id,
+      membershipYear:String(y),
+      activityId:'',
+      party:m.name,
+      amount:amount,
+      date:date,
+      financialYear:String(y),
+      method:method,
+      account:account,
+      desc:'دفعة اشتراك '+m.no+' — '+m.name+' — الباقة '+key,
+      ref:'',
+      kind:'membership'
+    };
+    db.finance=db.finance||[];
+    db.finance.push(f);
+
+    // حافظ على توافق السجل القديم مع الطبقة الجديدة، دون إنشاء دفعة ثانية.
+    m.year=String(y);
+    m.pack=key;
+    m.paid=afterPaid;
+    m.method=method;
+    m.date=date;
+    save();
+    try{saveV8();log('إضافة','عضوية',rec.id,m.name+' — '+key+' — '+v8MembershipMoney(amount));}catch(e){}
+    box.remove();
+    renderAll();
+    v8go('memberships');
+    alert('تم حفظ العضوية والدفعة بنجاح. الحالة: '+state.status+' — '+state.activity);
+  };
+
+  box.querySelector('#vmx_finance').onclick=()=>{
+    box.remove();
+    v8go('finance');
+    setTimeout(()=>{
+      const el=document.getElementById('v8fmember');
+      if(el){el.value=m.no;el.dispatchEvent(new Event('change'))}
+    },50);
+  };
+}
+window.v8OpenMembership=v8OpenMembershipFixed;
+window.v8EditMembershipSelection=function(no,year){
+  const y=document.getElementById('v8msyear');
+  if(y)y.value=String(year);
+  v8OpenMembershipFixed(no);
+};
+Object.assign(window,{v8OpenMembership:v8OpenMembershipFixed});
+
 // Build pages then show the new system.
 window.renderAllV8=renderAll2;
 setTimeout(()=>{try{shell();renderAll2();v8go('dash')}catch(e){console.error('Afak V8 startup error',e);document.body.insertAdjacentHTML('beforeend',`<div style=\"position:fixed;inset:0;background:#fff;padding:24px;z-index:99999;font-family:Arial;direction:rtl\"><h2>تعذر تشغيل المنصة</h2><p>حدث خطأ أثناء تهيئة الواجهة. البيانات المحلية لم تُحذف.</p><details><summary>تفاصيل تقنية</summary><pre style=\"white-space:pre-wrap\">${esc(e&&e.stack||e)}</pre></details></div>`)}},50);
