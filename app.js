@@ -17,6 +17,7 @@ let db=load();db.settings={...settingsDefault,...(db.settings||{})};db.packs={};
 if(!db.__baseline2025){
  const founders=['رحماني قوادري محمد','صابر عبدالعزيز','قانيت محمد امين','عبدالكريم محمد','رزيق احمد','لعرابة زيان بلقاسم','حاج هني مراد','مهدي نصرالدين','قانيت عبدالمجيد','دحماني جمال الدين','لعرابة زيان عبدالله','مجاهد عبدالرحمن','بوحديبة بوناقة','زياد العربي','شوال عبدالقادر','رقاد عبدالقادر'];
  if(!db.members.length)founders.forEach((name,i)=>db.members.push({no:String(i+1).padStart(4,'0'),name,type:'عضو مؤسس',joinDate:'2025-08-31',activityCodes:[],notes:''}));
+ db.activityCatalog=activityCatalogDefault.map(x=>({...x}));db.members.forEach(m=>m.activityCodes=[]);
  db.memberships=(db.memberships||[]).filter(x=>!x.pack);
  db.transactions=(db.transactions||[]).filter(x=>!(x.category==='اشتراكات'&&x.membershipYear&&String(x.membershipYear)==='2025'));
  if(!db.transactions.some(x=>x.year==='2025'&&x.amount===1000&&x.kind==='قبض'))db.transactions.push({id:uid('OP'),number:'2025-0001',date:'2025-08-31',year:'2025',financialYear:'2025',kind:'قبض',amount:1000,member:'',category:'فتح الرصيد البنكي',account:'البنك',method:'تحويل/إيداع',ref:'الرصيد-الافتتاحي-2025',description:'فتح الرصيد البنكي — مساهمة/تبرع من رئيس الجمعية'});
@@ -28,7 +29,6 @@ if(!db.__baseline2025){
 }
 if(!Array.isArray(db.activityCatalog)||!db.activityCatalog.length)db.activityCatalog=activityCatalogDefault.map(x=>({...x}));
 if(!Array.isArray(db.settings.memberTableColumns)||!db.settings.memberTableColumns.length)db.settings.memberTableColumns=settingsDefault.memberTableColumns.slice();
-const packTotal=p=>p?.code==='A'?Number(db.packs.A?.v||0):(Number(db.packs.A?.v||0)+Number(p?.insurance||0)+Number(p?.equipment||0));
 function activeActivities(){return db.activityCatalog.filter(x=>x.active!==false).sort((a,b)=>(a.order||0)-(b.order||0))}
 function activityByCode(code){return db.activityCatalog.find(x=>String(x.code)===String(code))}function isFrozen(m,code){return !!(m.practiceFreeze&&m.practiceFreeze[code])}function practiceLabel(m,r,c,a){if(isFrozen(m,a.code))return{status:'مجمد',active:false};if(!c.practiceActive)return{status:c.practiceStatus,active:false};return{status:'مسموح',active:true}}
 function save(){localStorage.setItem(K,JSON.stringify(db))}function member(no){return db.members.find(m=>String(m.no)===String(no))}function mn(no){return member(no)?.name||no||'—'}function log(a,e,id,d=''){db.audit.unshift({id:uid('AUD'),date:new Date().toISOString(),action:a,entity:e,id,detail:d});db.audit=db.audit.slice(0,500)}function yrs(){return Object.keys(db.years).sort((a,b)=>+a-+b)}function yof(x){return String(x.year||x.financialYear||String(x.date||'').slice(0,4))}function bal(y){let z=db.years[y]||{opening:0};return(+z.opening||0)+db.transactions.filter(x=>yof(x)===String(y)&&x.kind==='قبض'&&!x.voided).reduce((s,x)=>s+Number(x.amount||0),0)-db.transactions.filter(x=>yof(x)===String(y)&&x.kind==='دفع'&&!x.voided).reduce((s,x)=>s+Number(x.amount||0),0)}
