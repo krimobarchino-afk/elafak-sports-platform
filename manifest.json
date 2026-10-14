@@ -1,21 +1,15 @@
 {
-  "name": "منصة الأفق | جمعية الأفق للرياضات الجوية والجبلية",
-  "short_name": "منصة الأفق",
-  "lang": "ar",
+  "name": "جمعية الأفق للرياضات الجوية والجبلية",
+  "short_name": "جمعية الأفق",
+  "description": "المنصة الرسمية لجمعية الأفق الولائية للرياضات الجوية والجبلية بولاية الشلف",
+  "lang": "ar-DZ",
   "dir": "rtl",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#ffffff",
-  "theme_color": "#0f766e",
-  "description": "منصة التسيير الرسمية لجمعية الأفق للرياضات الجوية والجبلية",
+  "background_color": "#f7f7f1",
+  "theme_color": "#123b32",
   "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png"}
   ]
 }
