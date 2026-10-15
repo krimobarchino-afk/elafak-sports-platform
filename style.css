@@ -3,3 +3,24 @@
 @media(max-width:850px){.hero-grid{gap:15px}.hero h1{font-size:51px}.two-col{gap:45px}.values-grid{grid-template-columns:repeat(2,1fr)}.join-panel{padding:35px;flex-wrap:wrap}.join-panel .btn{margin-right:auto}}
 @media(max-width:620px){.container{width:calc(100% - 34px)}.nav-wrap{height:70px}.brand img{width:39px;height:39px}.brand b{font-size:14px}.brand small{font-size:9px}.menu-toggle{display:block;font-size:12px}.nav{display:none;position:absolute;top:70px;right:0;left:0;background:var(--paper);padding:12px 22px 18px;border-bottom:1px solid var(--line);flex-direction:column;gap:0}.nav.open{display:flex}.nav a{padding:10px 0;border-bottom:1px solid #e5e9e1}.nav a:last-child{border:0}.hero-grid{display:flex;flex-direction:column;align-items:stretch;padding-top:48px;padding-bottom:15px;min-height:0}.hero h1{font-size:43px;margin:20px 0 14px}.hero-copy>p{font-size:13px}.actions{gap:17px;margin-top:23px}.hero-note{margin-top:27px;font-size:10px}.hero-art{min-height:260px;width:100%;margin-top:12px}.sun{width:85px;height:85px;top:18px;right:29%}.mountain{bottom:20px;border-left-width:140px;border-right-width:140px;border-bottom-width:185px}.back{right:-15px}.mid{right:50px;bottom:15px;border-left-width:125px;border-right-width:125px;border-bottom-width:150px}.front{right:-60px;bottom:-10px;border-left-width:165px;border-right-width:165px;border-bottom-width:140px}.arc{top:48px;width:180px;height:90px}.glider{top:55px;font-size:53px}.art-label{font-size:10px}.hero-foot{font-size:9px;padding-bottom:15px}.section{padding:65px 0}.two-col{grid-template-columns:1fr;gap:22px}.section h2{font-size:34px}.body-copy{padding-top:0}.body-copy .lead{font-size:14px}.body-copy p{font-size:12px}.section-head{align-items:start;flex-direction:column;gap:15px;margin-bottom:28px}.cards{grid-template-columns:1fr;gap:12px}.card{min-height:250px;padding:22px}.symbol{top:36px;left:22px;width:45px;height:45px}.values-grid{grid-template-columns:1fr;gap:20px}.values h2{font-size:32px}.values article{padding-top:14px}.join-panel{padding:27px 22px;gap:20px}.join-panel h2{font-size:27px}.join-panel .btn{width:100%}.contact{padding:55px 0}.footer-main{align-items:flex-start;flex-wrap:wrap}.footer-main>p{order:3;width:100%;margin:0}.footer-main>a:last-child{margin-right:auto}.footer-bottom{flex-direction:column;gap:5px}.modal-card{padding:27px 21px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+/* Public information sections */
+.approach{background:#fbfbf7}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+.step{display:flex;gap:18px;padding:25px 22px;border:1px solid var(--line);background:#fff;min-height:170px}
+.step>span{font-size:12px;font-weight:700;color:#6f8c5d;border:1px solid #cbd8c4;border-radius:50%;width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px}
+.step h3{margin:0 0 8px;color:var(--green);font-size:16px}
+.step p{margin:0;color:var(--muted);font-size:12px;line-height:2.1}
+.safety-note{display:flex;align-items:flex-start;gap:16px;margin-top:22px;padding:20px 22px;background:#edf2e8;border-right:3px solid #8da96e}
+.safety-mark{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--green);color:var(--lime);font-weight:700;flex:0 0 28px}
+.safety-note b{font-size:13px;color:var(--green)}
+.safety-note p{font-size:12px;color:var(--muted);margin:4px 0 0;line-height:2}
+.faq{background:#edf0e8}
+.faq-list{max-width:850px;border-top:1px solid #d4ddd1}
+.faq-list details{border-bottom:1px solid #d4ddd1;padding:18px 4px}
+.faq-list summary{cursor:pointer;list-style:none;font-size:14px;font-weight:700;color:var(--green);display:flex;justify-content:space-between;gap:20px}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary:after{content:"+";font-size:20px;line-height:1;color:#718d5c}
+.faq-list details[open] summary:after{content:"−"}
+.faq-list details p{font-size:12px;color:var(--muted);line-height:2.2;max-width:760px;margin:12px 0 0}
+@media(max-width:850px){.steps{grid-template-columns:1fr}.step{min-height:0}}
+@media(max-width:620px){.step{padding:20px 16px}.safety-note{padding:17px 15px}.faq-list summary{font-size:13px}}
