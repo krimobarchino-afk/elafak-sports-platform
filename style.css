@@ -24,3 +24,26 @@
 .faq-list details p{font-size:12px;color:var(--muted);line-height:2.2;max-width:760px;margin:12px 0 0}
 @media(max-width:850px){.steps{grid-template-columns:1fr}.step{min-height:0}}
 @media(max-width:620px){.step{padding:20px 16px}.safety-note{padding:17px 15px}.faq-list summary{font-size:13px}}
+
+
+.join-form-card{width:min(560px,100%);max-height:90vh;overflow:auto;text-align:right}
+.join-form-card .modal-star{margin-right:0}
+.join-form-card .form-intro{margin-top:0}
+#join-form{display:grid;gap:8px}
+#join-form>label:not(.check-label):not(.consent-label),#join-form legend{font-size:12px;font-weight:700;color:var(--green)}
+#join-form input:not([type=checkbox]),#join-form textarea{width:100%;font:inherit;font-size:13px;padding:10px 12px;border:1px solid #ccd7ca;border-radius:7px;background:#fff;color:var(--ink);min-height:42px}
+#join-form input:focus,#join-form textarea:focus{outline:2px solid #9abf74;outline-offset:1px}
+#join-form fieldset{border:1px solid var(--line);border-radius:7px;padding:10px 12px;margin:6px 0}
+#join-form legend{padding:0 5px}
+#join-form .check-label{display:inline-flex;align-items:center;gap:7px;font-size:12px;margin:3px 0 3px 15px}
+#join-form input[type=checkbox]{accent-color:var(--green);width:16px;height:16px}
+#join-form .consent-label{display:flex;align-items:flex-start;gap:9px;font-size:11px;line-height:1.9;color:var(--muted);margin:7px 0}
+#join-form .consent-label input{flex:0 0 16px;margin-top:5px}
+.form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:5px}
+.form-actions .btn{justify-content:center}
+.btn-quiet{background:#e8eee2;color:var(--green)}
+.form-message{font-size:12px;line-height:1.9;margin:4px 0}
+.form-message.success{color:#23653d}
+.form-message.error{color:#a22d2d}
+#submit-join:disabled{opacity:.65;cursor:wait}
+@media(max-width:620px){.join-form-card{padding:22px 17px;max-height:88vh}.join-form-card h2{font-size:22px}}
