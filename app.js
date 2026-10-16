@@ -47,8 +47,7 @@
       email: String(values.get('email') || '').trim() || null,
       interests: selectedInterests,
       experience: String(values.get('experience') || '').trim() || null,
-      consent: values.get('consent') === 'on',
-      status: 'pending'
+      consent: values.get('consent') === 'on'
     };
     submitJoin.disabled = true;
     submitJoin.textContent = 'جارٍ إرسال الطلب…';
