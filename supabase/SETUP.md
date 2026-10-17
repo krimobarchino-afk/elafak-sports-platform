@@ -1,26 +1,30 @@
-# Supabase setup — El Afak platform
+# إعداد Supabase — منصة جمعية الأفق
 
-This repository's public page remains a static site until Supabase is configured. The SQL migration creates the first secure intake table; it does not yet connect the form or provide a staff dashboard.
+## الحالة الحالية
+- الصفحة العامة متصلة بمشروع Supabase عبر مفتاح **publishable** فقط.
+- نموذج طلب الانخراط يرسل البيانات إلى الجدول `public.join_requests`.
+- الجدول مفعّل عليه RLS؛ الزائر يستطيع إرسال طلب جديد فقط، ولا يستطيع قراءة الطلبات أو تعديلها أو حذفها.
+- توجد طلبات محفوظة في الجدول، لكن لا توجد حتى الآن لوحة مراجعة للمسؤولين.
+- لا يوجد نظام دخول للموظفين أو إدارة أدوار منشور حتى الآن. لا تعتبر إرسال الطلب قبولًا للانخراط، ولا ينشئ حسابًا.
 
-## 1. Create the Supabase project
-1. Open the official Supabase website and create a project for the association.
-2. Choose a strong database password and keep it somewhere private.
-3. Wait until the database has finished provisioning.
+## قاعدة البيانات الحالية
+ملف التهيئة الأولي: `supabase/migrations/202610150001_initial_join_requests.sql`
 
-## 2. Apply the database migration
-1. In the Supabase dashboard, open **SQL Editor**.
-2. Open `supabase/migrations/202610150001_initial_join_requests.sql` in this repository.
-3. Copy the entire SQL file into a new SQL Editor query and run it.
-4. Confirm that the `public.join_requests` table exists.
+الأعمدة الأساسية: `request_ref`, `full_name`, `birth_date`, `municipality`, `phone`, `email`, `interests`, `experience`, `consent`, `status`, `reviewer_note`, `reviewed_at`, `created_at`.
 
-The policy intentionally allows public visitors to submit a pending request only. Public visitors cannot read, edit, or delete submissions. Do not loosen those permissions to make the form work.
+حالات الطلب: `pending`, `needs_information`, `approved`, `declined`. تغيير الحالة أو إضافة ملاحظة مراجعة يجب أن يتم لاحقًا من خلال جلسة موظف موثقة وصلاحيات خادمية مناسبة، وليس من المتصفح العام.
 
-## 3. Keep credentials safe
-- The browser may use only the project's **Project URL** and **publishable/anon key**, and only after the table policies have been checked.
-- Never put a **service_role/secret key**, database password, or other privileged secret in HTML, JavaScript, GitHub, or a message.
-- For Vercel configuration, use Project Settings → Environment Variables. Do not commit a `.env` file.
+## ضوابط الأمان
+- لا تضع مفتاح `service_role` أو أي مفتاح سري أو كلمة مرور قاعدة البيانات في HTML أو JavaScript أو GitHub.
+- المفتاح الموجود في المتصفح يجب أن يبقى publishable فقط، مع إبقاء RLS والسياسات مفعّلة.
+- لا تضف سياسة SELECT عامة لتسهيل بناء لوحة المراجعة.
+- لا تخزّن كلمات المرور يدويًا في جداول التطبيق، ولا تعتمد على `user_metadata` لتحديد الأدوار.
+- أسماء المستخدمين التي يحددها مدير الموقع يجب أن ترتبط بمصادقة Supabase Auth آمنة؛ لا يُنشأ حساب تلقائيًا من نموذج طلب الانخراط.
+- يجب أن تُفرض صلاحيات الرئيس والأمين العام وأمين المال والنواب والمدير التقني في قاعدة البيانات/الخادم، لا بمجرد إخفاء عناصر الواجهة.
+- قبل تفعيل لوحة الدخول، يجب تجهيز إجراء آمن لإنشاء أول حساب مدير، وتعطيل الحسابات، وإعادة تعيين كلمات المرور، وتحديد الأدوار، مع اختبار RLS.
 
-## 4. Before making the form live
-The website form must be connected and tested against this schema, then spam protection/rate limiting and a secure staff-review mechanism must be added. A president-only review dashboard should use authenticated staff roles; never expose the service-role key to the browser.
-
-Until those steps are complete, the public site must continue to say that online joining is being prepared and must not claim that a request has been recorded.
+## الخطوات التالية
+1. تنفيذ تصميم حسابات الموظفين وربط اسم المستخدم بهوية مصادقة آمنة.
+2. إضافة صلاحيات قاعدة البيانات وسياسات RLS لكل دور.
+3. بناء لوحة مراجعة طلبات الانخراط واختبارها بحسابات ذات صلاحيات مختلفة.
+4. تحديث هذا الملف بعد التحقق الفعلي من كل مرحلة.
