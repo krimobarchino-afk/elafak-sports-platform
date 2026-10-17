@@ -3,7 +3,7 @@
 -- Create actual Auth users only through a trusted administrative workflow.
 
 create schema if not exists private;
-revoke all on schema private from public;
+revoke all on schema private from public, anon, authenticated;
 grant usage on schema private to authenticated;
 
 create table if not exists public.staff_profiles (
