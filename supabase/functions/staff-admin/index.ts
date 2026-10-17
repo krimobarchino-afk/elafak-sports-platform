@@ -30,6 +30,7 @@ Deno.serve(async(req)=>{
  }
  const id=typeof b.user_id==="string"?b.user_id:"";if(!id)return out({error:"معرّف الحساب مطلوب"},400);
  const {data:t}=await admin.from("staff_profiles").select("user_id,role").eq("user_id",id).maybeSingle();if(!t)return out({error:"الحساب غير موجود"},404);
+ if(id===u.user.id&&b.action==="update"&&b.role!==undefined&&b.role!==t.role)return out({error:"لا يمكن تغيير دور حساب مدير الموقع الحالي."},400);
  if(b.action==="activate"||b.action==="deactivate"){if(b.action==="deactivate"&&id===u.user.id)return out({error:"لا يمكن تعطيل حساب المدير الحالي."},400);const {error}=await admin.from("staff_profiles").update({is_active:b.action==="activate",updated_at:new Date().toISOString()}).eq("user_id",id);return error?out({error:"تعذر تحديث حالة الحساب"},500):out({ok:true})}
  if(b.action==="update"){
   const patch:Record<string,unknown>={updated_at:new Date().toISOString()};
