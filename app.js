@@ -57,7 +57,7 @@
       const result = await client.from('join_requests').insert(payload);
       if (result.error) throw result.error;
       joinForm.reset();
-      formMessage.textContent = 'تم إرسال طلبك بنجاح. سيبقى قيد المراجعة، وإرسال الطلب لا يعني قبول العضوية.';
+      formMessage.textContent = 'تم إرسال طلب الانخراط بنجاح. سيبقى قيد المراجعة، وإرساله لا يعني قبوله أو إتمام إجراءات الانخراط.';
       formMessage.className = 'form-message success';
       submitJoin.textContent = 'تم الإرسال';
     } catch (error) {
