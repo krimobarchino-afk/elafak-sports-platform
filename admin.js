@@ -9,7 +9,7 @@ const statuses={pending:"قيد المراجعة",needs_information:"استكم�
 const interests={paragliding:"الطيران الشراعي",hiking:"المشي الجبلي",volunteering:"التطوع"};
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function msg(id,text,bad){el(id).className="msg"+(bad?" error":"");el(id).textContent=text;}
-function show(p){me=p;el("login").classList.add("hidden");el("app").classList.remove("hidden");el("welcome").textContent="مرحبًا، "+p.full_name;el("role").textContent="الصلاحية: "+(roles[p.role]||p.role);el("staff-tab").classList.toggle("hidden",p.role!=="platform_admin");loadRequests();if(p.role==="platform_admin")loadStaff();}
+function show(p){me=p;el("login").classList.add("hidden");el("app").classList.remove("hidden");el("welcome").textContent="مرحبًا، "+p.full_name;el("role").textContent="الصلاحية: "+(roles[p.role]||p.role);el("staff-tab").classList.toggle("hidden",p.role!=="platform_admin");const forceChange=!!p.must_change_password;el("password-change-panel").classList.toggle("hidden",!forceChange);el("app-nav").classList.toggle("hidden",forceChange);el("requests-panel").classList.add("hidden");el("staff-panel").classList.add("hidden");if(!forceChange){el("requests-panel").classList.remove("hidden");loadRequests();if(p.role==="platform_admin")loadStaff();}}
 function loggedOut(){me=null;el("app").classList.add("hidden");el("login").classList.remove("hidden");}
 el("login-form").addEventListener("submit",async e=>{e.preventDefault();el("login-btn").disabled=true;try{
 const res=await db.functions.invoke("staff-login",{body:{username:el("username").value.trim(),password:el("password").value}});
@@ -19,6 +19,7 @@ const got=await db.from("staff_profiles").select("user_id,username,full_name,rol
 if(got.error||!got.data||!got.data.active)throw Error("تعذر تحميل صلاحيات الحساب.");
 e.target.reset();show(got.data);
 }catch(err){msg("login-msg",err.message||"حدث خطأ في تسجيل الدخول.",true);}finally{el("login-btn").disabled=false;}});
+el("password-change-form").addEventListener("submit",async e=>{e.preventDefault();const password=el("new-password").value;const confirmPassword=el("confirm-password").value;if(password.length<12){msg("password-change-msg","كلمة المرور يجب ألا تقل عن 12 محرفًا.",true);return;}if(password!==confirmPassword){msg("password-change-msg","كلمتا المرور غير متطابقتين.",true);return;}el("change-password-btn").disabled=true;try{const r=await db.functions.invoke("staff-admin",{body:{action:"change_own_password",new_password:password}});if(r.error||(r.data&&r.data.error))throw Error((r.data&&r.data.error)||(r.error&&r.error.message)||"تعذر تغيير كلمة المرور.");el("new-password").value="";el("confirm-password").value="";me.must_change_password=false;show(me);msg("password-change-msg","تم تغيير كلمة المرور بنجاح.");}catch(err){msg("password-change-msg",err.message||"تعذر تغيير كلمة المرور.",true);}finally{el("change-password-btn").disabled=false;}});
 async function loadRequests(){
 const body=el("requests-body");body.innerHTML="<tr><td colspan='6'>جارٍ التحميل…</td></tr>";
 const r=await db.from("join_requests").select("id,request_ref,full_name,birth_date,municipality,phone,email,interests,experience,status,reviewer_note,created_at").order("created_at",{ascending:false}).limit(300);
