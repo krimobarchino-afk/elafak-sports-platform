@@ -76,10 +76,32 @@ Deno.serve(async (req) => {
 
     const { data: actor, error: actorError } = await admin
       .from("staff_profiles")
-      .select("role, active")
+      .select("role, active, must_change_password")
       .eq("user_id", authData.user.id)
       .maybeSingle();
-    if (actorError || !actor?.active || actor.role !== "platform_admin") {
+    if (actorError || !actor?.active) {
+      return respond({ error: "الحساب غير نشط أو غير صالح." }, 403);
+    }
+
+    // The password update happens server-side so the temporary password cannot be bypassed
+    // by simply clearing a client-side flag.
+    if (action === "change_own_password") {
+      const newPassword = String(body.new_password || "");
+      if (newPassword.length < 12) {
+        return respond({ error: "يجب أن تتكون كلمة المرور الجديدة من 12 محرفًا على الأقل." }, 400);
+      }
+      const { error: passwordError } = await admin.auth.admin.updateUserById(authData.user.id, {
+        password: newPassword,
+      });
+      if (passwordError) return respond({ error: "تعذر تحديث كلمة المرور." }, 400);
+      const { error: profileError } = await admin.from("staff_profiles")
+        .update({ must_change_password: false, updated_at: new Date().toISOString() })
+        .eq("user_id", authData.user.id);
+      if (profileError) return respond({ error: "تغيرت كلمة المرور لكن تعذر تحديث حالة الحساب. تواصل مع مسؤول المنصة." }, 500);
+      return respond({ message: "تم تغيير كلمة المرور بنجاح." });
+    }
+
+    if (actor.role !== "platform_admin") {
       return respond({ error: "هذه العملية متاحة لمسؤول المنصة فقط." }, 403);
     }
 
