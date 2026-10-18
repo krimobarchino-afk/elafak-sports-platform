@@ -72,3 +72,10 @@
 .join-success p{font-size:13px;line-height:2;color:var(--muted)}
 .join-success .followup-hint{background:#edf2e8;padding:12px;border-right:3px solid #8da96e}
 #saved-track-button{margin-top:10px}
+
+.reference-card{display:flex;flex-direction:column;align-items:flex-start;gap:9px;padding:16px;background:#edf2e8;border:1px solid #d5e1cf;border-radius:8px;margin:16px 0;direction:rtl}
+.reference-card>span{font-size:12px;color:var(--muted);font-weight:600}
+.reference-card strong{font-family:Tahoma,Arial,sans-serif;font-size:20px;letter-spacing:.4px;color:var(--green);direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere;user-select:all}
+.reference-card .btn{margin-top:2px;justify-content:center}
+.join-success .followup-hint{background:#edf2e8;padding:12px;border-right:3px solid #8da96e}
+.join-success .followup-hint strong{color:var(--green)}
