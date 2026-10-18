@@ -21,6 +21,21 @@
   }
   const close = () => { if (modal) modal.hidden = true; if (openButton) openButton.focus(); };
   if (openButton && modal) openButton.addEventListener('click', () => {
+    // A completed request should not leave the modal stuck on its previous success screen.
+    const successPanel = document.querySelector('#join-success');
+    if (joinForm && joinForm.hidden) {
+      joinForm.reset();
+      joinForm.hidden = false;
+      if (submitJoin) {
+        submitJoin.disabled = false;
+        submitJoin.textContent = 'إرسال الطلب';
+      }
+    }
+    if (successPanel) successPanel.hidden = true;
+    if (formMessage) {
+      formMessage.textContent = '';
+      formMessage.className = 'form-message';
+    }
     modal.hidden = false;
     window.__joinFormOpenedAt = Date.now();
     const honeypot = joinForm?.elements.namedItem('website');
