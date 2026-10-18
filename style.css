@@ -82,3 +82,12 @@
 
 .reference-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .reference-actions .btn{margin-top:2px}
+
+/* Configurable join-file requirements */
+.requirement-results{margin-top:14px;padding:16px 18px;background:#f4f7f0;border:1px solid #d8e2d2;border-radius:10px;color:var(--green)}
+.requirement-results[hidden]{display:none!important}
+.requirement-results h3{font-size:15px;margin:0 0 10px}
+.requirement-results ul{padding-right:22px;margin:0}
+.requirement-results li{margin:9px 0;line-height:1.9}
+.requirement-results li p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.requirement-required{font-weight:700;color:#8a4a19}
