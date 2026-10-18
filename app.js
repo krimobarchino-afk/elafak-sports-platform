@@ -118,6 +118,7 @@
       }
     });
   }
-\n  if (modal) modal.addEventListener('click', e => { if (e.target === modal) close(); });
+
+  if (modal) modal.addEventListener('click', e => { if (e.target === modal) close(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal && !modal.hidden) close(); });
 })();
