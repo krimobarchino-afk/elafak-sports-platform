@@ -63,3 +63,12 @@
 .form-message.success{color:#245d3b}
 .form-message.error{color:#9a312b}
 @media(max-width:620px){.tracking-panel{grid-template-columns:1fr;gap:18px;padding:25px 20px}}
+
+/* Join request success and session follow-up */
+.join-success[hidden],#saved-track-button[hidden]{display:none!important}
+.join-success{text-align:right;padding-top:10px}
+.join-success .success-mark{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:#e0ecd7;color:#23653d;font-size:27px;font-weight:700;margin:0 0 14px}
+.join-success h3{font-size:21px;color:var(--green);margin:0 0 8px}
+.join-success p{font-size:13px;line-height:2;color:var(--muted)}
+.join-success .followup-hint{background:#edf2e8;padding:12px;border-right:3px solid #8da96e}
+#saved-track-button{margin-top:10px}
