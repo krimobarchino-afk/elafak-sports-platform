@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123b32">
+<meta name="description" content="بوابة المنخرطين في جمعية الأفق الولائية للرياضات الجوية والجبلية.">
+<title>بوابة المنخرطين | جمعية الأفق</title>
+<link rel="icon" href="/icon.svg">
+<link rel="stylesheet" href="/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="/member.js" defer></script>
+<style>
+.member-wrap{max-width:760px;margin:2rem auto;padding:1rem}.member-panel{background:#fff;color:#17352e;border:1px solid #dce5df;border-radius:16px;padding:1.3rem;margin:1rem 0}.member-form{display:grid;gap:1rem}.member-form label{display:grid;gap:.4rem}.member-form input{padding:.8rem;border:1px solid #b9c9c0;border-radius:8px;font:inherit;width:100%;box-sizing:border-box}.member-status{padding:.8rem;margin:.8rem 0;border-radius:8px}.member-error{color:#8c231b;background:#fff0ef}.member-success{color:#1d6032;background:#e9f7ed}.member-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem}.member-stat{padding:1rem;border:1px solid #dce5df;border-radius:10px;background:#f6f8f3}.member-stat small{display:block;color:#567267}.member-stat strong{display:block;margin-top:.4rem;overflow-wrap:anywhere}.member-hidden{display:none!important}
+</style>
+</head>
+<body>
+<header class="header"><div class="container nav-wrap"><a class="brand" href="/"><img src="/icon.svg" width="44" height="44" alt=""><span><b>جمعية الأفق</b><small>بوابة المنخرطين</small></span></a><a href="/">العودة للموقع العام ←</a></div></header>
+<main class="member-wrap">
+<section class="member-panel" id="member-login">
+<span class="kicker">دخول المنخرطين</span><h1>مرحبًا بك في بوابة المنخرطين</h1>
+<p>تُنشأ الحسابات بعد الاعتماد النهائي للانخراط فقط. لا يؤدي إرسال طلب الانخراط أو قبوله مبدئيًا إلى إنشاء حساب.</p>
+<form id="member-login-form" class="member-form">
+<label>البريد الإلكتروني<input name="email" type="email" autocomplete="username" required maxlength="254"></label>
+<label>كلمة المرور<input name="password" type="password" autocomplete="current-password" required></label>
+<div><button class="btn btn-lime" id="member-login-btn" type="submit">تسجيل الدخول</button></div>
+</form><p id="member-login-msg" role="status" aria-live="polite"></p>
+</section>
+<section class="member-panel member-hidden" id="member-activate">
+<span class="kicker">تفعيل الحساب</span><h1>اختر كلمة مرور لحسابك</h1>
+<p>هذه الخطوة متاحة بعد أن يعتمد الرئيس الانخراط نهائيًا ويرسل دعوة الحساب إلى بريدك الإلكتروني.</p>
+<form id="member-activate-form" class="member-form">
+<label>كلمة المرور الجديدة<input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></label>
+<label>تأكيد كلمة المرور<input name="confirm_password" type="password" autocomplete="new-password" minlength="12" maxlength="128" required></label>
+<div><button class="btn btn-lime" id="member-activate-btn" type="submit">حفظ كلمة المرور وتفعيل الحساب</button></div>
+</form><p id="member-activate-msg" role="status" aria-live="polite"></p>
+</section>
+<section class="member-panel member-hidden" id="member-dashboard">
+<div class="section-head"><div><span class="kicker">مساحتك الخاصة</span><h1>مركز المنخرط</h1><p id="member-welcome"></p></div><button class="btn" id="member-logout" type="button">تسجيل الخروج</button></div>
+<div class="member-grid">
+<div class="member-stat"><small>رقم الانخراط</small><strong id="member-number">—</strong></div>
+<div class="member-stat"><small>حالة الانخراط</small><strong id="member-membership-status">—</strong></div>
+<div class="member-stat"><small>حالة الحساب</small><strong id="member-account-status">—</strong></div>
+<div class="member-stat"><small>تاريخ بداية الانخراط</small><strong id="member-start-date">—</strong></div>
+</div>
+<p id="member-dashboard-msg" role="status" aria-live="polite"></p>
+<p>ستظهر هنا الخدمات والأنشطة والملفات التي يسمح بها دورك وحالة انخراطك. لا تُعرض وثائق الهوية أو ملف طلب الانخراط في هذه الصفحة.</p>
+</section>
+</main>
+<footer class="footer"><div class="container">جمعية الأفق الولائية للرياضات الجوية والجبلية — الشلف</div></footer>
+</body></html>
