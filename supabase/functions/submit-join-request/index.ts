@@ -67,7 +67,7 @@ Deno.serve(async (req: Request) => {
   const experience = clean(body.experience, 1500) || null;
   const birth_date = clean(body.birth_date, 10) || null;
   const interests = Array.isArray(body.interests)
-    ? [...new Set(body.interests.filter((v): v is string => typeof v === "string" && allowedInterests.has(v))]
+    ? [...new Set(body.interests.filter((v): v is string => typeof v === "string" && allowedInterests.has(v)))]
     : [];
 
   if (full_name.length < 3 || municipality.length < 2 || phone.length < 6 ||
