@@ -98,3 +98,5 @@
 .join-file-upload label{display:grid;gap:8px;font-weight:600;font-size:13px}
 .join-file-upload input[type=file]{width:100%;max-width:100%;padding:10px;background:#fff;border:1px solid var(--line);border-radius:8px;font:inherit}
 .join-file-upload button{justify-self:start}
+
+.privacy-note{font-size:12px;line-height:1.9;color:var(--muted);background:#f1f4ec;border-right:3px solid #9aaf8c;padding:10px 12px;margin:12px 0}
