@@ -190,6 +190,12 @@
             fileMessage.textContent = result.file_message || 'ملفك قيد المعالجة.';
             fileMessage.className = 'form-message success';
             requirementBox.append(fileMessage);
+            if (fileStatus === 'needs_correction' && result.correction_note) {
+              const correction = document.createElement('p');
+              correction.textContent = 'ملاحظة الإدارة: ' + result.correction_note;
+              correction.className = 'form-message error';
+              requirementBox.append(correction);
+            }
           }
           if (!fileStatus || fileStatus === 'awaiting_upload' || fileStatus === 'needs_correction') {
             const uploadHeading = document.createElement('h3');
