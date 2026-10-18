@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
+const SUPABASE_URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
 const KEY="sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ";
 const $=id=>document.getElementById(id);
 const ROLE={site_admin:"مدير الموقع",president:"الرئيس",deputy_president:"نائب الرئيس",secretary_general:"الأمين العام",treasurer:"أمين المال",deputy_secretary_general:"نائب الأمين العام",deputy_treasurer:"نائب أمين المال",technical_director:"المدير التقني"};
@@ -217,7 +217,7 @@ async function enter(){
 }
 addEventListener("DOMContentLoaded",()=>{
  if(!window.supabase){message("m-login-msg","تعذر تحميل خدمة الدخول. تحقق من الاتصال بالإنترنت.");return}
- sb=window.supabase.createClient(URL,KEY);bind();
+ sb=window.supabase.createClient(SUPABASE_URL,KEY);bind();
  sb.auth.getSession().then(({data})=>{if(data.session)enter()});
 });
 })();
