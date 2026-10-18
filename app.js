@@ -66,11 +66,17 @@
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'تعذر إرسال الطلب.');
-      joinForm.reset();
+      const submittedPhone = payload.phone;
+      const submittedRef = result.request_ref || '';
+      if (submittedRef && submittedPhone) {
+        try { sessionStorage.setItem('elafak_join_followup', JSON.stringify({ request_ref: submittedRef, phone: submittedPhone })); } catch (_) {}
+      }
+      joinForm.hidden = true;
+      const successPanel = document.querySelector('#join-success');
+      if (successPanel) successPanel.hidden = false;
       window.__joinFormOpenedAt = 0;
-      const reference = result.request_ref ? ' رقم المرجع: ' + result.request_ref + '.' : '';
-      formMessage.textContent = 'تم إرسال طلب الانخراط بنجاح.' + reference + ' سيبقى قيد المراجعة، وإرساله لا يعني قبوله أو إتمام إجراءات الانخراط.';
-      formMessage.className = 'form-message success';
+      formMessage.textContent = '';
+      formMessage.className = 'form-message';
       submitJoin.textContent = 'تم الإرسال';
     } catch (error) {
       console.error('Join request submission failed:', error);
@@ -86,38 +92,63 @@
   const trackForm = document.querySelector('#track-form');
   const trackMessage = document.querySelector('#track-message');
   const trackSubmit = document.querySelector('#track-submit');
+  const savedTrackButton = document.querySelector('#saved-track-button');
+  const savedTrackMessage = document.querySelector('#saved-track-message');
+  const runLookup = async (request_ref, phone, messageEl, buttonEl) => {
+    if (!request_ref || !phone || !messageEl) return;
+    if (buttonEl) { buttonEl.disabled = true; buttonEl.textContent = 'جارٍ التحقق…'; }
+    messageEl.textContent = 'جارٍ التحقق من حالة الطلب…';
+    messageEl.className = 'form-message';
+    try {
+      const response = await fetch('https://lfubzohsbwdoiagfkpkt.supabase.co/functions/v1/lookup-join-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': 'sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ' },
+        body: JSON.stringify({ request_ref, phone })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'تعذر التحقق من الحالة.');
+      messageEl.textContent = 'حالة الطلب: ' + result.status_label + '. ' + result.message;
+      messageEl.className = 'form-message success';
+    } catch (error) {
+      messageEl.textContent = error.message || 'تعذر التحقق الآن. يرجى المحاولة لاحقًا.';
+      messageEl.className = 'form-message error';
+    } finally {
+      if (buttonEl) { buttonEl.disabled = false; buttonEl.textContent = 'متابعة طلبي'; }
+    }
+  };
+  const getSavedTrack = () => {
+    try { return JSON.parse(sessionStorage.getItem('elafak_join_followup') || 'null'); } catch (_) { return null; }
+  };
+  const savedTrack = getSavedTrack();
+  if (savedTrack && savedTrack.request_ref && savedTrack.phone && trackForm && savedTrackButton) {
+    trackForm.hidden = true;
+    savedTrackButton.hidden = false;
+    savedTrackButton.addEventListener('click', () => runLookup(savedTrack.request_ref, savedTrack.phone, savedTrackMessage, savedTrackButton));
+  }
   if (trackForm && trackMessage && trackSubmit) {
     trackForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const values = new FormData(trackForm);
-      const request_ref = String(values.get('request_ref') || '').trim();
-      const phone = String(values.get('phone') || '').trim();
-      trackSubmit.disabled = true;
-      trackSubmit.textContent = 'جارٍ التحقق…';
-      trackMessage.textContent = '';
-      trackMessage.className = 'form-message';
-      try {
-        const response = await fetch('https://lfubzohsbwdoiagfkpkt.supabase.co/functions/v1/lookup-join-request', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': 'sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ'
-          },
-          body: JSON.stringify({ request_ref, phone })
-        });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(result.error || 'تعذر التحقق من الحالة.');
-        trackMessage.textContent = 'الحالة: ' + result.status_label + '. ' + result.message;
-        trackMessage.className = 'form-message success';
-      } catch (error) {
-        trackMessage.textContent = error.message || 'تعذر التحقق الآن. يرجى المحاولة لاحقًا.';
-        trackMessage.className = 'form-message error';
-      } finally {
-        trackSubmit.disabled = false;
-        trackSubmit.textContent = 'التحقق من الحالة';
+      await runLookup(String(values.get('request_ref') || '').trim(), String(values.get('phone') || '').trim(), trackMessage, trackSubmit);
+      if (trackMessage.classList.contains('success')) {
+        try { sessionStorage.setItem('elafak_join_followup', JSON.stringify({ request_ref: String(values.get('request_ref') || '').trim(), phone: String(values.get('phone') || '').trim() })); } catch (_) {}
+        if (savedTrackButton) savedTrackButton.hidden = false;
       }
     });
   }
+  const followFromSuccess = document.querySelector('#join-success-track');
+  if (followFromSuccess) followFromSuccess.addEventListener('click', () => {
+    if (modal) modal.hidden = true;
+    const trackSection = document.querySelector('#track');
+    if (trackSection) trackSection.scrollIntoView({ behavior: 'smooth' });
+    const saved = getSavedTrack();
+    if (saved && savedTrackMessage && savedTrackButton) {
+      savedTrackButton.hidden = false;
+      runLookup(saved.request_ref, saved.phone, savedTrackMessage, savedTrackButton);
+    }
+  });
+  const closeSuccess = document.querySelector('#join-success-close');
+  if (closeSuccess) closeSuccess.addEventListener('click', () => { if (modal) modal.hidden = true; });
 
   if (modal) modal.addEventListener('click', e => { if (e.target === modal) close(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal && !modal.hidden) close(); });
