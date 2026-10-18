@@ -13,7 +13,7 @@
 - `supabase/migrations/202610170001_staff_profiles.sql`
 - `supabase/migrations/202610170002_staff_join_request_review_policies.sql`
 - `supabase/migrations/202610180004_join_request_rate_limits.sql`
-- `supabase/migrations/202610180005_route_public_join_requests_through_edge_function.sql`\n- `supabase/migrations/202610180006_full_management_modules.sql`\n- `supabase/migrations/202610180007_seed_official_meetings.sql`
+- `supabase/migrations/202610180005_route_public_join_requests_through_edge_function.sql`\n- `supabase/migrations/202610180006_full_management_modules.sql`\n- `supabase/migrations/202610180007_seed_official_meetings.sql`\n- `supabase/migrations/202610180008_tighten_management_role_visibility.sql`
 
 ## إنشاء أول مدير — مطلوب قبل الاختبار
 لا يوجد حساب مدير موقع حتى الآن؛ لا يمكن إنشاء أول مدير بأمان من صفحة عامة. من لوحة Supabase:
