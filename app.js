@@ -82,6 +82,42 @@
     }
   });
 
-  if (modal) modal.addEventListener('click', e => { if (e.target === modal) close(); });
+
+  const trackForm = document.querySelector('#track-form');
+  const trackMessage = document.querySelector('#track-message');
+  const trackSubmit = document.querySelector('#track-submit');
+  if (trackForm && trackMessage && trackSubmit) {
+    trackForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const values = new FormData(trackForm);
+      const request_ref = String(values.get('request_ref') || '').trim();
+      const phone = String(values.get('phone') || '').trim();
+      trackSubmit.disabled = true;
+      trackSubmit.textContent = 'جارٍ التحقق…';
+      trackMessage.textContent = '';
+      trackMessage.className = 'form-message';
+      try {
+        const response = await fetch('https://lfubzohsbwdoiagfkpkt.supabase.co/functions/v1/lookup-join-request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ'
+          },
+          body: JSON.stringify({ request_ref, phone })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'تعذر التحقق من الحالة.');
+        trackMessage.textContent = 'الحالة: ' + result.status_label + '. ' + result.message;
+        trackMessage.className = 'form-message success';
+      } catch (error) {
+        trackMessage.textContent = error.message || 'تعذر التحقق الآن. يرجى المحاولة لاحقًا.';
+        trackMessage.className = 'form-message error';
+      } finally {
+        trackSubmit.disabled = false;
+        trackSubmit.textContent = 'التحقق من الحالة';
+      }
+    });
+  }
+\n  if (modal) modal.addEventListener('click', e => { if (e.target === modal) close(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal && !modal.hidden) close(); });
 })();
