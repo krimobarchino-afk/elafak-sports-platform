@@ -150,6 +150,43 @@
       if (!response.ok) throw new Error(result.error || 'تعذر التحقق من الحالة.');
       messageEl.textContent = 'حالة الطلب: ' + result.status_label + '. ' + result.message;
       messageEl.className = 'form-message success';
+      const requirementBox = document.querySelector('#track-requirements');
+      if (requirementBox) {
+        requirementBox.replaceChildren();
+        const requirements = Array.isArray(result.requirements) ? result.requirements : [];
+        if (result.status === 'approved') {
+          const heading = document.createElement('h3');
+          heading.textContent = 'متطلبات استكمال الملف';
+          requirementBox.append(heading);
+          if (!requirements.length) {
+            const note = document.createElement('p');
+            note.textContent = 'لم تعتمد الجمعية قائمة وثائق بعد. يرجى انتظار تعليمات الجمعية أو التواصل معها عبر قنواتها الرسمية.';
+            requirementBox.append(note);
+          } else {
+            const list = document.createElement('ul');
+            requirements.forEach(item => {
+              const li = document.createElement('li');
+              const name = document.createElement('strong');
+              name.textContent = item.title || 'متطلب';
+              li.append(name);
+              const tag = document.createElement('span');
+              tag.className = item.is_required ? 'requirement-required' : '';
+              tag.textContent = item.is_required ? ' — مطلوب' : ' — عند الاقتضاء';
+              li.append(tag);
+              if (item.description) {
+                const detail = document.createElement('p');
+                detail.textContent = item.description;
+                li.append(detail);
+              }
+              list.append(li);
+            });
+            requirementBox.append(list);
+          }
+          requirementBox.hidden = false;
+        } else {
+          requirementBox.hidden = true;
+        }
+      }
     } catch (error) {
       messageEl.textContent = error.message || 'تعذر التحقق الآن. يرجى المحاولة لاحقًا.';
       messageEl.className = 'form-message error';
