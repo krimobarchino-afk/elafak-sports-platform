@@ -47,3 +47,19 @@
 .form-message.error{color:#a22d2d}
 #submit-join:disabled{opacity:.65;cursor:wait}
 @media(max-width:620px){.join-form-card{padding:22px 17px;max-height:88vh}.join-form-card h2{font-size:22px}}
+
+/* Private-by-credentials join request status lookup */
+.tracking{background:#fff}
+.tracking-panel{display:grid;grid-template-columns:1fr 1fr;gap:55px;align-items:start;background:#edf0e8;padding:38px 42px}
+.tracking-panel h2{font-size:clamp(28px,3.2vw,40px);margin:0 0 12px}
+.tracking-panel>div>p{font-size:13px;line-height:2.1;color:var(--muted)}
+.tracking-caution{font-weight:700;color:var(--green)!important}
+#track-form{display:grid;gap:9px}
+#track-form label{font-size:12px;font-weight:700;color:var(--green)}
+#track-form input{width:100%;border:1px solid #cbd6ca;background:#fff;padding:12px 13px;border-radius:0;font:inherit;font-size:13px;color:var(--ink)}
+#track-form input:focus{outline:2px solid #9bb77b;outline-offset:1px}
+#track-form .btn{margin-top:7px}
+.form-message{font-size:12px;line-height:1.9;margin:8px 0 0;overflow-wrap:anywhere}
+.form-message.success{color:#245d3b}
+.form-message.error{color:#9a312b}
+@media(max-width:620px){.tracking-panel{grid-template-columns:1fr;gap:18px;padding:25px 20px}}
