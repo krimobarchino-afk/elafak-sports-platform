@@ -20,7 +20,13 @@
     }));
   }
   const close = () => { if (modal) modal.hidden = true; if (openButton) openButton.focus(); };
-  if (openButton && modal) openButton.addEventListener('click', () => { modal.hidden = false; if (closeButton) closeButton.focus(); });
+  if (openButton && modal) openButton.addEventListener('click', () => {
+    modal.hidden = false;
+    window.__joinFormOpenedAt = Date.now();
+    const honeypot = joinForm?.elements.namedItem('website');
+    if (honeypot) honeypot.value = '';
+    if (closeButton) closeButton.focus();
+  });
   if (closeButton) closeButton.addEventListener('click', close);
 
   if (joinForm) joinForm.addEventListener('submit', async (event) => {
@@ -32,12 +38,6 @@
       formMessage.className = 'form-message error';
       return;
     }
-    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-      formMessage.textContent = 'تعذر تحميل خدمة الإرسال. يرجى المحاولة لاحقًا.';
-      formMessage.className = 'form-message error';
-      return;
-    }
-    const client = window.supabase.createClient('https://lfubzohsbwdoiagfkpkt.supabase.co', 'sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ');
     const values = new FormData(joinForm);
     const payload = {
       full_name: String(values.get('full_name') || '').trim(),
@@ -47,17 +47,29 @@
       email: String(values.get('email') || '').trim() || null,
       interests: selectedInterests,
       experience: String(values.get('experience') || '').trim() || null,
-      consent: values.get('consent') === 'on'
+      consent: values.get('consent') === 'on',
+      website: String(values.get('website') || ''),
+      form_started_at: window.__joinFormOpenedAt || 0
     };
     submitJoin.disabled = true;
     submitJoin.textContent = 'جارٍ إرسال الطلب…';
     formMessage.textContent = '';
     formMessage.className = 'form-message';
     try {
-      const result = await client.from('join_requests').insert(payload);
-      if (result.error) throw result.error;
+      const response = await fetch('https://lfubzohsbwdoiagfkpkt.supabase.co/functions/v1/submit-join-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ'
+        },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'تعذر إرسال الطلب.');
       joinForm.reset();
-      formMessage.textContent = 'تم إرسال طلب الانخراط بنجاح. سيبقى قيد المراجعة، وإرساله لا يعني قبوله أو إتمام إجراءات الانخراط.';
+      window.__joinFormOpenedAt = 0;
+      const reference = result.request_ref ? ' رقم المرجع: ' + result.request_ref + '.' : '';
+      formMessage.textContent = 'تم إرسال طلب الانخراط بنجاح.' + reference + ' سيبقى قيد المراجعة، وإرساله لا يعني قبوله أو إتمام إجراءات الانخراط.';
       formMessage.className = 'form-message success';
       submitJoin.textContent = 'تم الإرسال';
     } catch (error) {
