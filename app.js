@@ -66,13 +66,28 @@
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'تعذر إرسال الطلب.');
-      const submittedPhone = payload.phone;
       const submittedRef = result.request_ref || '';
-      if (submittedRef && submittedPhone) {
-        try { sessionStorage.setItem('elafak_join_followup', JSON.stringify({ request_ref: submittedRef, phone: submittedPhone })); } catch (_) {}
-      }
       joinForm.hidden = true;
       const successPanel = document.querySelector('#join-success');
+      const referenceOutput = document.querySelector('#join-success-reference');
+      if (referenceOutput) referenceOutput.textContent = submittedRef || 'لم يُرجع النظام رقم المرجع؛ يرجى التواصل مع الجمعية.';
+      const copyReferenceButton = document.querySelector('#copy-join-reference');
+      if (copyReferenceButton) {
+        copyReferenceButton.hidden = !submittedRef;
+        copyReferenceButton.onclick = async () => {
+          try {
+            await navigator.clipboard.writeText(submittedRef);
+            copyReferenceButton.textContent = 'تم نسخ المرجع';
+          } catch (_) {
+            const range = document.createRange();
+            range.selectNodeContents(referenceOutput);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            copyReferenceButton.textContent = 'حدد المرجع وانسخه';
+          }
+        };
+      }
       if (successPanel) successPanel.hidden = false;
       window.__joinFormOpenedAt = 0;
       formMessage.textContent = '';
@@ -116,37 +131,15 @@
       if (buttonEl) { buttonEl.disabled = false; buttonEl.textContent = 'متابعة طلبي'; }
     }
   };
-  const getSavedTrack = () => {
-    try { return JSON.parse(sessionStorage.getItem('elafak_join_followup') || 'null'); } catch (_) { return null; }
-  };
-  const savedTrack = getSavedTrack();
-  if (savedTrack && savedTrack.request_ref && savedTrack.phone && trackForm && savedTrackButton) {
-    trackForm.hidden = true;
-    savedTrackButton.hidden = false;
-    savedTrackButton.addEventListener('click', () => runLookup(savedTrack.request_ref, savedTrack.phone, savedTrackMessage, savedTrackButton));
-  }
+  const getSavedTrack = () => null;
   if (trackForm && trackMessage && trackSubmit) {
     trackForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const values = new FormData(trackForm);
       await runLookup(String(values.get('request_ref') || '').trim(), String(values.get('phone') || '').trim(), trackMessage, trackSubmit);
-      if (trackMessage.classList.contains('success')) {
-        try { sessionStorage.setItem('elafak_join_followup', JSON.stringify({ request_ref: String(values.get('request_ref') || '').trim(), phone: String(values.get('phone') || '').trim() })); } catch (_) {}
-        if (savedTrackButton) savedTrackButton.hidden = false;
-      }
+
     });
   }
-  const followFromSuccess = document.querySelector('#join-success-track');
-  if (followFromSuccess) followFromSuccess.addEventListener('click', () => {
-    if (modal) modal.hidden = true;
-    const trackSection = document.querySelector('#track');
-    if (trackSection) trackSection.scrollIntoView({ behavior: 'smooth' });
-    const saved = getSavedTrack();
-    if (saved && savedTrackMessage && savedTrackButton) {
-      savedTrackButton.hidden = false;
-      runLookup(saved.request_ref, saved.phone, savedTrackMessage, savedTrackButton);
-    }
-  });
   const closeSuccess = document.querySelector('#join-success-close');
   if (closeSuccess) closeSuccess.addEventListener('click', () => { if (modal) modal.hidden = true; });
 
