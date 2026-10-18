@@ -100,3 +100,36 @@
 .join-file-upload button{justify-self:start}
 
 .privacy-note{font-size:12px;line-height:1.9;color:var(--muted);background:#f1f4ec;border-right:3px solid #9aaf8c;padding:10px 12px;margin:12px 0}
+
+
+/* Homepage adventure redesign */
+.hero-grid{grid-template-columns:minmax(0,1fr) minmax(350px,.95fr);gap:clamp(32px,6vw,82px);align-items:center;padding-top:64px;padding-bottom:52px}
+.hero-copy{max-width:590px}
+.hero-copy h1{font-size:clamp(42px,5.3vw,70px);line-height:1.3;letter-spacing:-1.2px}
+.hero-copy>p{max-width:520px;font-size:16px;line-height:2.05;color:#e0eae4}
+.hero-art{height:clamp(340px,42vw,500px);position:relative;overflow:hidden;border-radius:28px 28px 110px 28px;background:#284c43;isolation:isolate;box-shadow:0 28px 65px #061e1838}
+.hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.82)}
+.hero-photo-shade{position:absolute;inset:0;background:linear-gradient(180deg,#071e1a08 20%,#071e1a9c 100%),linear-gradient(90deg,#0b2b2533,#0b2b2500)}
+.hero-floating-label{position:absolute;right:22px;bottom:24px;display:flex;align-items:center;gap:12px;padding:13px 17px;border:1px solid #ffffff48;background:#102e2bcf;backdrop-filter:blur(12px);border-radius:14px;color:#fff}
+.hero-floating-label span:last-child{display:grid;gap:1px}.hero-floating-label b{font-size:13px}.hero-floating-label small{font-size:10px;color:#d1e0d6}
+.hero-label-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:var(--lime);color:var(--deep);font-size:24px}
+.hero-stamp{position:absolute;top:22px;left:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100px;height:100px;border-radius:50%;border:1px solid #ffffff82;background:#f7f7f1e8;color:var(--green);transform:rotate(-9deg);box-shadow:0 8px 26px #061e1825}
+.hero-stamp span{font:600 10px Tahoma,sans-serif;letter-spacing:2px}.hero-stamp b{font-size:28px;line-height:1.25}.hero-stamp small{font:600 7px Tahoma,sans-serif;letter-spacing:1px}
+.hero-foot{padding-bottom:20px}
+.activities{background:#f0f2e9}
+.activity-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:34px}
+.activity-card{overflow:hidden;border:1px solid #dce4d8;border-radius:18px;background:#fff;box-shadow:0 9px 28px #1b3a2d08;transition:transform .25s ease,box-shadow .25s ease}
+.activity-card:hover{transform:translateY(-5px);box-shadow:0 17px 35px #1b3a2d14}
+.activity-image{height:205px;position:relative;overflow:hidden;background:#dbe5da}
+.activity-image:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0b2b2500 45%,#0b2b2575)}
+.activity-image img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.activity-card:hover .activity-image img{transform:scale(1.045)}
+.activity-index{position:absolute;z-index:1;right:15px;bottom:13px;color:#fff;font-size:11px;font-weight:600;letter-spacing:.2px}
+.activity-content{padding:21px 22px 24px}
+.activity-content>small{color:#65836b;font-size:11px;font-weight:700;letter-spacing:.3px}
+.activity-content h3{margin:6px 0 9px;font-size:21px;line-height:1.55;color:#163b30}
+.activity-content p{margin:0;color:#66756c;font-size:13px;line-height:2}
+.activity-footnote{margin:22px 0 0;padding:13px 16px;border-right:3px solid #9bad7d;background:#e6ebdf;color:#586a5c;font-size:12px;line-height:1.9}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:30px;padding-top:46px}.hero-copy{max-width:720px}.hero-art{height:390px;max-width:700px;width:100%;margin-inline:auto}.activity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.activity-image{height:190px}}
+@media(max-width:560px){.container{width:min(100% - 32px,1160px)}.hero-grid{padding-top:36px;padding-bottom:30px}.hero-copy h1{font-size:42px}.hero-copy>p{font-size:14px}.hero-art{height:310px;border-radius:20px 20px 70px 20px}.hero-stamp{width:78px;height:78px;top:14px;left:14px}.hero-stamp span{font-size:8px}.hero-stamp b{font-size:22px}.hero-stamp small{font-size:6px}.hero-floating-label{right:13px;bottom:14px;padding:10px 12px}.hero-floating-label b{font-size:11px}.hero-floating-label small{font-size:9px}.activity-grid{grid-template-columns:1fr;gap:14px}.activity-image{height:215px}.activity-content{padding:18px}.activity-content h3{font-size:19px}.section-head{gap:16px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.activity-card,.activity-image img{transition:none}}
