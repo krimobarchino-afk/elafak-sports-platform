@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123b32">
+<meta name="description" content="فضاء تسيير جمعية الأفق: المالية والأنشطة والمعدات والاجتماعات والأرشيف.">
+<title>تسيير جمعية الأفق | المكتب التنفيذي</title>
+<link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="/management.js" defer></script>
+<style>
+:root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
+.m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
+.m-card{background:#fff;border:1px solid var(--m-line);border-radius:15px;padding:1.15rem;margin:1rem 0}
+.m-card h2,.m-card h3{color:#123b32;margin-top:.1rem}
+.m-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.85rem}
+.m-grid label{display:grid;gap:.35rem;font-size:.9rem;font-weight:600}
+.m-grid input,.m-grid select,.m-grid textarea{box-sizing:border-box;width:100%;min-width:0;padding:.7rem;border:1px solid #b9c9c0;border-radius:8px;background:white;color:#17352e;font:inherit}
+.m-grid textarea{min-height:88px;resize:vertical}
+.m-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}
+.m-tabs button{border:1px solid var(--m-line);background:#fff;color:#17352e;padding:.7rem 1rem;border-radius:8px;font:inherit;cursor:pointer}
+.m-tabs button.active{background:#123b32;color:#fff;border-color:#123b32}
+.m-pane[hidden],.m-hide{display:none!important}
+.m-tablewrap{overflow:auto;border:1px solid var(--m-line);border-radius:9px}
+.m-table{border-collapse:collapse;width:100%;min-width:760px}
+.m-table th,.m-table td{padding:.65rem .7rem;border-bottom:1px solid var(--m-line);text-align:right;vertical-align:top;font-size:.88rem}
+.m-table th{background:#f1f5ed;white-space:nowrap}
+.m-table tr:last-child td{border-bottom:0}
+.m-actions{display:flex;gap:.35rem;flex-wrap:wrap}
+.m-actions button,.m-small{border:1px solid #b9c9c0;background:#fff;border-radius:7px;padding:.35rem .6rem;font:inherit;cursor:pointer;color:#17352e}
+.m-actions .danger{color:#8c231b;border-color:#e7c2bf}
+.m-note{color:#617369;font-size:.9rem;line-height:1.9}
+.m-statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem}
+.m-stat{background:var(--m-soft);border:1px solid var(--m-line);border-radius:10px;padding:1rem}
+.m-stat small{display:block;color:#617369;margin-bottom:.4rem}
+.m-stat strong{font-size:1.35rem;color:#123b32}
+.m-msg{padding:.7rem;border-radius:8px;margin:.7rem 0;line-height:1.7}
+.m-msg.error{background:#fff0ef;color:#8c231b}.m-msg.success{background:#e9f7ed;color:#1d6032}
+.m-toolbar{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap;margin:.7rem 0}
+.m-badge{display:inline-block;padding:.2rem .5rem;border-radius:5px;background:#edf2e8;font-size:.78rem}
+.m-header{background:#123b32;color:#fff;padding:1.5rem 0}
+.m-header .container{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.m-header h1{font-size:clamp(1.3rem,3vw,2rem);margin:0}.m-header p{margin:.4rem 0 0;color:#d4e2d8;font-size:.9rem}
+.m-header a{color:#e0efb3}
+@media(max-width:620px){.m-wrap{padding:0 .7rem 2rem}.m-card{padding:.85rem}.m-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.m-tabs button{font-size:.85rem;padding:.6rem .4rem}.m-table{min-width:680px}}
+@media print{.m-header,.m-tabs,.m-no-print,form{display:none!important}.m-wrap{max-width:none;margin:0;padding:0}.m-card{border:0;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="m-header"><div class="container">
+<div><a href="/" aria-label="الموقع العام">← الموقع العام</a><h1>تسيير جمعية الأفق</h1><p>فضاء المكتب التنفيذي — بيانات الجمعية وسجلاتها الرسمية</p></div>
+<div class="m-actions m-no-print"><a href="/staff.html">بوابة الموظفين</a><button id="logout" class="m-small">تسجيل الخروج</button></div>
+</div></header>
+<main class="m-wrap">
+<section id="m-login" class="m-card">
+<h2>دخول المكتب التنفيذي</h2><p class="m-note">استعمل حساب الموظف الذي أنشأه مدير الموقع. لا تنشئ هذه الصفحة حسابات عامة.</p>
+<form id="m-login-form" class="m-grid"><label>اسم المستخدم<input name="username" autocomplete="username" minlength="3" maxlength="32" required></label><label>كلمة المرور<input name="password" type="password" autocomplete="current-password" required></label><div style="align-self:end"><button class="btn btn-dark" id="m-login-btn">دخول آمن</button></div></form><p id="m-login-msg" role="status"></p>
+</section>
+<section id="m-app" class="m-hide">
+<div class="m-card"><div class="m-toolbar"><div><span class="m-badge" id="m-role">موظف</span><h2 id="m-welcome">لوحة التسيير</h2><p class="m-note" id="m-permissions"></p></div><button id="m-refresh" class="btn btn-dark m-no-print">تحديث البيانات</button></div><p id="m-message" role="status"></p></div>
+<nav class="m-tabs m-no-print" aria-label="وحدات التسيير">
+<button data-pane="overview" class="active">الرئيسية</button>
+<button data-pane="finance" id="tab-finance">المالية</button>
+<button data-pane="activities">الأنشطة</button>
+<button data-pane="equipment">المعدات</button>
+<button data-pane="meetings">الاجتماعات والمحاضر</button>
+<button data-pane="archive">الأرشيف والنسخ</button>
+</nav>
+<section class="m-pane" id="pane-overview">
+<div class="m-statgrid">
+<div class="m-stat"><small>الرصيد المالي الحالي</small><strong id="stat-balance">—</strong></div>
+<div class="m-stat"><small>الأنشطة المسجلة</small><strong id="stat-activities">—</strong></div>
+<div class="m-stat"><small>المعدات المسجلة</small><strong id="stat-equipment">—</strong></div>
+<div class="m-stat"><small>الاجتماعات والمحاضر</small><strong id="stat-meetings">—</strong></div>
+</div>
+<div class="m-card"><h2>تنبيهات التشغيل</h2><ul class="m-note"><li>رصيد 2025 الختامي المثبت: 405 دج؛ السنة مغلقة لحماية السجل.</li><li>رصيد 2026 الافتتاحي: 405 دج، وتُسجّل العمليات الجديدة بتاريخها الفعلي.</li><li>لا توجد معدات محمّلة مسبقًا؛ أدخل الجرد بعد التحقق الميداني.</li><li>لا توجد رسوم أو باقات انخراط مفعّلة أو مفترضة.</li><li>النسخ الاحتياطي من هذه الصفحة يصدر بيانات السجلات المسموح لحسابك بقراءتها، وليس نسخة كاملة من حسابات Supabase أو ملفات التخزين الخاصة.</li></ul></div>
+</section>
+<section class="m-pane" id="pane-finance" hidden>
+<div class="m-card"><div class="m-toolbar"><h2>السجل المالي الموحد</h2><div class="m-actions m-no-print"><button id="finance-export" class="m-small">تصدير CSV</button><button id="close-year" class="m-small">إقفال السنة المحددة</button></div></div>
+<p class="m-note">تُسجّل الإيرادات والمصروفات الفعلية فقط. مبالغ الدينار الجزائري بدقتين عشريتين. إقفال السنة يمنع تعديل عملياتها أو حذفها.</p>
+<div class="m-grid"><label>السنة المالية<select id="finance-year"></select></label><label>الرصيد الافتتاحي<input id="finance-opening" readonly></label><label>مجموع الإيرادات<input id="finance-income" readonly></label><label>مجموع المصروفات<input id="finance-expense" readonly></label><label>الرصيد الختامي المحسوب<input id="finance-closing" readonly></label><label>حالة السنة<input id="finance-year-status" readonly></label></div>
+<form id="finance-form" class="m-grid m-no-print" style="margin-top:1.2rem">
+<input type="hidden" name="id">
+<label>تاريخ العملية<input name="transaction_date" type="date" required></label>
+<label>نوع العملية<select name="transaction_type" required><option value="income">إيراد</option><option value="expense">مصروف</option></select></label>
+<label>التصنيف<input name="category" maxlength="120" required placeholder="مثال: رسوم بنكية"></label>
+<label>المبلغ (دج)<input name="amount" type="number" min="0.01" step="0.01" required></label>
+<label>طريقة الدفع<select name="payment_method"><option value="bank">البنك</option><option value="cash">نقدًا</option><option value="transfer">تحويل</option><option value="other">أخرى</option></select></label>
+<label>المرجع (اختياري)<input name="reference" maxlength="180"></label>
+<label style="grid-column:1/-1">البيان<input name="description" maxlength="1000" required></label>
+<div class="m-actions"><button id="finance-save" class="btn btn-dark">حفظ العملية</button><button type="button" id="finance-cancel" class="m-small">إلغاء التعديل</button></div>
+</form><p id="finance-msg" role="status"></p>
+<div class="m-tablewrap"><table class="m-table"><thead><tr><th>التاريخ</th><th>النوع</th><th>التصنيف</th><th>البيان</th><th>المبلغ</th><th>طريقة الدفع</th><th>إجراءات</th></tr></thead><tbody id="finance-rows"></tbody></table></div>
+</div>
+</section>
+<section class="m-pane" id="pane-activities" hidden>
+<div class="m-card"><div class="m-toolbar"><h2>الأنشطة والبرامج</h2><button id="activities-export" class="m-small m-no-print">تصدير CSV</button></div>
+<p class="m-note">سجل الأنشطة مع التاريخ والمكان والمسؤول والميزانية المخططة والفعلية. تسجيل الميزانية هنا لا يغني عن إثبات العمليات المالية الفعلية في السجل المالي.</p>
+<form id="activity-form" class="m-grid m-no-print"><input type="hidden" name="id"><label>اسم النشاط<input name="title" required maxlength="180"></label><label>التاريخ<input name="activity_date" type="date"></label><label>المكان<input name="location" maxlength="180"></label><label>نوع النشاط<select name="activity_type"><option value="paragliding">الطيران الشراعي</option><option value="hiking">المشي الجبلي</option><option value="training">التكوين</option><option value="volunteering">التطوع</option><option value="other">أخرى</option></select></label><label>الحالة<select name="status"><option value="planned">مبرمج</option><option value="completed">منجز</option><option value="cancelled">ملغى</option></select></label><label>مسؤول النشاط<input name="leader" maxlength="180"></label><label>الميزانية المخططة (دج)<input name="planned_budget" type="number" min="0" step=".01" value="0"></label><label>التكلفة الفعلية (دج)<input name="actual_budget" type="number" min="0" step=".01" value="0"></label><label style="grid-column:1/-1">ملاحظات<textarea name="notes" maxlength="3000"></textarea></label><div class="m-actions"><button class="btn btn-dark">حفظ النشاط</button><button type="button" id="activity-cancel" class="m-small">إلغاء التعديل</button></div></form><p id="activities-msg" role="status"></p>
+<div class="m-tablewrap"><table class="m-table"><thead><tr><th>النشاط</th><th>التاريخ</th><th>المكان</th><th>الحالة</th><th>المسؤول</th><th>المخطط</th><th>الفعلي</th><th>إجراءات</th></tr></thead><tbody id="activity-rows"></tbody></table></div>
+</div></section>
+<section class="m-pane" id="pane-equipment" hidden>
+<div class="m-card"><div class="m-toolbar"><h2>سجل المعدات والجرد</h2><button id="equipment-export" class="m-small m-no-print">تصدير CSV</button></div>
+<p class="m-note">لا تُضاف أي معدّة افتراضيًا. سجّل فقط الموجود فعليًا، مع حالة المعدة والكمية والرقم التسلسلي عند توفره.</p>
+<form id="equipment-form" class="m-grid m-no-print"><input type="hidden" name="id"><label>اسم المعدة<input name="item_name" required maxlength="180"></label><label>الصنف<input name="category" maxlength="120" value="other"></label><label>الكمية<input name="quantity" type="number" min="0" step="1" value="1" required></label><label>الحالة<select name="condition"><option value="good">صالحة</option><option value="new">جديدة</option><option value="needs_repair">تحتاج إصلاحًا</option><option value="out_of_service">خارج الخدمة</option><option value="retired">مستبعدة</option></select></label><label>الرقم التسلسلي<input name="serial_number" maxlength="180"></label><label>تاريخ الاقتناء<input name="acquisition_date" type="date"></label><label>تكلفة الاقتناء (اختياري)<input name="acquisition_cost" type="number" min="0" step=".01"></label><label>مكان التخزين<input name="storage_location" maxlength="180"></label><label style="grid-column:1/-1">ملاحظات<textarea name="notes" maxlength="3000"></textarea></label><div class="m-actions"><button class="btn btn-dark">حفظ المعدة</button><button type="button" id="equipment-cancel" class="m-small">إلغاء التعديل</button></div></form><p id="equipment-msg" role="status"></p>
+<div class="m-tablewrap"><table class="m-table"><thead><tr><th>المعدة</th><th>الصنف</th><th>الكمية</th><th>الحالة</th><th>الرقم التسلسلي</th><th>مكان التخزين</th><th>إجراءات</th></tr></thead><tbody id="equipment-rows"></tbody></table></div>
+</div></section>
+<section class="m-pane" id="pane-meetings" hidden>
+<div class="m-card"><div class="m-toolbar"><h2>الاجتماعات والمحاضر والقرارات</h2><button id="meetings-export" class="m-small m-no-print">تصدير CSV</button></div>
+<p class="m-note">يمكن للأمين العام إنشاء المحاضر وحفظ المسودات؛ اعتماد المحضر النهائي متاح للرئيس أو مدير الموقع. لا تُحذف المحاضر المعتمدة إلا من الرئيس أو مدير الموقع.</p>
+<form id="meeting-form" class="m-grid m-no-print"><input type="hidden" name="id"><label>عنوان الاجتماع<input name="title" required maxlength="180"></label><label>النوع<select name="meeting_type"><option value="executive">المكتب التنفيذي</option><option value="general_assembly">الجمعية العامة</option><option value="committee">لجنة</option><option value="technical">تقني</option><option value="other">أخرى</option></select></label><label>التاريخ<input name="meeting_date" type="date"></label><label>المكان<input name="location" maxlength="180"></label><label>عدد الحاضرين<input name="attendees_count" type="number" min="0" step="1"></label><label>ملاحظة النصاب<input name="quorum_note" maxlength="500"></label><label style="grid-column:1/-1">القرارات<textarea name="decisions" maxlength="5000"></textarea></label><label style="grid-column:1/-1">نص المحضر<textarea name="minutes_text" maxlength="12000"></textarea></label><div class="m-actions"><button class="btn btn-dark">حفظ المسودة</button><button type="button" id="meeting-cancel" class="m-small">إلغاء التعديل</button></div></form><p id="meetings-msg" role="status"></p>
+<div class="m-tablewrap"><table class="m-table"><thead><tr><th>الاجتماع</th><th>النوع</th><th>التاريخ</th><th>المكان</th><th>الحضور</th><th>الحالة</th><th>القرارات/المحضر</th><th>إجراءات</th></tr></thead><tbody id="meeting-rows"></tbody></table></div>
+</div></section>
+<section class="m-pane" id="pane-archive" hidden>
+<div class="m-card"><h2>الأرشيف والنسخ الاحتياطي</h2><p class="m-note">أرشفة المحاضر والعمليات تتم في قاعدة البيانات. يمكن تنزيل نسخة JSON من السجلات التي يستطيع حسابك قراءتها، أو طباعة الصفحة/المحضر إلى PDF من المتصفح. النسخة لا تشمل كلمات المرور أو جلسات الدخول ولا تُعد نسخة كاملة من Supabase Storage.</p><div class="m-actions m-no-print"><button id="backup-json" class="btn btn-dark">تنزيل نسخة بيانات JSON</button><button id="print-page" class="m-small">طباعة / حفظ PDF</button><button id="audit-refresh" class="m-small">تحديث سجل العمليات</button></div><p id="archive-msg" role="status"></p><h3>سجل العمليات الإدارية</h3><div class="m-tablewrap"><table class="m-table"><thead><tr><th>الوقت</th><th>الوحدة</th><th>العملية</th><th>معرّف السجل</th><th>التفاصيل</th></tr></thead><tbody id="audit-rows"></tbody></table></div></div>
+</section>
+</section>
+</main>
+<footer><div class="container">جمعية الأفق الولائية للرياضات الجوية والجبلية — ولاية الشلف</div></footer>
+</body></html>
