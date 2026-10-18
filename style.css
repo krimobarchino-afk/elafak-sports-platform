@@ -79,3 +79,6 @@
 .reference-card .btn{margin-top:2px;justify-content:center}
 .join-success .followup-hint{background:#edf2e8;padding:12px;border-right:3px solid #8da96e}
 .join-success .followup-hint strong{color:var(--green)}
+
+.reference-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.reference-actions .btn{margin-top:2px}
