@@ -72,6 +72,13 @@
       const referenceOutput = document.querySelector('#join-success-reference');
       if (referenceOutput) referenceOutput.textContent = submittedRef || 'لم يُرجع النظام رقم المرجع؛ يرجى التواصل مع الجمعية.';
       const copyReferenceButton = document.querySelector('#copy-join-reference');
+      const copyTrackingLinkButton = document.querySelector('#copy-join-tracking-link');
+      const makeTrackingUrl = () => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('ref', submittedRef);
+        url.hash = 'track';
+        return url.toString();
+      };
       if (copyReferenceButton) {
         copyReferenceButton.hidden = !submittedRef;
         copyReferenceButton.onclick = async () => {
@@ -85,6 +92,17 @@
             selection.removeAllRanges();
             selection.addRange(range);
             copyReferenceButton.textContent = 'حدد المرجع وانسخه';
+          }
+        };
+      }
+      if (copyTrackingLinkButton) {
+        copyTrackingLinkButton.hidden = !submittedRef;
+        copyTrackingLinkButton.onclick = async () => {
+          try {
+            await navigator.clipboard.writeText(makeTrackingUrl());
+            copyTrackingLinkButton.textContent = 'تم نسخ رابط المتابعة';
+          } catch (_) {
+            copyTrackingLinkButton.textContent = 'تعذر النسخ؛ انسخ رابط الصفحة وأضف ?ref=' + encodeURIComponent(submittedRef) + '#track';
           }
         };
       }
@@ -105,6 +123,14 @@
 
 
   const trackForm = document.querySelector('#track-form');
+  const trackReferenceInput = document.querySelector('#track-ref');
+  const urlReference = new URLSearchParams(window.location.search).get('ref');
+  if (trackReferenceInput && urlReference) {
+    trackReferenceInput.value = urlReference.slice(0, 80);
+    if (window.location.hash === '#track') {
+      window.addEventListener('load', () => document.querySelector('#track')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), { once: true });
+    }
+  }
   const trackMessage = document.querySelector('#track-message');
   const trackSubmit = document.querySelector('#track-submit');
   const savedTrackButton = document.querySelector('#saved-track-button');
