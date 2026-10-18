@@ -43,6 +43,15 @@
     if (closeButton) closeButton.focus();
   });
   if (closeButton) closeButton.addEventListener('click', close);
+  // Allow keyboard and backdrop dismissal for a more accessible dialog.
+  if (modal) {
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) close();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !modal.hidden) close();
+    });
+  }
 
   if (joinForm) joinForm.addEventListener('submit', async (event) => {
     event.preventDefault();
