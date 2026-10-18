@@ -91,3 +91,10 @@
 .requirement-results li{margin:9px 0;line-height:1.9}
 .requirement-results li p{margin:3px 0 0;color:var(--muted);font-size:12px}
 .requirement-required{font-weight:700;color:#8a4a19}
+
+
+/* Private join-file submission form */
+.join-file-upload{display:grid;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.join-file-upload label{display:grid;gap:8px;font-weight:600;font-size:13px}
+.join-file-upload input[type=file]{width:100%;max-width:100%;padding:10px;background:#fff;border:1px solid var(--line);border-radius:8px;font:inherit}
+.join-file-upload button{justify-self:start}
