@@ -137,6 +137,8 @@
   const savedTrackMessage = document.querySelector('#saved-track-message');
   const runLookup = async (request_ref, phone, messageEl, buttonEl) => {
     if (!request_ref || !phone || !messageEl) return;
+    const requirementBoxAtLookup = document.querySelector('#track-requirements');
+    if (requirementBoxAtLookup) requirementBoxAtLookup.hidden = true;
     if (buttonEl) { buttonEl.disabled = true; buttonEl.textContent = 'جارٍ التحقق…'; }
     messageEl.textContent = 'جارٍ التحقق من حالة الطلب…';
     messageEl.className = 'form-message';
