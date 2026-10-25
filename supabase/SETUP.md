@@ -21,28 +21,14 @@
 - `supabase/migrations/202610180007_seed_official_meetings.sql`
 - `supabase/migrations/202610180008_tighten_management_role_visibility.sql`
 - `supabase/migrations/202610250001_restrict_finance_read_to_finance_roles.sql`
+- `supabase/migrations/202610250002_consolidate_members_select_policy.sql`
 
-## إنشاء أول مدير — مطلوب قبل الاختبار
-لا يوجد حساب مدير موقع حتى الآن؛ لا يمكن إنشاء أول مدير بأمان من صفحة عامة. من لوحة Supabase:
-1. افتح Authentication → Users وأنشئ مستخدمًا بالبريد `siteadmin@staff.elafak.invalid` وكلمة مرور قوية، مع تأكيد البريد إن ظهر الخيار.
-2. انسخ UUID للحساب.
-3. في SQL Editor نفّذ التالي بعد استبدال القيمة بالـ UUID الفعلي:
-```sql
-insert into public.staff_profiles (user_id, username, role, is_active)
-values ('PUT_AUTH_USER_UUID_HERE'::uuid, 'siteadmin', 'site_admin', true);
-```
-لا تضع كلمة المرور في SQL أو GitHub. هذه خطوة bootstrap واحدة؛ بعد ذلك أنشئ الحسابات الأخرى من `/staff.html`.
+## حالة حسابات المكتب الحالية
+تم التحقق من قاعدة الإنتاج بتاريخ 2026-10-25: يوجد 8 حسابات موظفين نشطة بالفعل، تشمل `siteadmin` و`president` و`deputy.president` و`secretary` و`deputy.secretary` و`treasurer` و`deputy.treasurer` و`technical`.
+لا تنفذ إجراء إنشاء المدير الأول على قاعدة الإنتاج الحالية، ولا تعِد إدخال صفوف `staff_profiles` يدويًا. كلمات المرور غير محفوظة في هذا المستند؛ إذا تعذر الدخول، يعاد تعيين كلمة المرور من مسار إداري موثوق دون مشاركة كلمة المرور أو حفظها في GitHub.
 
-## أسماء الدخول المقترحة
-- `siteadmin` — مدير الموقع (التهيئة الأولى أعلاه).
-- `president` — الرئيس.
-- `secretary` — الأمين العام.
-- `treasurer` — أمين المال.
-- `deputy.secretary` — نائب الأمين العام.
-- `deputy.treasurer` — نائب أمين المال.
-- `technical` — المدير التقني.
-
-الأسماء الأخرى ليست حسابات منشأة حتى الآن؛ ينشئها مدير الموقع مع كلمة مرور أولية لا تقل عن 12 خانة. يمكن تعديل الاسم والدور وإعادة تعيين كلمة المرور لاحقًا.
+## تهيئة بيئة جديدة فقط
+عند إنشاء بيئة Supabase جديدة خالية، أنشئ مستخدم `siteadmin@staff.elafak.invalid` من Authentication → Users، ثم أضف صف `site_admin` المرتبط بمعرّف المستخدم الفعلي في `staff_profiles`. لا تنفذ هذا الإجراء على قاعدة الإنتاج القائمة.
 
 ## فضاء تسيير الجمعية
 - افتح `/management.html` بعد تسجيل الدخول بحساب موظف نشط.
