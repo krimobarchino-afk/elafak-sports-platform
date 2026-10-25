@@ -109,6 +109,23 @@
 <section class="m-pane" id="pane-meetings" hidden>
 <div class="m-card"><div class="m-toolbar"><h2>الاجتماعات والمحاضر والقرارات</h2><button id="meetings-export" class="m-small m-no-print">تصدير CSV</button></div>
 <p class="m-note">يمكن للأمين العام إنشاء المحاضر وحفظ المسودات؛ اعتماد المحضر النهائي متاح للرئيس أو مدير الموقع. لا تُحذف المحاضر المعتمدة إلا من الرئيس أو مدير الموقع.</p>
+<div class="m-card" id="decision-settings-card">
+<h3>القرارات التي تتحكم في إعدادات المنصة</h3>
+<p class="m-note">لا يُفعّل أي قرار تلقائيًا بمجرد ذكره في النص. بعد اعتماد محضر الجمعية العامة، يستطيع الرئيس توثيق القرار وربطه بإعداد المنصة. يُحفظ المرجع والتاريخ والنص الذي ورد فيه القرار.</p>
+<p id="decision-settings-current" role="status" class="m-note">جارٍ تحميل الإعدادات المعتمدة…</p>
+<form id="decision-settings-form" class="m-grid m-no-print">
+<label style="grid-column:1/-1">محضر الجمعية العامة المعتمد
+<select name="source_meeting_id" id="decision-source-meeting" required><option value="">اختر محضرًا معتمدًا</option></select></label>
+<label>الاشتراك السنوي المعتمد (دج)
+<input name="amount" id="decision-fee-amount" type="number" min="1" step="1" required placeholder="المبلغ كما ورد في القرار"></label>
+<label>تاريخ سريان القرار
+<input name="effective_date" id="decision-fee-date" type="date" required></label>
+<label style="grid-column:1/-1">النص الحرفي للقرار كما ورد في المحضر
+<textarea name="source_decision" id="decision-fee-excerpt" minlength="5" maxlength="3000" required placeholder="انسخ هنا نص القرار الذي يذكر مبلغ الاشتراك السنوي"></textarea></label>
+<div class="m-actions"><button type="submit" class="btn btn-dark" id="decision-fee-save">توثيق القرار وتفعيل المبلغ</button></div>
+</form>
+<p id="decision-settings-msg" role="status"></p>
+</div>
 <form id="meeting-form" class="m-grid m-no-print"><input type="hidden" name="id"><label>عنوان الاجتماع<input name="title" required maxlength="180"></label><label>النوع<select name="meeting_type"><option value="executive">المكتب التنفيذي</option><option value="general_assembly">الجمعية العامة</option><option value="committee">لجنة</option><option value="technical">تقني</option><option value="other">أخرى</option></select></label><label>التاريخ<input name="meeting_date" type="date"></label><label>المكان<input name="location" maxlength="180"></label><label>عدد الحاضرين<input name="attendees_count" type="number" min="0" step="1"></label><label>ملاحظة النصاب<input name="quorum_note" maxlength="500"></label><label style="grid-column:1/-1">القرارات<textarea name="decisions" maxlength="5000"></textarea></label><label style="grid-column:1/-1">نص المحضر<textarea name="minutes_text" maxlength="12000"></textarea></label><div class="m-actions"><button class="btn btn-dark">حفظ المسودة</button><button type="button" id="meeting-cancel" class="m-small">إلغاء التعديل</button></div></form><p id="meetings-msg" role="status"></p>
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>الاجتماع</th><th>النوع</th><th>التاريخ</th><th>المكان</th><th>الحضور</th><th>الحالة</th><th>القرارات/المحضر</th><th>إجراءات</th></tr></thead><tbody id="meeting-rows"></tbody></table></div>
 </div></section>
