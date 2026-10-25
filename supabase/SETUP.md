@@ -12,6 +12,9 @@
 - `supabase/migrations/202610150001_initial_join_requests.sql`
 - `supabase/migrations/202610170001_staff_profiles.sql`
 - `supabase/migrations/202610170002_staff_join_request_review_policies.sql`
+- `supabase/migrations/202610180001_add_deputy_president_role.sql`
+- `supabase/migrations/202610180002_restrict_join_request_access.sql`
+- `supabase/migrations/202610180003_limit_secretary_review_to_open_requests.sql`
 - `supabase/migrations/202610180004_join_request_rate_limits.sql`
 - `supabase/migrations/202610180005_route_public_join_requests_through_edge_function.sql`
 - `supabase/migrations/202610180006_full_management_modules.sql`
