@@ -129,6 +129,31 @@ function suggestDecisionFromMeeting(){
  }else message("decision-settings-msg","عُثر على عبارة عن الاشتراك، لكن لم يمكن استخراج مبلغ واضح. أدخله يدويًا من نص القرار.","");
 }
 
+
+const FOUNDER_STATUS={pending_review:"قيد المراجعة",active:"نشط",inactive:"غير نشط",resigned:"منسحب",deceased:"متوفى",unknown:"غير محدد"};
+const GA_ELIGIBILITY={pending_review:"قيد المراجعة",eligible:"مؤهل للمشاركة",ineligible:"غير مؤهل للمشاركة"};
+async function loadFoundingRoster(){
+ const {data,error}=await sb.from("founding_member_roster").select("*").order("founder_number",{ascending:true});
+ if(error)throw error;
+ const rows=$( "founding-roster-rows" );rows.replaceChildren();
+ (data||[]).forEach(x=>{
+  const tr=document.createElement("tr");safeCell(tr,x.founder_number);safeCell(tr,x.full_name);
+  const statusCell=tr.insertCell();const status=document.createElement("select");status.dataset.status="";status.setAttribute("aria-label","الحالة الحالية لـ "+x.full_name);
+  Object.entries(FOUNDER_STATUS).forEach(([v,label])=>{const o=document.createElement("option");o.value=v;o.textContent=label;status.append(o)});status.value=x.current_status;statusCell.append(status);
+  const eligibilityCell=tr.insertCell();const eligibility=document.createElement("select");eligibility.dataset.eligibility="";eligibility.setAttribute("aria-label","أهلية الجمعية العامة لـ "+x.full_name);
+  Object.entries(GA_ELIGIBILITY).forEach(([v,label])=>{const o=document.createElement("option");o.value=v;o.textContent=label;eligibility.append(o)});eligibility.value=x.assembly_eligibility;eligibilityCell.append(eligibility);
+  const noteCell=tr.insertCell();const note=document.createElement("input");note.type="text";note.maxLength=1000;note.value=x.review_note||"";note.placeholder="ملاحظة أو مرجع تحقق";note.dataset.note="";note.setAttribute("aria-label","ملاحظة مراجعة "+x.full_name);noteCell.append(note);
+  const actionCell=tr.insertCell();if(canEditMeetings()){button(actionCell,"حفظ المراجعة",async()=>{
+   const nextStatus=status.value,nextEligibility=eligibility.value,nextNote=note.value.trim()||null;
+   if(nextEligibility==="eligible"&&nextStatus!=="active"){message("founding-roster-msg","لا يمكن اعتماد الأهلية للمشاركة قبل تحديد الحالة الحالية للعضو على أنها نشط.","error");return;}
+   if(nextEligibility==="eligible"&&!confirm("تأكيد أهلية "+x.full_name+" للمشاركة في الجمعية العامة؟ راجع النظام الأساسي وسجلات الجمعية قبل الاعتماد."))return;
+   try{const {error:updateError}=await sb.from("founding_member_roster").update({current_status:nextStatus,assembly_eligibility:nextEligibility,review_note:nextNote}).eq("founder_number",x.founder_number);if(updateError)throw updateError;await loadFoundingRoster();message("founding-roster-msg","تم حفظ مراجعة "+x.full_name+".","success");}
+   catch(e){message("founding-roster-msg","تعذر حفظ المراجعة: "+e.message,"error")}
+  });}else safeCellDummy(actionCell,"عرض فقط");
+  rows.append(tr);
+ });
+ if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد سجلات للمراجعة.");td.colSpan=6;rows.append(tr)}
+}
 function refreshGAInvitationSources(){
  const select=$("ga-invite-source");if(!select)return;
  const prior=select.value;select.replaceChildren();
@@ -159,22 +184,18 @@ async function createGAInvitationsAndPrint(){
  const meetingTitle=$("ga-invite-title").value.trim(),meetingDate=$("ga-invite-date").value,meetingTime=$("ga-invite-time").value;
  const location=$("ga-invite-location").value.trim(),issuedDate=$("ga-invite-issued-date").value,agenda=$("ga-invite-agenda").value.trim();
  if(!meetingTitle||!meetingDate||!meetingTime||!location||!issuedDate||!agenda){message("ga-invitations-msg","أكمل عنوان الجمعية وتاريخها وساعتها ومكانها وتاريخ تحرير الاستدعاء وجدول الأعمال.","error");return;}
- if(!confirm("سيتم إعداد استدعاء قابل للطباعة لكل عضو نشط مسجل في سجل الأعضاء. هذا لا يعني إرسال الاستدعاءات أو إثبات استلامها. هل تريد المتابعة؟"))return;
+ if(!confirm("سيتم إعداد استدعاء قابل للطباعة لكل مؤسس جرى اعتماده بوصفه نشطًا ومؤهلًا للمشاركة في الجمعية العامة. هذا لا يعني إرسال الاستدعاءات أو إثبات استلامها. هل تريد المتابعة؟"))return;
  const btn=$("ga-invite-print");btn.disabled=true;
  try{
-  const {data:memberRows,error:memberError}=await sb.from("members").select("id,member_no,join_request_id,membership_status").eq("membership_status","active").order("member_no",{ascending:true});
+  const {data:memberRows,error:memberError}=await sb.from("founding_member_roster").select("founder_number,full_name,current_status,assembly_eligibility").eq("current_status","active").eq("assembly_eligibility","eligible").order("founder_number",{ascending:true});
   if(memberError)throw memberError;
   const activeMembers=memberRows||[];
-  if(!activeMembers.length){message("ga-invitations-msg","لم تُنشأ استدعاءات: سجل الأعضاء لا يحتوي حاليًا أعضاء نشطين مسجلين. يوجد فرق بين طلب الانخراط والعضوية النهائية؛ سجّل الأعضاء المؤسسين/النشطين رسميًا أولًا، ثم أعد المحاولة.","error");return;}
-  const requestIds=[...new Set(activeMembers.map(m=>m.join_request_id).filter(Boolean))];
-  const {data:requestRows,error:requestError}=requestIds.length?await sb.from("join_requests").select("id,full_name").in("id",requestIds):{data:[],error:null};
-  if(requestError)throw requestError;
-  const names=new Map((requestRows||[]).map(r=>[r.id,r.full_name]));
+  if(!activeMembers.length){message("ga-invitations-msg","لم تُنشأ استدعاءات: لا يوجد مؤسسون جرى اعتمادهم حتى الآن بوصفهم نشطين ومؤهلين للمشاركة. راجع سجل المؤسسين واحفظ حالة كل عضو وأهليته أولًا.","error");return;}
   const esc=htmlEscape;
   const agendaHtml=agenda.split(/\n+/).map(line=>line.trim()).filter(Boolean).map((line,i)=>"<li>"+esc(line.replace(/^[-*•\d٠-٩]+[.)、-]?\s*/,""))+"</li>").join("");
   const pages=activeMembers.map(m=>{
-   const name=names.get(m.join_request_id)||"عضو الجمعية العامة";
-   return '<section class="invite-page"><header><h1>جمعية الأفق الولائية للرياضات الجوية والجبلية</h1><p>ولاية الشلف</p></header><h2>استدعاء لحضور جمعية عامة</h2><p class="member">إلى السيد(ة): <strong>'+esc(name)+'</strong></p><p>يشرف المكتب التنفيذي لجمعية الأفق الولائية للرياضات الجوية والجبلية أن يدعوكم لحضور أشغال الجمعية العامة، وذلك وفق البيانات الآتية:</p><div class="details"><p><b>تاريخ الاجتماع:</b> '+esc(dateFmt(meetingDate))+'</p><p><b>الساعة:</b> '+esc(meetingTime)+'</p><p><b>المكان:</b> '+esc(location)+'</p><p><b>المرجع:</b> '+esc(source.title)+' ('+esc(dateFmt(source.meeting_date))+')</p></div><h3>جدول الأعمال</h3><ol>'+agendaHtml+'</ol><p>نرجو منكم الحضور في الموعد المحدد للمشاركة في مناقشة البنود المدرجة واتخاذ ما يلزم وفق القوانين الأساسية والتنظيمية للجمعية.</p><p class="issued">حرر بالشلف في: '+esc(dateFmt(issuedDate))+'</p><div class="sign"><span>رئيس الجمعية</span><span>الأمين العام</span></div><footer>رقم العضوية: '+esc(m.member_no||"غير محدد")+' — هذه نسخة معدّة للطباعة، ولا تُثبت وحدها تبليغ الاستدعاء أو استلامه.</footer></section>';
+   const name=m.full_name;
+   return '<section class="invite-page"><header><h1>جمعية الأفق الولائية للرياضات الجوية والجبلية</h1><p>ولاية الشلف</p></header><h2>استدعاء لحضور جمعية عامة</h2><p class="member">إلى السيد(ة): <strong>'+esc(name)+'</strong></p><p>يشرف المكتب التنفيذي لجمعية الأفق الولائية للرياضات الجوية والجبلية أن يدعوكم لحضور أشغال الجمعية العامة، وذلك وفق البيانات الآتية:</p><div class="details"><p><b>تاريخ الاجتماع:</b> '+esc(dateFmt(meetingDate))+'</p><p><b>الساعة:</b> '+esc(meetingTime)+'</p><p><b>المكان:</b> '+esc(location)+'</p><p><b>المرجع:</b> '+esc(source.title)+' ('+esc(dateFmt(source.meeting_date))+')</p></div><h3>جدول الأعمال</h3><ol>'+agendaHtml+'</ol><p>نرجو منكم الحضور في الموعد المحدد للمشاركة في مناقشة البنود المدرجة واتخاذ ما يلزم وفق القوانين الأساسية والتنظيمية للجمعية.</p><p class="issued">حرر بالشلف في: '+esc(dateFmt(issuedDate))+'</p><div class="sign"><span>رئيس الجمعية</span><span>الأمين العام</span></div><footer>رقم العضوية: '+esc("مؤسس رقم "+m.founder_number)+' — هذه نسخة معدّة للطباعة، ولا تُثبت وحدها تبليغ الاستدعاء أو استلامه.</footer></section>';
   }).join("");
   const w=window.open("","_blank");if(!w){message("ga-invitations-msg","اسمح بالنوافذ المنبثقة حتى تتمكن من فتح الاستدعاءات للطباعة.","error");return;}
   w.document.write('<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>استدعاءات الجمعية العامة — جمعية الأفق</title><style>body{font-family:Tahoma,Arial,sans-serif;color:#17352e;line-height:1.9;margin:0}.invite-page{box-sizing:border-box;min-height:270mm;padding:18mm 20mm;page-break-after:always;break-after:page;position:relative}.invite-page:last-child{page-break-after:auto;break-after:auto}header{text-align:center;border-bottom:2px solid #123b32;padding-bottom:10px}header h1{font-size:20px;margin:0}header p{margin:0}h2{text-align:center;margin:28px 0;font-size:22px}h3{border-bottom:1px solid #b9c9c0;padding-bottom:5px}.member{font-size:17px}.details{border:1px solid #cbd7d0;border-radius:8px;padding:8px 16px;margin:20px 0}.details p{margin:3px 0}li{margin:8px 0}.issued{margin-top:35px}.sign{display:flex;justify-content:space-between;margin-top:60px;font-weight:bold}footer{position:absolute;bottom:10mm;left:20mm;right:20mm;border-top:1px solid #ddd;padding-top:5px;font-size:10px;color:#53665c}@media print{.invite-page{height:270mm}}@media screen{.invite-page{max-width:900px;margin:20px auto;border:1px solid #ddd;box-shadow:0 1px 8px #ddd}}</style>'+pages+'<script>window.onload=()=>window.print()<\\/script></html>');
@@ -234,7 +255,7 @@ async function refreshAll(){
  message("m-message","جارٍ تحديث بيانات التسيير…");
  try{
   if(canFinance()){await loadYears();await loadFinance();}
-  if(canViewActivities())await loadActivities();if(canViewEquipment())await loadEquipment();if(canViewMeetings())await loadMeetings();
+  if(canViewActivities())await loadActivities();if(canViewEquipment())await loadEquipment();if(canViewMeetings()){await loadMeetings();await loadFoundingRoster();}
   message("m-message","تم تحديث الوحدات المتاحة لهذا الحساب.","success");
  }catch(e){message("m-message","تعذر تحميل بعض البيانات: "+(e.message||"خطأ غير معروف"),"error")}
 }
