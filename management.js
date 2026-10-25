@@ -109,6 +109,24 @@ async function loadEquipment(){
  if(canEditEquipment()){button(box,"تعديل",()=>{setForm($("equipment-form"),x);$("equipment-form").scrollIntoView({behavior:"smooth",block:"center"})});if(roleIs("site_admin","president"))button(box,"حذف",async()=>{if(!confirm("حذف هذه المعدة من سجل الجرد؟"))return;try{const {error}=await sb.from("equipment").delete().eq("id",x.id);if(error)throw error;await loadEquipment();message("equipment-msg","تم حذف المعدة.","success")}catch(e){message("equipment-msg","تعذر الحذف: "+e.message,"error")}},"danger")}else safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!equipment.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد معدات مسجلة. أدخل الجرد بعد التحقق الفعلي.");td.colSpan=7;body.append(tr)}
 }
+async function loadDecisionSettings(){
+ const form=$("decision-settings-form");if(!form)return;
+ hide("decision-settings-card",!canApprove());
+ const select=$("decision-source-meeting");select.replaceChildren();
+ const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="اختر محضرًا معتمدًا";select.append(placeholder);
+ meetings.filter(m=>m.meeting_type==="general_assembly"&&m.status==="approved").forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=(m.title||"جمعية عامة")+" — "+dateFmt(m.meeting_date);select.append(o)});
+ $("decision-fee-date").value=$("decision-fee-date").value||localToday();
+ const {data,error}=await sb.from("association_settings").select("*").eq("setting_key","annual_membership_fee_dzd").maybeSingle();
+ const status=$("decision-settings-current");
+ if(error){status.textContent="تعذر تحميل الإعداد المعتمد: "+error.message;return}
+ if(data){
+  $("decision-fee-amount").value=String(data.setting_value?.amount||"");
+  $("decision-fee-excerpt").value=data.source_decision||"";
+  $("decision-source-meeting").value=data.source_meeting_id||"";
+  $("decision-fee-date").value=data.effective_date||localToday();
+  status.textContent="الاشتراك السنوي المعتمد حاليًا: "+fmt(data.setting_value?.amount)+" — المرجع: "+(meetings.find(m=>m.id===data.source_meeting_id)?.title||"محضر جمعية عامة")+". لا يتغير إلا بقرار جديد معتمد.";
+ }else status.textContent="لا يوجد اشتراك سنوي مفعّل. سيبقى تحصيل رسوم الانخراط محظورًا حتى توثيق قرار معتمد.";
+}
 async function loadMeetings(){
  const {data,error}=await sb.from("meetings").select("*").order("meeting_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
  if(error)throw error;meetings=data||[];$("stat-meetings").textContent=meetings.length;
@@ -120,6 +138,7 @@ async function loadMeetings(){
  if(canApprove())button(box,"حذف",async()=>{if(!confirm("حذف سجل الاجتماع؟"))return;try{const {error}=await sb.from("meetings").delete().eq("id",x.id);if(error)throw error;await loadMeetings();message("meetings-msg","تم حذف الاجتماع.","success")}catch(e){message("meetings-msg","تعذر الحذف: "+e.message,"error")} },"danger");
  if(!canEditMeetings()&&!canApprove())safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!meetings.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد محاضر مسجلة بعد.");td.colSpan=8;body.append(tr)}
+ await loadDecisionSettings();
 }
 function printMeeting(x){
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -153,7 +172,12 @@ async function saveForm(form,table,fields,roleCheck,msgId){
   if(table==="finance_transactions"){
    payload.fiscal_year=Number($("finance-year").value);payload.amount=Number(payload.amount);payload.entered_by=user.id;
    const feeLikeIncome=payload.transaction_type==="income"&&/اشتراك|انخراط|رسوم\s*(?:العضوية|الانخراط)|membership\s*(?:fee|dues)|annual\s*(?:subscription|dues)/i.test(String(payload.category||"")+" "+String(payload.description||""));
-   if(!id&&feeLikeIncome){message(msgId,"لا يمكن تسجيل إيراد مصنّف كاشتراك أو رسوم انخراط قبل مصادقة الجمعية العامة. سجّل المساهمات الطوعية بتوصيفها الصحيح فقط.","error");return;}
+   if(!id&&feeLikeIncome){
+    const {data:feeSetting,error:feeError}=await sb.from("association_settings").select("setting_value,source_meeting_id").eq("setting_key","annual_membership_fee_dzd").maybeSingle();
+    const approvedAmount=Number(feeSetting?.setting_value?.amount||0);
+    if(feeError||!approvedAmount){message(msgId,"لا يوجد مبلغ اشتراك سنوي معتمد ومربوط بمحضر جمعية عامة. سجّل القرار أولًا من قسم الاجتماعات والقرارات.","error");return;}
+    if(Math.abs(Number(payload.amount)-approvedAmount)>0.001){message(msgId,"مبلغ العملية لا يطابق الاشتراك السنوي المعتمد ("+fmt(approvedAmount)+").","error");return;}
+   }
   }
   if(table==="activities"){payload.planned_budget=Number(payload.planned_budget||0);payload.actual_budget=Number(payload.actual_budget||0);payload.entered_by=user.id;}
   if(table==="equipment"){payload.quantity=Number(payload.quantity||0);payload.acquisition_cost=payload.acquisition_cost===null?null:Number(payload.acquisition_cost);payload.entered_by=user.id;}
@@ -186,7 +210,7 @@ function downloadJSON(filename,data){
 async function backup(){
  message("archive-msg","جارٍ تجهيز نسخة بيانات قابلة للتنزيل…");
  const backup={association:"جمعية الأفق الولائية للرياضات الجوية والجبلية",exported_at:new Date().toISOString(),note:"تتضمن الجداول التي يستطيع الحساب الحالي قراءتها فقط؛ لا تشمل بيانات Auth السرية أو ملفات التخزين الخاصة.",tables:{}};
- const tables=["financial_years","finance_transactions","activities","equipment","meetings","join_requests","members","staff_profiles","audit_log"];
+ const tables=["financial_years","finance_transactions","association_settings","activities","equipment","meetings","join_requests","members","staff_profiles","audit_log"];
  for(const t of tables){
   try{const {data,error}=await sb.from(t).select("*").limit(10000);if(error)throw error;backup.tables[t]=data||[];}
   catch(e){backup.tables[t]={not_exported:true,reason:e.message||"غير متاح وفق صلاحيات الحساب"};}
@@ -205,6 +229,24 @@ function bind(){
  $("activity-cancel").onclick=()=>setForm($("activity-form"));
  $("equipment-cancel").onclick=()=>setForm($("equipment-form"));
  $("meeting-cancel").onclick=()=>setForm($("meeting-form"));
+ $("decision-settings-form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!canApprove()){message("decision-settings-msg","اعتماد الإعدادات متاح للرئيس أو مدير الموقع فقط.","error");return}
+  const v=values(e.currentTarget),source=meetings.find(m=>m.id===v.source_meeting_id);
+  if(!source||source.meeting_type!=="general_assembly"||source.status!=="approved"){message("decision-settings-msg","اختر محضر جمعية عامة معتمدًا فقط.","error");return}
+  const excerpt=v.source_decision.trim(),report=(source.decisions||"")+"\n"+(source.minutes_text||"");
+  if(!excerpt||!report.includes(excerpt)){message("decision-settings-msg","يجب أن يكون نص القرار منقولًا حرفيًا من خانة القرارات أو نص المحضر المعتمد.","error");return}
+  const amount=Number(v.amount);if(!Number.isFinite(amount)||amount<=0){message("decision-settings-msg","أدخل مبلغًا صحيحًا أكبر من صفر.","error");return}
+  if(!confirm("سيُفعّل مبلغ اشتراك سنوي قدره "+fmt(amount)+" استنادًا إلى محضر الجمعية العامة المعتمد. هل تحققت من نص القرار وصحة المبلغ؟"))return;
+  const btn=$("decision-fee-save");btn.disabled=true;
+  try{
+   const {error}=await sb.from("association_settings").upsert({setting_key:"annual_membership_fee_dzd",setting_value:{amount,currency:"DZD",period:"annual"},source_meeting_id:source.id,source_decision:excerpt,effective_date:v.effective_date,updated_by:user.id,updated_at:new Date().toISOString()},{onConflict:"setting_key"});
+   if(error)throw error;
+   message("decision-settings-msg","تم توثيق قرار الجمعية العامة وتفعيل المبلغ. ستُحفظ معه إحالة المحضر والنص الحرفي.","success");
+   await loadDecisionSettings();
+  }catch(err){message("decision-settings-msg","تعذر تفعيل القرار: "+(err.message||"خطأ غير معروف"),"error")}
+  finally{btn.disabled=false}
+ });
  $("finance-export").onclick=()=>exportCSV("elafak-finance-"+$("finance-year").value+".csv",transactions);
  $("activities-export").onclick=()=>exportCSV("elafak-activities.csv",activities);
  $("equipment-export").onclick=()=>exportCSV("elafak-equipment.csv",equipment);
