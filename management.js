@@ -152,7 +152,7 @@ async function saveForm(form,table,fields,roleCheck,msgId){
   if("entered_by" in payload)delete payload.entered_by;
   if(table==="finance_transactions"){
    payload.fiscal_year=Number($("finance-year").value);payload.amount=Number(payload.amount);payload.entered_by=user.id;
-   const feeLikeIncome=payload.transaction_type==="income"&&/اشتراك|انخراط|رسوم\\s*(?:العضوية|الانخراط)|membership\\s*(?:fee|dues)|annual\\s*(?:subscription|dues)/i.test(String(payload.category||"")+" "+String(payload.description||""));
+   const feeLikeIncome=payload.transaction_type==="income"&&/اشتراك|انخراط|رسوم\s*(?:العضوية|الانخراط)|membership\s*(?:fee|dues)|annual\s*(?:subscription|dues)/i.test(String(payload.category||"")+" "+String(payload.description||""));
    if(!id&&feeLikeIncome){message(msgId,"لا يمكن تسجيل إيراد مصنّف كاشتراك أو رسوم انخراط قبل مصادقة الجمعية العامة. سجّل المساهمات الطوعية بتوصيفها الصحيح فقط.","error");return;}
   }
   if(table==="activities"){payload.planned_budget=Number(payload.planned_budget||0);payload.actual_budget=Number(payload.actual_budget||0);payload.entered_by=user.id;}
