@@ -239,8 +239,17 @@ async function loadMeetings(){
 }
 function printMeeting(x){
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const section=(title,value)=>value?'<h3>'+esc(title)+'</h3><div class="content">'+esc(value)+'</div>':"";
  const w=window.open("","_blank");if(!w){message("meetings-msg","اسمح بالنوافذ المنبثقة لطباعة المحضر.","error");return}
- w.document.write('<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>محضر اجتماع — جمعية الأفق</title><style>body{font-family:Tahoma,Arial;max-width:850px;margin:30px auto;padding:20px;color:#17352e;line-height:2}h1,h2{text-align:center}h1{font-size:22px}h2{font-size:18px;border-bottom:1px solid #aaa;padding-bottom:10px}.meta{border:1px solid #aaa;padding:12px;margin:20px 0;white-space:pre-wrap}.content{white-space:pre-wrap;min-height:100px}.sign{display:flex;justify-content:space-between;margin-top:70px}@media print{body{margin:0 auto;padding:10mm}}</style><h1>جمعية الأفق الولائية للرياضات الجوية والجبلية</h1><h2>محضر اجتماع / قرار</h2><div class="meta"><b>العنوان:</b> '+esc(x.title)+'<br><b>النوع:</b> '+esc(MEETTYPE[x.meeting_type]||x.meeting_type)+'<br><b>التاريخ:</b> '+esc(dateFmt(x.meeting_date))+'<br><b>المكان:</b> '+esc(x.location||"غير محدد")+'<br><b>الحاضرون:</b> '+esc(x.attendees_count??"غير محدد")+'<br><b>النصاب:</b> '+esc(x.quorum_note||"غير محدد")+'<br><b>الحالة:</b> '+esc(x.status==="approved"?"معتمد":"مسودة")+'</div><h3>القرارات</h3><div class="content">'+esc(x.decisions||"—")+'</div><h3>نص المحضر</h3><div class="content">'+esc(x.minutes_text||"—")+'</div><div class="sign"><span>الرئيس</span><span>الأمين العام</span></div><script>window.onload=()=>window.print()<\/script></html>');
+ const meta=[
+  ["العنوان",x.title],["النوع",MEETTYPE[x.meeting_type]||x.meeting_type],["التاريخ",dateFmt(x.meeting_date)],
+  ["ساعة البداية",x.meeting_start_time],["ساعة الرفع",x.meeting_end_time],["المكان",x.location],
+  ["رئيس الاجتماع",x.meeting_chair],["عدد الحاضرين",x.attendees_count],["النصاب",x.quorum_note],
+  ["الحالة",x.status==="approved"?"معتمد":"مسودة"]
+ ].map(([k,v])=>'<div><b>'+esc(k)+':</b> '+esc(v||"غير محدد")+'</div>').join("");
+ w.document.write('<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>محضر اجتماع — جمعية الأفق</title><style>body{font-family:Tahoma,Arial;max-width:850px;margin:30px auto;padding:20px;color:#17352e;line-height:2}h1,h2{text-align:center}h1{font-size:22px}h2{font-size:18px;border-bottom:1px solid #aaa;padding-bottom:10px}.meta{border:1px solid #aaa;padding:12px;margin:20px 0}.content{white-space:pre-wrap;min-height:30px}.sign{display:flex;justify-content:space-between;gap:30px;margin-top:70px}.sign span{min-width:40%}@media print{body{margin:0 auto;padding:10mm}h3{break-after:avoid}.meta,.content{break-inside:avoid}}</style><h1>جمعية الأفق الولائية للرياضات الجوية والجبلية</h1><h2>محضر اجتماع / قرار</h2><div class="meta">'+meta+'</div>'+
+ section("الحاضرون وصفاتهم",x.meeting_attendees)+section("جدول الأعمال",x.meeting_agenda)+section("مجريات الاجتماع والمناقشات",x.meeting_discussion)+section("القرارات",x.decisions)+section("المرفقات والإشارات المرجعية",x.meeting_attachments)+section("نص المحضر",x.minutes_text)+
+ '<div class="sign"><span>رئيس الاجتماع<br><br>الإمضاء: ____________________</span><span>الأمين العام / محرر المحضر<br><br>الإمضاء: ____________________</span></div><script>window.onload=()=>window.print()<\\/script></html>');
  w.document.close();
 }
 async function loadAudit(showMessage=true){
@@ -368,7 +377,7 @@ function bind(){
  saveForm($("finance-form"),"finance_transactions",["transaction_date","transaction_type","category","amount","payment_method","reference","description"],canFinance,"finance-msg");
  saveForm($("activity-form"),"activities",["title","activity_date","location","activity_type","status","leader","planned_budget","actual_budget","notes"],canEditActivities,"activities-msg");
  saveForm($("equipment-form"),"equipment",["item_name","category","quantity","condition","serial_number","acquisition_date","acquisition_cost","storage_location","notes"],canEditEquipment,"equipment-msg");
- saveForm($("meeting-form"),"meetings",["title","meeting_type","meeting_date","location","attendees_count","quorum_note","decisions","minutes_text"],canEditMeetings,"meetings-msg");
+ saveForm($("meeting-form"),"meetings",["title","meeting_type","meeting_date","meeting_start_time","meeting_end_time","location","meeting_chair","attendees_count","quorum_note","meeting_attendees","meeting_agenda","meeting_discussion","decisions","meeting_attachments","minutes_text"],canEditMeetings,"meetings-msg");
  $("finance-form").elements.transaction_date.value=localToday();
 }
 async function enter(){
