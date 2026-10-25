@@ -23,6 +23,8 @@ Do not recreate these by guessing or reapply them to production. Their exact his
 
 Migration `202610250002_consolidate_members_select_policy.sql` was applied and saved to the repository. It consolidates the two permissive `members` SELECT policies into one equivalent policy: president and secretary-general can read member records, while a member can read only their own linked record. This clears the advisor's multiple-permissive-policy warning without broadening access.
 
+Migration `202610250003_block_unapproved_membership_fee_income.sql` was applied and saved. A database trigger now blocks new income entries classified in Arabic/English as membership subscriptions or dues until a future migration changes the rule after General Assembly approval. A rollback-only SQL probe confirmed that an unapproved subscription entry is rejected and a voluntary-contribution entry is accepted. The existing 1,000 DZD entry described as an annual subscription dated 2026-10-18 was not altered.
+
 ## Financial read-policy correction applied
 
 Migration `202610250001_restrict_finance_read_to_finance_roles.sql` was applied to the linked project and checked into this repository. It removes deputy president from read access to finance transactions and financial years. The deputy treasurer retains read-only access; write policies remain limited to site admin, president, and treasurer.
@@ -33,6 +35,7 @@ Migration `202610250001_restrict_finance_read_to_finance_roles.sql` was applied 
 - The private Storage bucket `join-request-files` is configured for PDF files only, with a 15 MiB maximum per file.
 - Eight staff profiles are active. The production setup guide now reflects these existing accounts; do not run the initial-admin bootstrap SQL against production.
 - The `members` table currently has zero rows; the database contains 11 join requests (5 pending, 1 needing information, and 5 provisionally approved). There is one file-submission record. These counts are a snapshot, not proof that the end-to-end workflow has been tested.
+- The 2026 ledger contains a 1,000 DZD income entry described as an annual subscription. Because membership fees have not been approved, it is flagged for manual verification and was not deleted or changed. The UI now warns finance users about it; the database blocks new fee-like income entries.
 - The member-policy performance warning was cleared after consolidation. The advisor still reports 16 unused indexes (informational in a new/lightly used system); do not drop them without workload evidence because several support foreign keys and expected workflows.
 
 ## Remaining operational checks
