@@ -22,6 +22,7 @@
 - `supabase/migrations/202610180008_tighten_management_role_visibility.sql`
 - `supabase/migrations/202610250001_restrict_finance_read_to_finance_roles.sql`
 - `supabase/migrations/202610250002_consolidate_members_select_policy.sql`
+- `supabase/migrations/202610250003_block_unapproved_membership_fee_income.sql`
 
 ## حالة حسابات المكتب الحالية
 تم التحقق من قاعدة الإنتاج بتاريخ 2026-10-25: يوجد 8 حسابات موظفين نشطة بالفعل، تشمل `siteadmin` و`president` و`deputy.president` و`secretary` و`deputy.secretary` و`treasurer` و`deputy.treasurer` و`technical`.
