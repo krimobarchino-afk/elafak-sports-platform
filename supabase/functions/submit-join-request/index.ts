@@ -42,8 +42,9 @@ Deno.serve(async (req: Request) => {
     return reply({ error: "يرجى إعادة فتح النموذج وإكماله ثم المحاولة مجددًا." }, 400);
   }
 
-  const forwarded = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const clientIp = forwarded || req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || "unknown";
+  // Prefer the edge-provided client IP; avoid trusting the leftmost forwarded value.
+  const forwarded = req.headers.get("x-forwarded-for")?.split(",").map((v) => v.trim()).filter(Boolean);
+  const clientIp = req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || forwarded?.at(-1) || "unknown";
   const ipHash = await digest(serviceKey + ":" + clientIp);
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
