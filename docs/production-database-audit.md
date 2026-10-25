@@ -8,7 +8,7 @@ Supabase project reference: `lfubzohsbwdoiagfkpkt`
 
 The live database contains the public tables `activities`, `audit_log`, `equipment`, `finance_transactions`, `financial_years`, `join_request_document_requirements`, `join_request_file_submissions`, `join_request_lookup_rate_limits`, `join_request_rate_limits`, `join_requests`, `meetings`, `members`, and `staff_profiles`.
 
-The linked project has seven active Edge Functions: `staff-admin`, `submit-join-request`, `lookup-join-request`, `submit-join-file`, `staff-join-files`, `staff-finalize-member`, and `member-activate-account`. The sources of the last five match the repository. The `staff-admin` repository source was aligned with the deployed production CORS restriction. `submit-join-request` was updated in production to version 4 and aligned with the repository to avoid trusting the leftmost `x-forwarded-for` value for rate limiting.
+The linked project has seven active Edge Functions: `staff-admin`, `submit-join-request`, `lookup-join-request`, `submit-join-file`, `staff-join-files`, `staff-finalize-member`, and `member-activate-account`. All seven deployed Edge Function sources now match the corresponding repository files. `staff-admin` retains the production CORS restriction. `submit-join-request` is deployed as version 4 and uses the rightmost forwarded address as a fallback rather than trusting the leftmost `x-forwarded-for` value for rate limiting.
 
 ## Migration source discrepancy
 
