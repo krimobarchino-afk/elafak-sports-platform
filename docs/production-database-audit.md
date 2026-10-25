@@ -23,7 +23,7 @@ Do not recreate these by guessing or reapply them to production. Their exact his
 
 Migration `202610250002_consolidate_members_select_policy.sql` was applied and saved to the repository. It consolidates the two permissive `members` SELECT policies into one equivalent policy: president and secretary-general can read member records, while a member can read only their own linked record. This clears the advisor's multiple-permissive-policy warning without broadening access.
 
-Migration `202610250003_block_unapproved_membership_fee_income.sql` was applied and saved. A database trigger now blocks new income entries classified in Arabic/English as membership subscriptions or dues until a future migration changes the rule after General Assembly approval. A rollback-only SQL probe confirmed that an unapproved subscription entry is rejected and a voluntary-contribution entry is accepted. The existing 1,000 DZD entry described as an annual subscription dated 2026-10-18 was not altered.
+Migration `202610250003_block_unapproved_membership_fee_income.sql` was applied and saved. A database trigger blocks new income entries classified as membership subscriptions until a General Assembly decision approves the fee. Migration `202610250004_decision_driven_membership_fee_settings.sql` adds the protected `association_settings` table and binds the annual fee to an approved General Assembly meeting and an exact excerpt from its decisions/minutes. The management interface can suggest a fee amount from the report text, but requires the president/site admin to verify and confirm it; the database rejects a source that is not an approved General Assembly report. After activation, new fee-like income must match the approved amount. The existing 1,000 DZD entry described as an annual subscription dated 2026-10-18 was not altered.
 
 ## Financial read-policy correction applied
 
@@ -35,8 +35,12 @@ Migration `202610250001_restrict_finance_read_to_finance_roles.sql` was applied 
 - The private Storage bucket `join-request-files` is configured for PDF files only, with a 15 MiB maximum per file.
 - Eight staff profiles are active. The production setup guide now reflects these existing accounts; do not run the initial-admin bootstrap SQL against production.
 - The `members` table currently has zero rows; the database contains 11 join requests (5 pending, 1 needing information, and 5 provisionally approved). There is one file-submission record. These counts are a snapshot, not proof that the end-to-end workflow has been tested.
-- The 2026 ledger contains a 1,000 DZD income entry described as an annual subscription. Because membership fees have not been approved, it is flagged for manual verification and was not deleted or changed. The UI now warns finance users about it; the database blocks new fee-like income entries.
+- The 2026 ledger contains a 1,000 DZD income entry described as an annual subscription. It remains flagged for manual verification and was not deleted or changed. A decision-driven settings workflow now requires a president/site admin to link the fee to an approved General Assembly record before new subscription income is allowed.
 - The member-policy performance warning was cleared after consolidation. The advisor still reports 16 unused indexes (informational in a new/lightly used system); do not drop them without workload evidence because several support foreign keys and expected workflows.
+
+## Decision-driven operations
+
+The first decision-linked rule is implemented for the annual membership fee. Other decision types (such as approved activity plans, equipment purchases, training, and budgets) are not yet auto-applied; they should be added as explicit, typed actions with source-meeting references and approval gates rather than interpreting arbitrary report prose as executable instructions.
 
 ## Remaining operational checks
 
