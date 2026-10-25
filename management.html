@@ -126,6 +126,28 @@
 </form>
 <p id="decision-settings-msg" role="status"></p>
 </div>
+<div class="m-card" id="ga-invitations-card">
+<h3>تحرير استدعاءات الجمعية العامة من تقرير المكتب التنفيذي</h3>
+<p class="m-note">اختر تقرير المكتب التنفيذي المحفوظ؛ ستقترح المنصة جدول الأعمال من خانة القرارات، ثم تنشئ استدعاءً فرديًا قابلًا للطباعة لكل عضو مسجل ونشط. هذه العملية تُعدّ الاستدعاءات فقط ولا تثبت تبليغها أو استلامها. لا يُعامل أصحاب طلبات الانخراط كأعضاء ما لم تُسجل عضويتهم رسميًا.</p>
+<form id="ga-invitations-form" class="m-grid m-no-print">
+<label style="grid-column:1/-1">تقرير المكتب التنفيذي المصدر
+<select id="ga-invite-source" required><option value="">اختر تقريرًا محفوظًا للمكتب التنفيذي</option></select></label>
+<label>عنوان الجمعية العامة
+<input id="ga-invite-title" required maxlength="180" value="دعوة إلى جمعية عامة"></label>
+<label>تاريخ الجمعية العامة
+<input id="ga-invite-date" type="date" required></label>
+<label>ساعة الانعقاد
+<input id="ga-invite-time" type="time" required></label>
+<label>مكان الانعقاد
+<input id="ga-invite-location" required maxlength="240" placeholder="المكان المحدد في قرار المكتب التنفيذي"></label>
+<label>تاريخ تحرير الاستدعاء
+<input id="ga-invite-issued-date" type="date" required></label>
+<label style="grid-column:1/-1">جدول الأعمال المقترح من التقرير (قابل للمراجعة)
+<textarea id="ga-invite-agenda" required maxlength="5000" placeholder="يُقترح من قرارات التقرير المختار؛ راجعه قبل الطباعة"></textarea></label>
+<div class="m-actions"><button type="submit" class="btn btn-dark" id="ga-invite-print">إنشاء الاستدعاءات وطباعتها</button></div>
+</form>
+<p id="ga-invitations-msg" role="status"></p>
+</div>
 <form id="meeting-form" class="m-grid m-no-print"><input type="hidden" name="id"><label>عنوان الاجتماع<input name="title" required maxlength="180"></label><label>النوع<select name="meeting_type"><option value="executive">المكتب التنفيذي</option><option value="general_assembly">الجمعية العامة</option><option value="committee">لجنة</option><option value="technical">تقني</option><option value="other">أخرى</option></select></label><label>التاريخ<input name="meeting_date" type="date"></label><label>المكان<input name="location" maxlength="180"></label><label>عدد الحاضرين<input name="attendees_count" type="number" min="0" step="1"></label><label>ملاحظة النصاب<input name="quorum_note" maxlength="500"></label><label style="grid-column:1/-1">القرارات<textarea name="decisions" maxlength="5000"></textarea></label><label style="grid-column:1/-1">نص المحضر<textarea name="minutes_text" maxlength="12000"></textarea></label><div class="m-actions"><button class="btn btn-dark">حفظ المسودة</button><button type="button" id="meeting-cancel" class="m-small">إلغاء التعديل</button></div></form><p id="meetings-msg" role="status"></p>
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>الاجتماع</th><th>النوع</th><th>التاريخ</th><th>المكان</th><th>الحضور</th><th>الحالة</th><th>القرارات/المحضر</th><th>إجراءات</th></tr></thead><tbody id="meeting-rows"></tbody></table></div>
 </div></section>

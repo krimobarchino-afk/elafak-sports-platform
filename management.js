@@ -44,6 +44,7 @@ function setupTabs(){
  }));
 }
 function applyPermissions(){
+ $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
  $("m-permissions").textContent="تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
@@ -127,6 +128,61 @@ function suggestDecisionFromMeeting(){
   message("decision-settings-msg","اكتُشفت عبارة محتملة عن الاشتراك. راجع المبلغ والنص مقابل المحضر الأصلي قبل التفعيل.","");
  }else message("decision-settings-msg","عُثر على عبارة عن الاشتراك، لكن لم يمكن استخراج مبلغ واضح. أدخله يدويًا من نص القرار.","");
 }
+
+function refreshGAInvitationSources(){
+ const select=$("ga-invite-source");if(!select)return;
+ const prior=select.value;select.replaceChildren();
+ const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="اختر تقريرًا محفوظًا للمكتب التنفيذي";select.append(placeholder);
+ meetings.filter(m=>m.meeting_type==="executive").forEach(m=>{
+  const o=document.createElement("option");o.value=m.id;
+  o.textContent=(m.title||"تقرير المكتب التنفيذي")+" — "+dateFmt(m.meeting_date)+(m.status==="approved"?" (معتمد)":" (مسودة)");
+  select.append(o);
+ });
+ if(prior&&meetings.some(m=>m.id===prior))select.value=prior;
+}
+function suggestGAInvitationAgenda(){
+ const source=meetings.find(m=>m.id===$("ga-invite-source").value);if(!source)return;
+ const agenda=String(source.decisions||"").trim();
+ $("ga-invite-agenda").value=agenda;
+ if(source.meeting_date&&!$("ga-invite-issued-date").value)$("ga-invite-issued-date").value=localToday();
+ if(source.title)$("ga-invite-title").value="دعوة إلى جمعية عامة";
+ if(!agenda)message("ga-invitations-msg","التقرير المختار لا يحتوي قرارات مدونة في خانتها. أدخل جدول الأعمال يدويًا بعد مراجعته.","error");
+ else message("ga-invitations-msg","اقتُرح جدول الأعمال من خانة قرارات تقرير المكتب التنفيذي. راجعه قبل الطباعة.","success");
+}
+function htmlEscape(value){
+ return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+async function createGAInvitationsAndPrint(){
+ if(!canEditMeetings()){message("ga-invitations-msg","إنشاء الاستدعاءات متاح للأمين العام أو الرئيس أو مدير الموقع فقط.","error");return;}
+ const source=meetings.find(m=>m.id===$("ga-invite-source").value);
+ if(!source||source.meeting_type!=="executive"){message("ga-invitations-msg","اختر تقريرًا محفوظًا للمكتب التنفيذي.","error");return;}
+ const meetingTitle=$("ga-invite-title").value.trim(),meetingDate=$("ga-invite-date").value,meetingTime=$("ga-invite-time").value;
+ const location=$("ga-invite-location").value.trim(),issuedDate=$("ga-invite-issued-date").value,agenda=$("ga-invite-agenda").value.trim();
+ if(!meetingTitle||!meetingDate||!meetingTime||!location||!issuedDate||!agenda){message("ga-invitations-msg","أكمل عنوان الجمعية وتاريخها وساعتها ومكانها وتاريخ تحرير الاستدعاء وجدول الأعمال.","error");return;}
+ if(!confirm("سيتم إعداد استدعاء قابل للطباعة لكل عضو نشط مسجل في سجل الأعضاء. هذا لا يعني إرسال الاستدعاءات أو إثبات استلامها. هل تريد المتابعة؟"))return;
+ const btn=$("ga-invite-print");btn.disabled=true;
+ try{
+  const {data:memberRows,error:memberError}=await sb.from("members").select("id,member_no,join_request_id,membership_status").eq("membership_status","active").order("member_no",{ascending:true});
+  if(memberError)throw memberError;
+  const activeMembers=memberRows||[];
+  if(!activeMembers.length){message("ga-invitations-msg","لم تُنشأ استدعاءات: سجل الأعضاء لا يحتوي حاليًا أعضاء نشطين مسجلين. يوجد فرق بين طلب الانخراط والعضوية النهائية؛ سجّل الأعضاء المؤسسين/النشطين رسميًا أولًا، ثم أعد المحاولة.","error");return;}
+  const requestIds=[...new Set(activeMembers.map(m=>m.join_request_id).filter(Boolean))];
+  const {data:requestRows,error:requestError}=requestIds.length?await sb.from("join_requests").select("id,full_name").in("id",requestIds):{data:[],error:null};
+  if(requestError)throw requestError;
+  const names=new Map((requestRows||[]).map(r=>[r.id,r.full_name]));
+  const esc=htmlEscape;
+  const agendaHtml=agenda.split(/\n+/).map(line=>line.trim()).filter(Boolean).map((line,i)=>"<li>"+esc(line.replace(/^[-*•\d٠-٩]+[.)、-]?\s*/,""))+"</li>").join("");
+  const pages=activeMembers.map(m=>{
+   const name=names.get(m.join_request_id)||"عضو الجمعية العامة";
+   return '<section class="invite-page"><header><h1>جمعية الأفق الولائية للرياضات الجوية والجبلية</h1><p>ولاية الشلف</p></header><h2>استدعاء لحضور جمعية عامة</h2><p class="member">إلى السيد(ة): <strong>'+esc(name)+'</strong></p><p>يشرف المكتب التنفيذي لجمعية الأفق الولائية للرياضات الجوية والجبلية أن يدعوكم لحضور أشغال الجمعية العامة، وذلك وفق البيانات الآتية:</p><div class="details"><p><b>تاريخ الاجتماع:</b> '+esc(dateFmt(meetingDate))+'</p><p><b>الساعة:</b> '+esc(meetingTime)+'</p><p><b>المكان:</b> '+esc(location)+'</p><p><b>المرجع:</b> '+esc(source.title)+' ('+esc(dateFmt(source.meeting_date))+')</p></div><h3>جدول الأعمال</h3><ol>'+agendaHtml+'</ol><p>نرجو منكم الحضور في الموعد المحدد للمشاركة في مناقشة البنود المدرجة واتخاذ ما يلزم وفق القوانين الأساسية والتنظيمية للجمعية.</p><p class="issued">حرر بالشلف في: '+esc(dateFmt(issuedDate))+'</p><div class="sign"><span>رئيس الجمعية</span><span>الأمين العام</span></div><footer>رقم العضوية: '+esc(m.member_no||"غير محدد")+' — هذه نسخة معدّة للطباعة، ولا تُثبت وحدها تبليغ الاستدعاء أو استلامه.</footer></section>';
+  }).join("");
+  const w=window.open("","_blank");if(!w){message("ga-invitations-msg","اسمح بالنوافذ المنبثقة حتى تتمكن من فتح الاستدعاءات للطباعة.","error");return;}
+  w.document.write('<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>استدعاءات الجمعية العامة — جمعية الأفق</title><style>body{font-family:Tahoma,Arial,sans-serif;color:#17352e;line-height:1.9;margin:0}.invite-page{box-sizing:border-box;min-height:270mm;padding:18mm 20mm;page-break-after:always;break-after:page;position:relative}.invite-page:last-child{page-break-after:auto;break-after:auto}header{text-align:center;border-bottom:2px solid #123b32;padding-bottom:10px}header h1{font-size:20px;margin:0}header p{margin:0}h2{text-align:center;margin:28px 0;font-size:22px}h3{border-bottom:1px solid #b9c9c0;padding-bottom:5px}.member{font-size:17px}.details{border:1px solid #cbd7d0;border-radius:8px;padding:8px 16px;margin:20px 0}.details p{margin:3px 0}li{margin:8px 0}.issued{margin-top:35px}.sign{display:flex;justify-content:space-between;margin-top:60px;font-weight:bold}footer{position:absolute;bottom:10mm;left:20mm;right:20mm;border-top:1px solid #ddd;padding-top:5px;font-size:10px;color:#53665c}@media print{.invite-page{height:270mm}}@media screen{.invite-page{max-width:900px;margin:20px auto;border:1px solid #ddd;box-shadow:0 1px 8px #ddd}}</style>'+pages+'<script>window.onload=()=>window.print()<\\/script></html>');
+  w.document.close();
+  message("ga-invitations-msg","تم إعداد "+activeMembers.length+" استدعاءً فرديًا من سجل الأعضاء وفتحها للطباعة. لم يُسجّل ذلك كتسليم أو إرسال.","success");
+ }catch(err){message("ga-invitations-msg","تعذر إعداد الاستدعاءات: "+(err.message||"خطأ غير معروف"),"error");}
+ finally{btn.disabled=false;}
+}
 async function loadDecisionSettings(){
  const form=$("decision-settings-form");if(!form)return;
  hide("decision-settings-card",!canApprove());
@@ -156,6 +212,7 @@ async function loadMeetings(){
  if(canApprove())button(box,"حذف",async()=>{if(!confirm("حذف سجل الاجتماع؟"))return;try{const {error}=await sb.from("meetings").delete().eq("id",x.id);if(error)throw error;await loadMeetings();message("meetings-msg","تم حذف الاجتماع.","success")}catch(e){message("meetings-msg","تعذر الحذف: "+e.message,"error")} },"danger");
  if(!canEditMeetings()&&!canApprove())safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!meetings.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد محاضر مسجلة بعد.");td.colSpan=8;body.append(tr)}
+ refreshGAInvitationSources();
  await loadDecisionSettings();
 }
 function printMeeting(x){
@@ -248,6 +305,10 @@ function bind(){
  $("equipment-cancel").onclick=()=>setForm($("equipment-form"));
  $("meeting-cancel").onclick=()=>setForm($("meeting-form"));
  $("decision-source-meeting").addEventListener("change",suggestDecisionFromMeeting);
+ $("ga-invite-source").addEventListener("change",suggestGAInvitationAgenda);
+ $("ga-invitations-form").addEventListener("submit",async e=>{e.preventDefault();await createGAInvitationsAndPrint()});
+ $("ga-invite-date").value=localToday();
+ $("ga-invite-issued-date").value=localToday();
  $("decision-settings-form").addEventListener("submit",async e=>{
   e.preventDefault();
   if(!canApprove()){message("decision-settings-msg","اعتماد الإعدادات متاح للرئيس أو مدير الموقع فقط.","error");return}
