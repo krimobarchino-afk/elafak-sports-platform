@@ -109,6 +109,24 @@ async function loadEquipment(){
  if(canEditEquipment()){button(box,"تعديل",()=>{setForm($("equipment-form"),x);$("equipment-form").scrollIntoView({behavior:"smooth",block:"center"})});if(roleIs("site_admin","president"))button(box,"حذف",async()=>{if(!confirm("حذف هذه المعدة من سجل الجرد؟"))return;try{const {error}=await sb.from("equipment").delete().eq("id",x.id);if(error)throw error;await loadEquipment();message("equipment-msg","تم حذف المعدة.","success")}catch(e){message("equipment-msg","تعذر الحذف: "+e.message,"error")}},"danger")}else safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!equipment.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد معدات مسجلة. أدخل الجرد بعد التحقق الفعلي.");td.colSpan=7;body.append(tr)}
 }
+function suggestDecisionFromMeeting(){
+ const source=meetings.find(m=>m.id===$("decision-source-meeting").value);
+ if(!source)return;
+ const report=[source.decisions||"",source.minutes_text||""].filter(Boolean).join("\n");
+ const lines=report.split(/[\n.!؟؛]+/).map(x=>x.trim()).filter(Boolean);
+ const feeLine=lines.find(x=>/(اشتراك|انخراط|رسوم\s*(?:العضوية|الانخراط)|membership\s*(?:fee|dues)|annual\s*(?:subscription|dues))/i.test(x));
+ if(!feeLine){message("decision-settings-msg","لم أعثر على عبارة واضحة عن الاشتراك في هذا المحضر. أدخل نص القرار والمبلغ يدويًا بعد مراجعته.","");return}
+ $("decision-fee-excerpt").value=feeLine;
+ const normalized=feeLine.replace(/[٠-٩]/g,d=>String("٠١٢٣٤٥٦٧٨٩".indexOf(d))).replace(/[۰-۹]/g,d=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)));
+ const match=normalized.match(/(\d[\d\s.,]*\d|\d)\s*(?:دج|د\.ج|دينار(?:\s*جزائري)?|DZD)?[^\d]{0,35}(?:اشتراك|انخراط|رسوم\s*(?:العضوية|الانخراط)|membership|subscription)/i)
+  || normalized.match(/(?:اشتراك|انخراط|رسوم\s*(?:العضوية|الانخراط)|membership|subscription)[^\d]{0,35}(\d[\d\s.,]*\d|\d)\s*(?:دج|د\.ج|دينار(?:\s*جزائري)?|DZD)?/i);
+ if(match){
+  const raw=match[1]||match[0].match(/\d[\d\s.,]*\d|\d/)[0];
+  const amount=Number(raw.replace(/[\s.,]/g,""));
+  if(Number.isFinite(amount)&&amount>0)$("decision-fee-amount").value=String(amount);
+  message("decision-settings-msg","اكتُشفت عبارة محتملة عن الاشتراك. راجع المبلغ والنص مقابل المحضر الأصلي قبل التفعيل.","");
+ }else message("decision-settings-msg","عُثر على عبارة عن الاشتراك، لكن لم يمكن استخراج مبلغ واضح. أدخله يدويًا من نص القرار.","");
+}
 async function loadDecisionSettings(){
  const form=$("decision-settings-form");if(!form)return;
  hide("decision-settings-card",!canApprove());
@@ -229,6 +247,7 @@ function bind(){
  $("activity-cancel").onclick=()=>setForm($("activity-form"));
  $("equipment-cancel").onclick=()=>setForm($("equipment-form"));
  $("meeting-cancel").onclick=()=>setForm($("meeting-form"));
+ $("decision-source-meeting").addEventListener("change",suggestDecisionFromMeeting);
  $("decision-settings-form").addEventListener("submit",async e=>{
   e.preventDefault();
   if(!canApprove()){message("decision-settings-msg","اعتماد الإعدادات متاح للرئيس أو مدير الموقع فقط.","error");return}
