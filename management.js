@@ -325,7 +325,18 @@ function bind(){
  $("finance-cancel").onclick=()=>{setForm($("finance-form"));$("finance-form").elements.transaction_date.value=localToday();message("finance-msg","تم إلغاء التعديل.")};
  $("activity-cancel").onclick=()=>setForm($("activity-form"));
  $("equipment-cancel").onclick=()=>setForm($("equipment-form"));
- $("meeting-cancel").onclick=()=>setForm($("meeting-form"));
+ $("meeting-cancel").onclick=()=>{setForm($("meeting-form"));message("meetings-msg","تم إلغاء التعديل.")};
+ $("meeting-build-template").onclick=()=>{
+  const f=$("meeting-form"),v=values(f),type=MEETTYPE[v.meeting_type]||v.meeting_type;
+  const section=(title,value)=>title+"\n"+(String(value||"").trim()||"لم يُدرج.");
+  const parts=["جمعية الأفق الولائية للرياضات الجوية والجبلية","محضر اجتماع",
+   "عنوان الاجتماع: "+(v.title||"غير محدد"),"نوع الاجتماع: "+type,"التاريخ: "+(v.meeting_date||"غير محدد"),"ساعة البداية: "+(v.meeting_start_time||"غير محددة"),"المكان: "+(v.location||"غير محدد"),"رئيس الاجتماع: "+(v.meeting_chair||"غير محدد"),
+   section("الحاضرون وصفاتهم:",v.meeting_attendees),section("جدول الأعمال:",v.meeting_agenda),section("مجريات الاجتماع والمناقشات:",v.meeting_discussion),section("القرارات:",v.decisions),section("النصاب وملاحظاته:",v.quorum_note),section("المرفقات:",v.meeting_attachments),
+   "اختتام الاجتماع: "+(v.meeting_end_time||"ساعة غير محددة"),"حرر هذا المحضر للمراجعة قبل اعتماده.", "إمضاء رئيس الاجتماع: ____________________","إمضاء الأمين العام/محرر المحضر: ____________________"];
+  f.elements.minutes_text.value=parts.join("\n\n");
+  if(!f.elements.attendees_count.value.trim()&&v.meeting_attendees.trim())f.elements.attendees_count.value=String(v.meeting_attendees.trim().split("\n").filter(Boolean).length);
+  message("meetings-msg","تم تكوين مسودة قابلة للتحرير. راجع الوقائع والأسماء والنصاب والقرارات قبل الحفظ أو الاعتماد.","success");
+ };
  $("decision-source-meeting").addEventListener("change",suggestDecisionFromMeeting);
  $("ga-invite-source").addEventListener("change",suggestGAInvitationAgenda);
  $("ga-invitations-form").addEventListener("submit",async e=>{e.preventDefault();await createGAInvitationsAndPrint()});
