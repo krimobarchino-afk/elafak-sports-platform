@@ -44,6 +44,7 @@ function setupTabs(){
  }));
 }
 function applyPermissions(){
+ $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
  $("m-permissions").textContent="تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
