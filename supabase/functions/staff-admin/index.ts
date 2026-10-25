@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Content-Type":"application/json"};
+const cors={"Access-Control-Allow-Origin":"https://horizon-barchino.vercel.app","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Content-Type":"application/json"};
 const out=(v:unknown,s=200)=>new Response(JSON.stringify(v),{status:s,headers:cors});
 const roles=["site_admin","president","deputy_president","secretary_general","treasurer","deputy_secretary_general","deputy_treasurer","technical_director"];
 const valid=(v:unknown):v is string=>typeof v==="string"&&/^[a-z0-9][a-z0-9._-]{2,31}$/.test(v);
