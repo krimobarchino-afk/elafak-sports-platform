@@ -75,15 +75,16 @@ async function loadFinance(){
  const year=Number($("finance-year").value||new Date().getFullYear()),fy=years.find(y=>Number(y.fiscal_year)===year);
  const {data,error}=await sb.from("finance_transactions").select("*").eq("fiscal_year",year).order("transaction_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
  if(error)throw error;transactions=data||[];
- const inc=transactions.filter(x=>x.transaction_type==="income").reduce((a,x)=>a+Number(x.amount),0);
- const exp=transactions.filter(x=>x.transaction_type==="expense").reduce((a,x)=>a+Number(x.amount),0);
+ const officialTransactions=transactions.filter(x=>!x.is_test);
+ const inc=officialTransactions.filter(x=>x.transaction_type==="income").reduce((a,x)=>a+Number(x.amount),0);
+ const exp=officialTransactions.filter(x=>x.transaction_type==="expense").reduce((a,x)=>a+Number(x.amount),0);
  const opening=Number(fy?.opening_balance||0),closing=opening+inc-exp;
  $("finance-opening").value=fmt(opening);$("finance-income").value=fmt(inc);$("finance-expense").value=fmt(exp);$("finance-closing").value=fmt(closing);$("finance-year-status").value=fy?(fy.is_closed?"مغلقة — للقراءة فقط":"مفتوحة"):"غير مهيأة";
  $("stat-balance").textContent=fmt(closing);
  $("close-year").disabled=!fy||fy.is_closed;
  const body=$("finance-rows");body.replaceChildren();
  transactions.forEach(x=>{
-  const tr=document.createElement("tr");safeCell(tr,dateFmt(x.transaction_date));safeCell(tr,TYPE[x.transaction_type]);safeCell(tr,x.category);safeCell(tr,x.description);safeCell(tr,fmt(x.amount));safeCell(tr,PAY[x.payment_method]||x.payment_method);
+  const tr=document.createElement("tr");safeCell(tr,dateFmt(x.transaction_date));safeCell(tr,TYPE[x.transaction_type]);safeCell(tr,x.category+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,x.description);safeCell(tr,fmt(x.amount));safeCell(tr,PAY[x.payment_method]||x.payment_method);
   const box=rowActions(tr);
   if(!fy?.is_closed&&canWriteFinance()){
    button(box,"تعديل",()=>{setForm($("finance-form"),x);$("finance-form").elements.transaction_date.value=x.transaction_date||localToday();message("finance-msg","تعديل العملية المحددة. احفظ لإتمام التعديل.");$("finance-form").scrollIntoView({behavior:"smooth",block:"center"});});
@@ -99,7 +100,7 @@ async function loadActivities(){
  const {data,error}=await sb.from("activities").select("*").order("activity_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
  if(error)throw error;activities=data||[];$("stat-activities").textContent=activities.length;
  const body=$("activity-rows");body.replaceChildren();
- activities.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.title);safeCell(tr,dateFmt(x.activity_date));safeCell(tr,x.location);safeCell(tr,ACTSTATUS[x.status]||x.status);safeCell(tr,x.leader);safeCell(tr,fmt(x.planned_budget));safeCell(tr,fmt(x.actual_budget));const box=rowActions(tr);
+ activities.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.title+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,dateFmt(x.activity_date));safeCell(tr,x.location);safeCell(tr,ACTSTATUS[x.status]||x.status);safeCell(tr,x.leader);safeCell(tr,fmt(x.planned_budget));safeCell(tr,fmt(x.actual_budget));const box=rowActions(tr);
  if(canEditActivities()){button(box,"تعديل",()=>{setForm($("activity-form"),x);$("activity-form").scrollIntoView({behavior:"smooth",block:"center"})});if(roleIs("site_admin","president"))button(box,"حذف",async()=>{if(!confirm("حذف سجل النشاط؟"))return;try{const {error}=await sb.from("activities").delete().eq("id",x.id);if(error)throw error;await loadActivities();message("activities-msg","تم حذف النشاط.","success")}catch(e){message("activities-msg","تعذر الحذف: "+e.message,"error")}},"danger")}else safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!activities.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد أنشطة مسجلة.");td.colSpan=8;body.append(tr)}
 }
@@ -107,7 +108,7 @@ async function loadEquipment(){
  const {data,error}=await sb.from("equipment").select("*").order("item_name");
  if(error)throw error;equipment=data||[];$("stat-equipment").textContent=equipment.reduce((n,x)=>n+Number(x.quantity||0),0);
  const body=$("equipment-rows");body.replaceChildren();
- equipment.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.item_name);safeCell(tr,x.category);safeCell(tr,x.quantity);safeCell(tr,CONDITION[x.condition]||x.condition);safeCell(tr,x.serial_number);safeCell(tr,x.storage_location);const box=rowActions(tr);
+ equipment.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.item_name+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,x.category);safeCell(tr,x.quantity);safeCell(tr,CONDITION[x.condition]||x.condition);safeCell(tr,x.serial_number);safeCell(tr,x.storage_location);const box=rowActions(tr);
  if(canEditEquipment()){button(box,"تعديل",()=>{setForm($("equipment-form"),x);$("equipment-form").scrollIntoView({behavior:"smooth",block:"center"})});if(roleIs("site_admin","president"))button(box,"حذف",async()=>{if(!confirm("حذف هذه المعدة من سجل الجرد؟"))return;try{const {error}=await sb.from("equipment").delete().eq("id",x.id);if(error)throw error;await loadEquipment();message("equipment-msg","تم حذف المعدة.","success")}catch(e){message("equipment-msg","تعذر الحذف: "+e.message,"error")}},"danger")}else safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!equipment.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد معدات مسجلة. أدخل الجرد بعد التحقق الفعلي.");td.colSpan=7;body.append(tr)}
 }
@@ -159,7 +160,7 @@ function refreshGAInvitationSources(){
  const select=$("ga-invite-source");if(!select)return;
  const prior=select.value;select.replaceChildren();
  const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="اختر تقريرًا محفوظًا للمكتب التنفيذي";select.append(placeholder);
- meetings.filter(m=>m.meeting_type==="executive").forEach(m=>{
+ meetings.filter(m=>!m.is_test&&m.meeting_type==="executive").forEach(m=>{
   const o=document.createElement("option");o.value=m.id;
   o.textContent=(m.title||"تقرير المكتب التنفيذي")+" — "+dateFmt(m.meeting_date)+(m.status==="approved"?" (معتمد)":" (مسودة)");
   select.append(o);
@@ -210,7 +211,7 @@ async function loadDecisionSettings(){
  hide("decision-settings-card",!canApprove());
  const select=$("decision-source-meeting");select.replaceChildren();
  const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="اختر محضرًا معتمدًا";select.append(placeholder);
- meetings.filter(m=>m.meeting_type==="general_assembly"&&m.status==="approved").forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=(m.title||"جمعية عامة")+" — "+dateFmt(m.meeting_date);select.append(o)});
+ meetings.filter(m=>!m.is_test&&m.meeting_type==="general_assembly"&&m.status==="approved").forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=(m.title||"جمعية عامة")+" — "+dateFmt(m.meeting_date);select.append(o)});
  $("decision-fee-date").value=$("decision-fee-date").value||localToday();
  const {data,error}=await sb.from("association_settings").select("*").eq("setting_key","annual_membership_fee_dzd").maybeSingle();
  const status=$("decision-settings-current");
@@ -227,7 +228,7 @@ async function loadMeetings(){
  const {data,error}=await sb.from("meetings").select("*").order("meeting_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
  if(error)throw error;meetings=data||[];$("stat-meetings").textContent=meetings.length;
  const body=$("meeting-rows");body.replaceChildren();
- meetings.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.title);safeCell(tr,MEETTYPE[x.meeting_type]||x.meeting_type);safeCell(tr,dateFmt(x.meeting_date));safeCell(tr,x.location);safeCell(tr,x.attendees_count??"غير محدد");safeCell(tr,x.status==="approved"?"معتمد":"مسودة");safeCell(tr,[x.decisions,x.minutes_text].filter(Boolean).join(" — ")||"—");const box=rowActions(tr);
+ meetings.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.title+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,MEETTYPE[x.meeting_type]||x.meeting_type);safeCell(tr,dateFmt(x.meeting_date));safeCell(tr,x.location);safeCell(tr,x.attendees_count??"غير محدد");safeCell(tr,x.status==="approved"?"معتمد":"مسودة");safeCell(tr,[x.decisions,x.minutes_text].filter(Boolean).join(" — ")||"—");const box=rowActions(tr);
  if(canEditMeetings()&&(x.status!=="approved"||canApprove()))button(box,"تعديل",()=>{setForm($("meeting-form"),x);$("meeting-form").scrollIntoView({behavior:"smooth",block:"center"})});
  if(canApprove()&&x.status!=="approved")button(box,"اعتماد المحضر",async()=>{if(!confirm("هل تؤكد أن هذا المحضر/القرار اعتمد رسميًا؟"))return;try{const {error}=await sb.from("meetings").update({status:"approved",approved_by:user.id,approved_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",x.id);if(error)throw error;await loadMeetings();message("meetings-msg","تم اعتماد المحضر.","success")}catch(e){message("meetings-msg","تعذر الاعتماد: "+e.message,"error")}});
  if(canApprove())button(box,"طباعة",()=>printMeeting(x));
@@ -275,6 +276,7 @@ async function saveForm(form,table,fields,roleCheck,msgId){
   const raw=values(form),id=raw.id;delete raw.id;
   const payload={};fields.forEach(k=>{if(raw[k]!==undefined)payload[k]=raw[k]===""?null:raw[k]});
   if("entered_by" in payload)delete payload.entered_by;
+  if(!id&&["finance_transactions","activities","equipment","meetings"].includes(table))payload.is_test=true;
   if(table==="finance_transactions"){
    payload.fiscal_year=Number($("finance-year").value);payload.amount=Number(payload.amount);payload.entered_by=user.id;
    const feeLikeIncome=payload.transaction_type==="income"&&/اشتراك|انخراط|رسوم\s*(?:العضوية|الانخراط)|membership\s*(?:fee|dues)|annual\s*(?:subscription|dues)/i.test(String(payload.category||"")+" "+String(payload.description||""));
@@ -330,7 +332,7 @@ function bind(){
  $("logout").onclick=async()=>{await sb.auth.signOut();profile=null;user=null;hide("m-app",true);hide("m-login",false);};
  $("m-refresh").onclick=refreshAll;
  $("finance-year").addEventListener("change",()=>loadFinance().catch(e=>message("finance-msg",e.message,"error")));
- $("close-year").onclick=async()=>{const y=years.find(x=>String(x.fiscal_year)===$("finance-year").value);if(!y||y.is_closed)return;if(!confirm("إقفال السنة "+y.fiscal_year+"؟ سيصبح سجل عملياتها للقراءة فقط."))return;try{const closing=Number($("finance-closing").value.replace(/[^0-9,.-]/g,"").replace(",", "."));const income=transactions.filter(x=>x.transaction_type==="income").reduce((a,x)=>a+Number(x.amount),0),expense=transactions.filter(x=>x.transaction_type==="expense").reduce((a,x)=>a+Number(x.amount),0);const balance=Number(y.opening_balance)+income-expense;const {error}=await sb.from("financial_years").update({is_closed:true,closing_balance:balance,closed_at:new Date().toISOString(),closed_by:user.id}).eq("fiscal_year",y.fiscal_year);if(error)throw error;await loadYears();await loadFinance();message("finance-msg","أُقفلت السنة المالية وحُفظ رصيدها الختامي.","success")}catch(e){message("finance-msg","تعذر إقفال السنة: "+e.message,"error")}};
+ $("close-year").onclick=async()=>{const y=years.find(x=>String(x.fiscal_year)===$("finance-year").value);if(!y||y.is_closed)return;if(!confirm("إقفال السنة "+y.fiscal_year+"؟ سيصبح سجل عملياتها للقراءة فقط."))return;try{const closing=Number($("finance-closing").value.replace(/[^0-9,.-]/g,"").replace(",", "."));const officialTransactions=transactions.filter(x=>!x.is_test),income=officialTransactions.filter(x=>x.transaction_type==="income").reduce((a,x)=>a+Number(x.amount),0),expense=officialTransactions.filter(x=>x.transaction_type==="expense").reduce((a,x)=>a+Number(x.amount),0);const balance=Number(y.opening_balance)+income-expense;const {error}=await sb.from("financial_years").update({is_closed:true,closing_balance:balance,closed_at:new Date().toISOString(),closed_by:user.id}).eq("fiscal_year",y.fiscal_year);if(error)throw error;await loadYears();await loadFinance();message("finance-msg","أُقفلت السنة المالية وحُفظ رصيدها الختامي.","success")}catch(e){message("finance-msg","تعذر إقفال السنة: "+e.message,"error")}};
  $("finance-cancel").onclick=()=>{setForm($("finance-form"));$("finance-form").elements.transaction_date.value=localToday();message("finance-msg","تم إلغاء التعديل.")};
  $("activity-cancel").onclick=()=>setForm($("activity-form"));
  $("equipment-cancel").onclick=()=>setForm($("equipment-form"));
@@ -369,10 +371,10 @@ function bind(){
   }catch(err){message("decision-settings-msg","تعذر تفعيل القرار: "+(err.message||"خطأ غير معروف"),"error")}
   finally{btn.disabled=false}
  });
- $("finance-export").onclick=()=>exportCSV("elafak-finance-"+$("finance-year").value+".csv",transactions);
- $("activities-export").onclick=()=>exportCSV("elafak-activities.csv",activities);
- $("equipment-export").onclick=()=>exportCSV("elafak-equipment.csv",equipment);
- $("meetings-export").onclick=()=>exportCSV("elafak-meetings.csv",meetings);
+ $("finance-export").onclick=()=>exportCSV("elafak-finance-"+$("finance-year").value+".csv",transactions.filter(x=>!x.is_test));
+ $("activities-export").onclick=()=>exportCSV("elafak-activities.csv",activities.filter(x=>!x.is_test));
+ $("equipment-export").onclick=()=>exportCSV("elafak-equipment.csv",equipment.filter(x=>!x.is_test));
+ $("meetings-export").onclick=()=>exportCSV("elafak-meetings.csv",meetings.filter(x=>!x.is_test));
  $("backup-json").onclick=backup;$("print-page").onclick=()=>window.print();$("audit-refresh").onclick=()=>loadAudit();
  saveForm($("finance-form"),"finance_transactions",["transaction_date","transaction_type","category","amount","payment_method","reference","description"],canFinance,"finance-msg");
  saveForm($("activity-form"),"activities",["title","activity_date","location","activity_type","status","leader","planned_budget","actual_budget","notes"],canEditActivities,"activities-msg");
