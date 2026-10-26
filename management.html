@@ -7,7 +7,7 @@
 <title>فضاء تسيير جمعية الأفق</title>
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/management.js?v=20261026-site-admin-isolation-v2" defer></script>
+<script src="/management.js?v=20261026-president-join-requests-v1" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -60,6 +60,7 @@
 <div class="m-card"><div class="m-toolbar"><div><span class="m-badge" id="m-role">موظف</span><h2 id="m-welcome">لوحة التسيير</h2><p class="m-note" id="m-permissions"></p></div><button id="m-refresh" class="btn btn-dark m-no-print">تحديث البيانات</button></div><p id="m-message" role="status"></p></div>
 <nav class="m-tabs m-no-print" aria-label="وحدات التسيير">
 <button data-pane="overview" class="active">الرئيسية</button>
+<button data-pane="join-requests" id="tab-join-requests">طلبات الانخراط</button>
 <button data-pane="finance" id="tab-finance">المالية</button>
 <button data-pane="activities">الأنشطة</button>
 <button data-pane="equipment">المعدات</button>
@@ -67,6 +68,12 @@
 <button data-pane="office-roster" id="tab-office-roster">التشكيلة الرسمية</button>
 <button data-pane="archive">الأرشيف والنسخ</button>
 </nav>
+<section class="m-pane" id="pane-join-requests" hidden>
+<div class="m-card"><div class="m-toolbar"><h2>طلبات الانخراط</h2><button type="button" class="m-small" onclick="document.getElementById('m-refresh').click()">تحديث البيانات</button></div>
+<p class="m-note">تظهر الطلبات هنا ضمن حساب الرئيس بدلًا من صفحة مستقلة. يستطيع الرئيس مراجعة الطلبات واتخاذ القرار المبدئي، ويستطيع الأمين العام مراجعة الطلبات قيد المعالجة ضمن صلاحياته. القبول المبدئي لا ينشئ حسابًا ولا يثبت الانخراط النهائي. لا تُفعّل رسوم أو باقات غير مصادق عليها.</p>
+<p id="join-requests-msg" role="status"></p>
+<div class="m-tablewrap"><table class="m-table"><thead><tr><th>مرجع الطلب</th><th>تاريخ الإرسال</th><th>الاسم الكامل</th><th>الهاتف</th><th>البلدية</th><th>الاهتمامات</th><th>الحالة</th><th>ملاحظة المراجعة</th><th>الإجراء</th></tr></thead><tbody id="join-request-rows"></tbody></table></div>
+</div></section>
 <section class="m-pane" id="pane-overview">
 <div class="m-statgrid">
 <div class="m-stat"><small>الرصيد المالي الحالي</small><strong id="stat-balance">—</strong></div>
