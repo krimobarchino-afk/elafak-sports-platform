@@ -208,21 +208,22 @@ async function createGAInvitationsAndPrint(){
 }
 async function loadDecisionSettings(){
  const form=$("decision-settings-form");if(!form)return;
- hide("decision-settings-card",!canApprove());
+ hide("decision-settings-card",!canFinance());
+ if(!canFinance())return;
  const select=$("decision-source-meeting");select.replaceChildren();
  const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="اختر محضرًا معتمدًا";select.append(placeholder);
  meetings.filter(m=>!m.is_test&&m.meeting_type==="general_assembly"&&m.status==="approved").forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=(m.title||"جمعية عامة")+" — "+dateFmt(m.meeting_date);select.append(o)});
  $("decision-fee-date").value=$("decision-fee-date").value||localToday();
- const {data,error}=await sb.from("association_settings").select("*").eq("setting_key","annual_membership_fee_dzd").maybeSingle();
+ const {data,error}=await sb.from("membership_fee_rules").select("*").eq("status","active").order("applies_from",{ascending:false}).limit(1).maybeSingle();
  const status=$("decision-settings-current");
- if(error){status.textContent="تعذر تحميل الإعداد المعتمد: "+error.message;return}
+ if(error){status.textContent="تعذر تحميل قاعدة الاشتراك المعتمدة: "+error.message;return}
  if(data){
-  $("decision-fee-amount").value=String(data.setting_value?.amount||"");
+  $("decision-fee-amount").value=String(data.annual_amount||"");
   $("decision-fee-excerpt").value=data.source_decision||"";
   $("decision-source-meeting").value=data.source_meeting_id||"";
-  $("decision-fee-date").value=data.effective_date||localToday();
-  status.textContent="الاشتراك السنوي المعتمد حاليًا: "+fmt(data.setting_value?.amount)+" — المرجع: "+(meetings.find(m=>m.id===data.source_meeting_id)?.title||"محضر جمعية عامة")+". لا يتغير إلا بقرار جديد معتمد.";
- }else status.textContent="لا يوجد اشتراك سنوي مفعّل. سيبقى تحصيل رسوم الانخراط محظورًا حتى توثيق قرار معتمد.";
+  $("decision-fee-date").value=data.applies_from||localToday();
+  status.textContent="قاعدة الاشتراك النشطة: "+fmt(data.annual_amount)+" دج سنويًا ابتداءً من "+dateFmt(data.applies_from)+" — المرجع: "+(meetings.find(m=>m.id===data.source_meeting_id)?.title||"محضر جمعية عامة")+". أي تغيير يتطلب قرارًا معتمدًا جديدًا.";
+ }else status.textContent="لا توجد قاعدة اشتراك نشطة في سجل الاشتراكات. لن تُنشأ استحقاقات أو تُحصّل رسوم حتى توثيق قرار جمعية عامة معتمد.";
 }
 async function loadMeetings(){
  const {data,error}=await sb.from("meetings").select("*").order("meeting_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
@@ -355,20 +356,20 @@ function bind(){
  $("ga-invite-issued-date").value=localToday();
  $("decision-settings-form").addEventListener("submit",async e=>{
   e.preventDefault();
-  if(!canApprove()){message("decision-settings-msg","اعتماد الإعدادات متاح للرئيس أو مدير الموقع فقط.","error");return}
+  if(!roleIs("president")){message("decision-settings-msg","تفعيل قاعدة الاشتراك المعتمدة متاح للرئيس فقط.","error");return}
   const v=values(e.currentTarget),source=meetings.find(m=>m.id===v.source_meeting_id);
-  if(!source||source.meeting_type!=="general_assembly"||source.status!=="approved"){message("decision-settings-msg","اختر محضر جمعية عامة معتمدًا فقط.","error");return}
+  if(!source||source.is_test||source.meeting_type!=="general_assembly"||source.status!=="approved"){message("decision-settings-msg","اختر محضر جمعية عامة معتمدًا وغير تجريبي.","error");return}
   const excerpt=v.source_decision.trim(),report=(source.decisions||"")+"\n"+(source.minutes_text||"");
   if(!excerpt||!report.includes(excerpt)){message("decision-settings-msg","يجب أن يكون نص القرار منقولًا حرفيًا من خانة القرارات أو نص المحضر المعتمد.","error");return}
   const amount=Number(v.amount);if(!Number.isFinite(amount)||amount<=0){message("decision-settings-msg","أدخل مبلغًا صحيحًا أكبر من صفر.","error");return}
-  if(!confirm("سيُفعّل مبلغ اشتراك سنوي قدره "+fmt(amount)+" استنادًا إلى محضر الجمعية العامة المعتمد. هل تحققت من نص القرار وصحة المبلغ؟"))return;
+  if(!confirm("سيُنشأ سجل اشتراك سنوي نشط بمبلغ "+fmt(amount)+" دج اعتمادًا على محضر جمعية عامة معتمد. هل تحققت من نص القرار والمبلغ وتاريخ السريان؟"))return;
   const btn=$("decision-fee-save");btn.disabled=true;
   try{
-   const {error}=await sb.from("association_settings").upsert({setting_key:"annual_membership_fee_dzd",setting_value:{amount,currency:"DZD",period:"annual"},source_meeting_id:source.id,source_decision:excerpt,effective_date:v.effective_date,updated_by:user.id,updated_at:new Date().toISOString()},{onConflict:"setting_key"});
+   const {data,error}=await sb.rpc("activate_membership_fee_rule",{p_source_meeting_id:source.id,p_annual_amount:amount,p_effective_date:v.effective_date,p_source_decision:excerpt});
    if(error)throw error;
-   message("decision-settings-msg","تم توثيق قرار الجمعية العامة وتفعيل المبلغ. ستُحفظ معه إحالة المحضر والنص الحرفي.","success");
+   message("decision-settings-msg","تم تسجيل قاعدة الاشتراك المعتمدة في سجل الاشتراكات. لم تُنشأ استحقاقات للأعضاء تلقائيًا؛ يلزم تشغيل إنشاء الاستحقاقات للسنة المطلوبة بعد مراجعتها.","success");
    await loadDecisionSettings();
-  }catch(err){message("decision-settings-msg","تعذر تفعيل القرار: "+(err.message||"خطأ غير معروف"),"error")}
+  }catch(err){message("decision-settings-msg","تعذر تفعيل قاعدة الاشتراك: "+(err.message||"خطأ غير معروف"),"error")}
   finally{btn.disabled=false}
  });
  $("finance-export").onclick=()=>exportCSV("elafak-finance-"+$("finance-year").value+".csv",transactions.filter(x=>!x.is_test));
