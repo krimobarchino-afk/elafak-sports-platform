@@ -32,9 +32,14 @@ function setForm(form,obj={}){form.reset();for(const [k,v] of Object.entries(obj
 function values(form){const f=new FormData(form),o={};for(const [k,v] of f.entries())o[k]=typeof v==="string"?v.trim():v;return o;}
 function hide(id,yes){$(id)?.classList.toggle("m-hide",yes);}
 async function profileLoad(){
- const {data:{user:u},error}=await sb.auth.getUser();if(error||!u)return null;
+ const {data:{user:u},error}=await sb.auth.getUser();
+ if(error)throw new Error("تعذر قراءة جلسة الدخول: "+error.message);
+ if(!u)throw new Error("لم يتم العثور على جلسة دخول محفوظة لهذا النطاق. سجّل الدخول من بوابة الموظفين على الرابط نفسه.");
  const {data,error:e}=await sb.from("staff_profiles").select("user_id,username,role,is_active").eq("user_id",u.id).maybeSingle();
- if(e||!data||!data.is_active){await sb.auth.signOut();return null;}user=u;return data;
+ if(e)throw new Error("الجلسة موجودة لكن تعذر قراءة صلاحيات الحساب من staff_profiles: "+e.message);
+ if(!data)throw new Error("الجلسة موجودة، لكن لا يوجد سجل مطابق لهذا المستخدم في staff_profiles.");
+ if(!data.is_active)throw new Error("الحساب موجود لكنه غير مفعّل. راجع مدير الموقع.");
+ user=u;return data;
 }
 function setupTabs(){
  document.querySelectorAll(".m-tabs button").forEach(b=>b.addEventListener("click",()=>{
@@ -402,7 +407,7 @@ async function backup(){
 }
 function bind(){
  setupTabs();
- $("m-login-form").addEventListener("submit",async e=>{e.preventDefault();const f=new FormData(e.currentTarget),username=String(f.get("username")||"").trim().toLowerCase(),password=String(f.get("password")||""),b=$("m-login-btn");b.disabled=true;message("m-login-msg","جارٍ التحقق من الحساب…");try{const {error}=await sb.auth.signInWithPassword({email:username+"@staff.elafak.invalid",password});if(error)throw error;await enter()}catch(err){message("m-login-msg","تعذر الدخول: تحقق من اسم المستخدم وكلمة المرور وتفعيل الحساب.","error")}finally{b.disabled=false}});
+ $("m-login-form").addEventListener("submit",async e=>{e.preventDefault();const f=new FormData(e.currentTarget),username=String(f.get("username")||"").trim().toLowerCase(),password=String(f.get("password")||""),b=$("m-login-btn");b.disabled=true;message("m-login-msg","جارٍ التحقق من الحساب…");try{const {error}=await sb.auth.signInWithPassword({email:username+"@staff.elafak.invalid",password});if(error)throw error;await enter()}catch(err){console.error("Management sign-in/profile error:",err);message("m-login-msg",err?.message||"تعذر الدخول. تحقق من بيانات الحساب.","error")}finally{b.disabled=false}});
  $("logout").onclick=async()=>{await sb.auth.signOut();profile=null;user=null;hide("m-app",true);hide("m-login",false);};
  $("m-refresh").onclick=refreshAll;
  $("finance-year").addEventListener("change",()=>loadFinance().catch(e=>message("finance-msg",e.message,"error")));
@@ -498,6 +503,6 @@ async function enter(){
 addEventListener("DOMContentLoaded",()=>{
  if(!window.supabase){message("m-login-msg","تعذر تحميل خدمة الدخول. تحقق من الاتصال بالإنترنت.");return}
  sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:"sb-lfubzohsbwdoiagfkpkt-auth-token"}});bind();
- sb.auth.getSession().then(({data,error})=>{if(error){message("m-login-msg","تعذر استعادة جلسة الدخول: "+error.message,"error");return}if(data.session)enter().catch(err=>{console.error("Management session restore failed:",err);hide("m-app",true);hide("m-login",false);message("m-login-msg","تم استعادة الجلسة لكن تعذر تحميل لوحة الإدارة. أعد المحاولة أو راجع سجل الأخطاء.","error")})});
+ sb.auth.getSession().then(({data,error})=>{if(error){message("m-login-msg","تعذر استعادة جلسة الدخول: "+error.message,"error");return}if(data.session){enter().catch(err=>{console.error("Management session restore failed:",err);hide("m-app",true);hide("m-login",false);message("m-login-msg",err?.message||"تم العثور على جلسة لكن تعذر تحميل لوحة الإدارة.","error")})}else{message("m-login-msg","لم يتم العثور على جلسة محفوظة في هذا النطاق. سجّل الدخول هنا، ثم انتقل إلى الإدارة من الرابط الموجود في بوابة الموظفين.","error")}});
 });
 })();
