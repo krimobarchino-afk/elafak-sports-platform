@@ -51,6 +51,7 @@ function applyPermissions(){
  $("m-permissions").textContent="تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
  $("tab-finance").classList.toggle("m-hide",!canFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
+ $("decision-settings-form").classList.toggle("m-hide",!roleIs("president"));
  $("finance-form").classList.toggle("m-hide",!canFinance());
  $("close-year").classList.toggle("m-hide",!canApprove());
  $("backup-json").classList.toggle("m-hide",!roleIs("site_admin","president"));
