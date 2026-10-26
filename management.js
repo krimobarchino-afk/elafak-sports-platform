@@ -18,8 +18,8 @@ function safeCell(row,value){const td=document.createElement("td");td.textConten
 function button(parent,label,fn,kind=""){const b=document.createElement("button");b.type="button";b.textContent=label;b.className=kind==="danger"?"danger":"";b.onclick=fn;parent.append(b);return b;}
 function rowActions(tr){const td=document.createElement("td"),box=document.createElement("div");box.className="m-actions";td.append(box);tr.append(td);return box;}
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
-function canFinance(){return roleIs("site_admin","president","treasurer","deputy_treasurer");}
-function canWriteFinance(){return roleIs("site_admin","president","treasurer");}
+function canFinance(){return roleIs("president","treasurer");}
+function canWriteFinance(){return roleIs("president","treasurer");}
 function canViewActivities(){return roleIs("site_admin","president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
 function canViewEquipment(){return canViewActivities();}
 function canViewMeetings(){return canViewActivities();}
