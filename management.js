@@ -497,7 +497,7 @@ async function enter(){
 }
 addEventListener("DOMContentLoaded",()=>{
  if(!window.supabase){message("m-login-msg","تعذر تحميل خدمة الدخول. تحقق من الاتصال بالإنترنت.");return}
- sb=window.supabase.createClient(SUPABASE_URL,KEY);bind();
- sb.auth.getSession().then(({data})=>{if(data.session)enter()});
+ sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:"sb-lfubzohsbwdoiagfkpkt-auth-token"}});bind();
+ sb.auth.getSession().then(({data,error})=>{if(error){message("m-login-msg","تعذر استعادة جلسة الدخول: "+error.message,"error");return}if(data.session)enter().catch(err=>{console.error("Management session restore failed:",err);hide("m-app",true);hide("m-login",false);message("m-login-msg","تم استعادة الجلسة لكن تعذر تحميل لوحة الإدارة. أعد المحاولة أو راجع سجل الأخطاء.","error")})});
 });
 })();
