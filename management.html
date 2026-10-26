@@ -85,7 +85,24 @@
 <div class="m-grid"><label>سنة الاستحقاق<input id="dues-generation-year" type="number" min="2025" max="2029" step="1" required></label><div class="m-actions" style="align-self:end"><button type="button" id="dues-generate-button" class="btn btn-dark">إنشاء الاستحقاقات</button></div></div>
 <p id="dues-generation-msg" role="status"></p>
 </div>
-<div class="m-grid"><label>السنة المالية<select id="finance-year"></select></label><label>الرصيد الافتتاحي<input id="finance-opening" readonly></label><label>مجموع الإيرادات<input id="finance-income" readonly></label><label>مجموع المصروفات<input id="finance-expense" readonly></label><label>الرصيد الختامي المحسوب<input id="finance-closing" readonly></label><label>حالة السنة<input id="finance-year-status" readonly></label></div>
+
+<div class="m-card m-no-print" id="payment-workflow-card">
+<h3>تسجيل دفعة الاشتراك ومراجعتها</h3>
+<p class="m-note">يظهر هذا القسم للرئيس وأمين المال فقط. تسجل الدفعة أولًا «بانتظار التحقق» ولا تدخل السجل المالي العام إلا بعد التحقق. لا توجد مبالغ اشتراك مفترضة؛ ستظهر الاستحقاقات فقط بعد اعتماد قرار الجمعية العامة وإنشائها.</p>
+<form id="dues-payment-form" class="m-grid">
+<label style="grid-column:1/-1">استحقاق العضو
+<select name="obligation_id" id="dues-payment-obligation" required><option value="">لا توجد استحقاقات متاحة</option></select></label>
+<label>المبلغ المدفوع (دج)<input name="amount" type="number" min="0.01" step="0.01" required></label>
+<label>تاريخ الدفع<input name="payment_date" type="date" required></label>
+<label>طريقة الدفع<select name="payment_method" required><option value="bank">البنك</option><option value="cash">نقدًا</option><option value="transfer">تحويل</option><option value="other">أخرى</option></select></label>
+<label>مرجع الإيصال (اختياري)<input name="receipt_reference" maxlength="180" placeholder="رقم وصل أو مرجع تحويل"></label>
+<div class="m-actions" style="align-self:end"><button type="submit" id="dues-payment-save" class="btn btn-dark">تسجيل الدفعة للمراجعة</button></div>
+</form>
+<p id="dues-payment-msg" role="status"></p>
+<h4>سجل دفعات الاشتراك</h4>
+<div class="m-tablewrap"><table class="m-table"><thead><tr><th>العضو</th><th>السنة</th><th>المبلغ</th><th>تاريخ الدفع</th><th>الطريقة</th><th>المرجع</th><th>الحالة</th><th>المراجعة</th></tr></thead><tbody id="dues-payment-rows"></tbody></table></div>
+</div>
+\n<div class="m-grid"><label>السنة المالية<select id="finance-year"></select></label><label>الرصيد الافتتاحي<input id="finance-opening" readonly></label><label>مجموع الإيرادات<input id="finance-income" readonly></label><label>مجموع المصروفات<input id="finance-expense" readonly></label><label>الرصيد الختامي المحسوب<input id="finance-closing" readonly></label><label>حالة السنة<input id="finance-year-status" readonly></label></div>
 <form id="finance-form" class="m-grid m-no-print" style="margin-top:1.2rem">
 <input type="hidden" name="id">
 <label>تاريخ العملية<input name="transaction_date" type="date" required></label>

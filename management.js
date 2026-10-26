@@ -265,10 +265,68 @@ async function loadAudit(showMessage=true){
  if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد عمليات مسجلة.");td.colSpan=5;body.append(tr)}
  if(showMessage)message("archive-msg","تم تحميل سجل العمليات (آخر "+(data||[]).length+" عملية).","success");
 }
-async function refreshAll(){
+
+async function loadPaymentWorkflow(){
+ if(!canFinance())return;
+ const form=$("dues-payment-form");if(!form)return;
+ hide("payment-workflow-card",false);
+ const [or, mr, pr]=await Promise.all([
+  sb.from("membership_dues_obligations").select("id,association_member_id,period_year,amount_due,due_date,status").order("period_year",{ascending:false}).order("due_date",{ascending:true}),
+  sb.from("association_members").select("id,full_name,founder_number,source_kind,membership_status"),
+  sb.from("membership_dues_payments").select("*").order("created_at",{ascending:false}).limit(300)
+ ]);
+ if(or.error)throw or.error;if(mr.error)throw mr.error;if(pr.error)throw pr.error;
+ const obligations=or.data||[], members=mr.data||[], payments=pr.data||[];
+ const memberMap=new Map(members.map(m=>[m.id,m]));
+ const obligationMap=new Map(obligations.map(o=>[o.id,o]));
+ const sel=$("dues-payment-obligation"), prior=sel.value;sel.replaceChildren();
+ const eligible=obligations.filter(o=>!["paid","closed","loss_review"].includes(o.status)&&memberMap.get(o.association_member_id)?.membership_status==="active");
+ const placeholder=document.createElement("option");placeholder.value="";
+ placeholder.textContent=eligible.length?"اختر استحقاق العضو":"لا توجد استحقاقات متاحة؛ لا يُنشأ اشتراك قبل اعتماد قرار الجمعية العامة";
+ sel.append(placeholder);
+ eligible.forEach(o=>{
+  const m=memberMap.get(o.association_member_id);if(!m)return;
+  const op=document.createElement("option");op.value=o.id;
+  op.textContent=(m.full_name||"عضو")+(m.founder_number?" — مؤسس #"+m.founder_number:"")+" — "+o.period_year+" — المتبقي "+fmt(Math.max(0,Number(o.amount_due)-payments.filter(p=>p.obligation_id===o.id&&p.verification_status==="verified").reduce((s,p)=>s+Number(p.amount),0)));
+  sel.append(op);
+ });
+ if(prior&&eligible.some(o=>o.id===prior))sel.value=prior;
+ sel.disabled=!eligible.length;
+ $("dues-payment-save").disabled=!eligible.length;
+ const body=$("dues-payment-rows");body.replaceChildren();
+ if(!payments.length){const tr=document.createElement("tr"),td=safeCell(tr,"لا توجد دفعات مسجلة.");td.colSpan=8;body.append(tr)}
+ payments.forEach(p=>{
+  const o=obligationMap.get(p.obligation_id),m=o?memberMap.get(o.association_member_id):null;
+  const tr=document.createElement("tr");
+  safeCell(tr,m?.full_name||"عضو غير مرتبط");safeCell(tr,o?.period_year||"—");safeCell(tr,fmt(p.amount));safeCell(tr,dateFmt(p.payment_date));safeCell(tr,PAY[p.payment_method]||p.payment_method||"أخرى");safeCell(tr,p.receipt_reference||"—");
+  safeCell(tr,p.verification_status==="verified"?"مثبتة":p.verification_status==="rejected"?"مرفوضة":"بانتظار التحقق");
+  const actions=rowActions(tr);
+  if(p.verification_status==="pending"){
+   button(actions,"تأكيد الدفع",()=>reviewDuesPayment(p.id,"verified"),"");
+   button(actions,"رفض مع تعليل",()=>reviewDuesPayment(p.id,"rejected"),"danger");
+  }
+  body.append(tr);
+ });
+ if(!obligations.length){
+  message("dues-payment-msg","لا توجد استحقاقات بعد. لم تُعتمد رسوم اشتراك في البيانات الحالية؛ لا تُسجّل دفعة رسمية حتى يصدر قرار صحيح من الجمعية العامة.","");
+ }else message("dues-payment-msg","تم تحميل الاستحقاقات والدفعات. الدفعات المعلقة لا تُحتسب إيرادًا قبل التحقق.","");
+}
+async function reviewDuesPayment(paymentId,decision){
+ if(!canFinance())return;
+ let note="";
+ if(decision==="rejected"){note=prompt("اكتب سبب رفض إثبات الدفع:")||"";if(!note.trim())return;}
+ else {note=prompt("ملاحظة التحقق (اختيارية):")||"";if(!confirm("هل تحققت من الإيصال ومطابقة المبلغ والتاريخ قبل إثبات الدفعة؟"))return;}
+ try{
+  const {data,error}=await sb.rpc("verify_membership_dues_payment",{p_payment_id:paymentId,p_decision:decision,p_verification_note:note.trim()||null});
+  if(error)throw error;
+  message("dues-payment-msg",decision==="verified"?"تم التحقق من الدفعة وربطها بالسجل المالي الرسمي.":"تم رفض إثبات الدفع مع حفظ السبب وإشعار العضو.","success");
+  await loadPaymentWorkflow();await loadFinance();
+ }catch(err){message("dues-payment-msg","تعذرت مراجعة الدفعة: "+(err.message||"خطأ غير معروف"),"error")}
+}
+\nasync function refreshAll(){
  message("m-message","جارٍ تحديث بيانات التسيير…");
  try{
-  if(canFinance()){await loadYears();await loadFinance();}
+  if(canFinance()){await loadYears();await loadFinance();await loadPaymentWorkflow();}
   if(canViewActivities())await loadActivities();if(canViewEquipment())await loadEquipment();if(canViewMeetings()){await loadMeetings();await loadFoundingRoster();}
   message("m-message","تم تحديث الوحدات المتاحة لهذا الحساب.","success");
  }catch(e){message("m-message","تعذر تحميل بعض البيانات: "+(e.message||"خطأ غير معروف"),"error")}
@@ -351,7 +409,24 @@ function bind(){
   if(!f.elements.attendees_count.value.trim()&&v.meeting_attendees.trim())f.elements.attendees_count.value=String(v.meeting_attendees.trim().split("\n").filter(Boolean).length);
   message("meetings-msg","تم تكوين مسودة قابلة للتحرير. راجع الوقائع والأسماء والنصاب والقرارات قبل الحفظ أو الاعتماد.","success");
  };
- $("decision-source-meeting").addEventListener("change",suggestDecisionFromMeeting);
+
+ $("dues-payment-form").addEventListener("submit",async e=>{
+  e.preventDefault();if(!canFinance()){message("dues-payment-msg","هذه العملية متاحة للرئيس وأمين المال فقط.","error");return}
+  const v=values(e.currentTarget),amount=Number(v.amount);
+  if(!v.obligation_id||!Number.isFinite(amount)||amount<=0){message("dues-payment-msg","اختر استحقاقًا وأدخل مبلغًا صحيحًا.","error");return}
+  if(!confirm("ستُسجل الدفعة بانتظار التحقق فقط، ولن تُحتسب إيرادًا رسميًا قبل مراجعة الإيصال. هل تريد المتابعة؟"))return;
+  const btn=$("dues-payment-save");btn.disabled=true;
+  try{
+   const {data,error}=await sb.rpc("record_membership_dues_payment",{p_obligation_id:v.obligation_id,p_amount:amount,p_payment_date:v.payment_date,p_payment_method:v.payment_method,p_receipt_reference:v.receipt_reference||null});
+   if(error)throw error;
+   message("dues-payment-msg","سُجلت الدفعة بانتظار التحقق. لم يُنشأ إيراد رسمي بعد.","success");
+   e.currentTarget.reset();e.currentTarget.elements.payment_date.value=localToday();
+   await loadPaymentWorkflow();
+  }catch(err){message("dues-payment-msg","تعذر تسجيل الدفعة: "+(err.message||"خطأ غير معروف"),"error")}
+  finally{btn.disabled=false}
+ });
+ $("dues-payment-form").elements.payment_date.value=localToday();
+\n $("decision-source-meeting").addEventListener("change",suggestDecisionFromMeeting);
  $("dues-generation-year").value=String(new Date().getFullYear());
  $("dues-generation-year").min="2025";
  $("dues-generation-year").max=String(new Date().getFullYear()+3);
