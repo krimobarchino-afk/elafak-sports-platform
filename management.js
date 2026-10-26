@@ -325,11 +325,24 @@ async function reviewDuesPayment(paymentId,decision){
 }
 \nasync function refreshAll(){
  message("m-message","جارٍ تحديث بيانات التسيير…");
- try{
-  if(canFinance()){await loadYears();await loadFinance();await loadPaymentWorkflow();}
-  if(canViewActivities())await loadActivities();if(canViewEquipment())await loadEquipment();if(canViewMeetings()){await loadMeetings();await loadFoundingRoster();}
+ const failures=[];
+ const run=async(label,task)=>{try{await task()}catch(e){failures.push(label+": "+(e?.message||"خطأ غير معروف"));console.error("[Elafak management] "+label,e)}};
+ if(canFinance()){
+  await run("السنة المالية",loadYears);
+  await run("السجل المالي",loadFinance);
+  await run("دفعات الاشتراك",loadPaymentWorkflow);
+ }
+ if(canViewActivities())await run("الأنشطة",loadActivities);
+ if(canViewEquipment())await run("المعدات",loadEquipment);
+ if(canViewMeetings()){
+  await run("الاجتماعات",loadMeetings);
+  await run("قائمة الجمعية العامة",loadFoundingRoster);
+ }
+ if(failures.length){
+  message("m-message","تم تحميل الوحدات التي تعمل، لكن تعذر تحميل: "+failures.join("؛ "),"error");
+ }else{
   message("m-message","تم تحديث الوحدات المتاحة لهذا الحساب.","success");
- }catch(e){message("m-message","تعذر تحميل بعض البيانات: "+(e.message||"خطأ غير معروف"),"error")}
+ }
 }
 async function saveForm(form,table,fields,roleCheck,msgId){
  form.addEventListener("submit",async e=>{
