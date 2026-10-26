@@ -7,7 +7,7 @@
 <title>فضاء تسيير جمعية الأفق</title>
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/management.js?v=20261026-role-classification" defer></script>
+<script src="/management.js?v=20261026-executive-roster" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -64,6 +64,7 @@
 <button data-pane="activities">الأنشطة</button>
 <button data-pane="equipment">المعدات</button>
 <button data-pane="meetings">الاجتماعات والمحاضر</button>
+<button data-pane="office-roster" id="tab-office-roster">التشكيلة الرسمية</button>
 <button data-pane="archive">الأرشيف والنسخ</button>
 </nav>
 <section class="m-pane" id="pane-overview">
@@ -180,6 +181,14 @@
 <form id="meeting-form" class="m-grid m-no-print"><input type="hidden" name="id"><label>عنوان الاجتماع<input name="title" required maxlength="180"></label><label>النوع<select name="meeting_type"><option value="executive">المكتب التنفيذي</option><option value="general_assembly">الجمعية العامة</option><option value="committee">لجنة</option><option value="technical">تقني</option><option value="other">أخرى</option></select></label><label>التاريخ<input name="meeting_date" type="date"></label><label>ساعة البداية<input name="meeting_start_time" type="time"></label><label>ساعة الرفع<input name="meeting_end_time" type="time"></label><label>المكان<input name="location" maxlength="180"></label><label>رئيس الاجتماع<input name="meeting_chair" maxlength="180" placeholder="الاسم والصفة"></label><label>عدد الحاضرين<input name="attendees_count" type="number" min="0" step="1"></label><label>ملاحظة النصاب<input name="quorum_note" maxlength="500"></label><label style="grid-column:1/-1">الحاضرون وصفاتهم (كل اسم في سطر)<textarea name="meeting_attendees" maxlength="5000" placeholder="01 — الاسم واللقب — الصفة"></textarea></label><label style="grid-column:1/-1">جدول الأعمال (كل نقطة في سطر)<textarea name="meeting_agenda" maxlength="5000" placeholder="1- ..."></textarea></label><label style="grid-column:1/-1">مجريات الاجتماع والمناقشات<textarea name="meeting_discussion" maxlength="5000"></textarea></label><label style="grid-column:1/-1">القرارات<textarea name="decisions" maxlength="5000"></textarea></label><label style="grid-column:1/-1">المرفقات والإشارات المرجعية<textarea name="meeting_attachments" maxlength="2000" placeholder="القوائم أو الوثائق المرفقة، إن وجدت"></textarea></label><label style="grid-column:1/-1">نص المحضر النهائي القابل للتحرير والطباعة<textarea name="minutes_text" maxlength="12000" placeholder="أنشئ مسودة من الحقول أعلاه ثم راجع النص وعدّله قبل الحفظ."></textarea></label><div class="m-actions"><button type="button" id="meeting-build-template" class="m-small">تكوين نص المحضر من الحقول</button><button type="submit" class="btn btn-dark">حفظ المسودة</button><button type="button" id="meeting-cancel" class="m-small">إلغاء التعديل</button></div></form><p id="meetings-msg" role="status"></p>
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>الاجتماع</th><th>النوع</th><th>التاريخ</th><th>المكان</th><th>الحضور</th><th>الحالة</th><th>القرارات/المحضر</th><th>إجراءات</th></tr></thead><tbody id="meeting-rows"></tbody></table></div>
 </div></section>
+<section class="m-pane" id="pane-office-roster" hidden>
+<div class="m-card" id="executive-roster-card">
+<div class="m-toolbar"><h2>التشكيلة الرسمية للمكتب التنفيذي</h2><span class="m-badge">سجل رسمي مستقل عن حسابات الدخول</span></div>
+<p class="m-note">هذا السجل يبيّن المناصب الستة للمكتب التنفيذي وأسماء شاغليها وفق المحاضر الرسمية. لا تُضاف حسابات مدير الموقع أو المدير التقني إلى هذه القائمة بسبب وظيفتهم. يقتصر تعديل الأسماء على الرئيس والأمين العام ومدير الموقع، ويجب أن يستند أي تغيير إلى محضر أو قرار رسمي. الخانات غير المثبتة تبقى فارغة حتى التحقق من الاسم.</p>
+<div class="m-tablewrap"><table class="m-table"><thead><tr><th>المنصب الرسمي</th><th>اسم شاغل المنصب</th><th>مرجع التوثيق / ملاحظة</th><th class="m-no-print">الإجراء</th></tr></thead><tbody id="executive-roster-rows"></tbody></table></div>
+<p id="executive-roster-msg" role="status"></p>
+</div>
+</section>
 <section class="m-pane" id="pane-archive" hidden>
 <div class="m-card"><h2>الأرشيف والنسخ الاحتياطي</h2><p class="m-note">أرشفة المحاضر والعمليات تتم في قاعدة البيانات. يمكن تنزيل نسخة JSON من السجلات التي يستطيع حسابك قراءتها، أو طباعة الصفحة/المحضر إلى PDF من المتصفح. النسخة لا تشمل كلمات المرور أو جلسات الدخول ولا تُعد نسخة كاملة من Supabase Storage.</p><div class="m-actions m-no-print"><button id="backup-json" class="btn btn-dark">تنزيل نسخة بيانات JSON</button><button id="print-page" class="m-small">طباعة / حفظ PDF</button><button id="audit-refresh" class="m-small">تحديث سجل العمليات</button></div><p id="archive-msg" role="status"></p><h3>سجل العمليات الإدارية</h3><div class="m-tablewrap"><table class="m-table"><thead><tr><th>الوقت</th><th>الوحدة</th><th>العملية</th><th>معرّف السجل</th><th>التفاصيل</th></tr></thead><tbody id="audit-rows"></tbody></table></div></div>
 </section>
