@@ -329,7 +329,8 @@ async function reviewDuesPayment(paymentId,decision){
   await loadPaymentWorkflow();await loadFinance();
  }catch(err){message("dues-payment-msg","تعذرت مراجعة الدفعة: "+(err.message||"خطأ غير معروف"),"error")}
 }
-\nasync function loadExecutiveRoster(){
+
+async function loadExecutiveRoster(){
  const {data,error}=await sb.from("executive_office_roster").select("id,position_key,position_label,full_name,notes,updated_at").order("position_key");
  if(error)throw error;
  const order=["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer"];
@@ -481,7 +482,8 @@ function bind(){
   finally{btn.disabled=false}
  });
  $("dues-payment-form").elements.payment_date.value=localToday();
-\n $("decision-source-meeting").addEventListener("change",suggestDecisionFromMeeting);
+
+ $("decision-source-meeting").addEventListener("change",suggestDecisionFromMeeting);
  $("dues-generation-year").value=String(new Date().getFullYear());
  $("dues-generation-year").min="2025";
  $("dues-generation-year").max=String(new Date().getFullYear()+3);
