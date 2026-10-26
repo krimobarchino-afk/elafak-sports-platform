@@ -50,6 +50,7 @@ function setupTabs(){
 }
 function applyPermissions(){
  $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
+ $("tab-join-requests").classList.toggle("m-hide",!roleIs("president","secretary_general"));
  $("founding-roster-card").classList.toggle("m-hide",!canViewMeetings());
  $("tab-office-roster").classList.toggle("m-hide",!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
  $("m-role").textContent=ROLE[profile.role]||profile.role;
@@ -365,6 +366,52 @@ async function loadExecutiveRoster(){
  });
  if(!executiveRoster.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد سجلات للتشكيلة الرسمية. راجع مدير الموقع.");td.colSpan=4;body.append(tr)}
 }
+
+const JOIN_STATUS={pending:"قيد المراجعة",needs_information:"استكمال معلومات",approved:"مقبول مبدئيًا",declined:"مرفوض"};
+const JOIN_INTERESTS={paragliding:"الطيران الشراعي",hiking:"المشي الجبلي",volunteering:"التطوع"};
+async function loadJoinRequests(){
+ if(!roleIs("president","secretary_general"))return;
+ const body=$("join-request-rows");if(!body)return;
+ body.replaceChildren();message("join-requests-msg","جارٍ تحميل طلبات الانخراط…");
+ const {data,error}=await sb.from("join_requests").select("id,request_ref,full_name,birth_date,municipality,phone,email,interests,experience,status,reviewer_note,created_at,is_test").order("created_at",{ascending:false});
+ if(error){message("join-requests-msg","تعذر تحميل الطلبات وفق صلاحيات هذا الحساب: "+error.message,"error");return}
+ for(const x of data||[]){
+  const tr=document.createElement("tr"),cell=v=>{const td=document.createElement("td");td.textContent=String(v??"—");tr.append(td);return td};
+  cell((x.request_ref||"—")+(x.is_test?" — تجريبي غير رسمي":""));
+  cell(x.created_at?new Date(x.created_at).toLocaleString("ar-DZ"):"—");
+  cell(x.full_name);cell(x.phone);cell(x.municipality);
+  cell((x.interests||[]).map(v=>JOIN_INTERESTS[v]||v).join("، ")||"—");
+  const statusCell=cell("");
+  const select=document.createElement("select");
+  const allowed=roleIs("secretary_general")?["pending","needs_information"]:["pending","needs_information","approved","declined"];
+  if(x.status&&!allowed.includes(x.status))allowed.unshift(x.status);
+  allowed.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=JOIN_STATUS[v]||v;select.append(o)});
+  select.value=x.status||"pending";
+  const editable=["pending","needs_information"].includes(x.status)||roleIs("president")&&["approved","declined"].includes(x.status);
+  select.disabled=!editable;statusCell.append(select);
+  const noteCell=cell("");const note=document.createElement("input");note.type="text";note.maxLength=1500;note.value=x.reviewer_note||"";note.disabled=!editable;note.setAttribute("aria-label","ملاحظة المراجعة");note.style.minWidth="180px";noteCell.append(note);
+  const actions=cell("");
+  if(editable){
+   const save=button(actions,"حفظ المراجعة");
+   save.onclick=async()=>{
+    if(select.value==="pending"){message("join-requests-msg","اختر نتيجة للمراجعة؛ لا تحفظ الطلب على «قيد المراجعة».","error");return}
+    save.disabled=true;
+    try{
+     const {data:updated,error:updateError}=await sb.from("join_requests").update({status:select.value,reviewer_note:note.value.trim()||null,reviewed_at:new Date().toISOString()}).eq("id",x.id).select("id");
+     if(updateError)throw updateError;
+     if(!updated||updated.length!==1)throw new Error("لم يتم تحديث الطلب؛ تحقق من صلاحيات الحساب وحالة الطلب.");
+     message("join-requests-msg","تم حفظ مراجعة الطلب "+x.request_ref+".","success");await loadJoinRequests();
+    }catch(e){message("join-requests-msg","تعذر حفظ المراجعة: "+(e.message||"خطأ غير معروف"),"error")}
+    finally{save.disabled=false}
+   };
+  }
+  tr.append(document.createElement("td"));
+  body.append(tr);
+ }
+ if(!(data||[]).length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=8;td.textContent="لا توجد طلبات انخراط حتى الآن.";tr.append(td);body.append(tr)}
+ message("join-requests-msg","عدد الطلبات: "+(data||[]).length+". القبول المبدئي لا يعني الانخراط النهائي أو إنشاء حساب.");
+}
+
 async function refreshAll(){
  message("m-message","جارٍ تحديث بيانات التسيير…");
  const failures=[];
@@ -374,6 +421,7 @@ async function refreshAll(){
   await run("السجل المالي",loadFinance);
   await run("دفعات الاشتراك",loadPaymentWorkflow);
  }
+ if(roleIs("president","secretary_general"))await run("طلبات الانخراط",loadJoinRequests);
  if(canViewActivities())await run("الأنشطة",loadActivities);
  if(canViewEquipment())await run("المعدات",loadEquipment);
  if(canViewMeetings()){
