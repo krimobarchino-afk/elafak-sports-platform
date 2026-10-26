@@ -10,7 +10,7 @@ const ACTTYPE={paragliding:"الطيران الشراعي",hiking:"المشي ا
 const ACTSTATUS={planned:"مبرمج",completed:"منجز",cancelled:"ملغى"};
 const CONDITION={new:"جديدة",good:"صالحة",needs_repair:"تحتاج إصلاحًا",out_of_service:"خارج الخدمة",retired:"مستبعدة"};
 const MEETTYPE={executive:"المكتب التنفيذي",general_assembly:"الجمعية العامة",committee:"لجنة",technical:"تقني",other:"أخرى"};
-let sb,profile,user,years=[],transactions=[],activities=[],equipment=[],meetings=[];
+let sb,profile,user,years=[],transactions=[],activities=[],equipment=[],meetings=[],executiveRoster=[];
 const fmt=n=>new Intl.NumberFormat('ar-DZ',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n||0))+" دج";
 const dateFmt=v=>v?new Date(v+"T12:00:00").toLocaleDateString("ar-DZ"):"غير محدد";
 function message(id,text,kind=""){const el=$(id);if(!el)return;el.textContent=text;el.className=kind?"m-msg "+kind:"m-msg";}
@@ -51,6 +51,7 @@ function setupTabs(){
 function applyPermissions(){
  $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
  $("founding-roster-card").classList.toggle("m-hide",!canViewMeetings());
+ $("tab-office-roster").classList.toggle("m-hide",!canViewMeetings());
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
  $("m-permissions").textContent="تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
@@ -328,7 +329,42 @@ async function reviewDuesPayment(paymentId,decision){
   await loadPaymentWorkflow();await loadFinance();
  }catch(err){message("dues-payment-msg","تعذرت مراجعة الدفعة: "+(err.message||"خطأ غير معروف"),"error")}
 }
-\nasync function refreshAll(){
+\nasync function loadExecutiveRoster(){
+ const {data,error}=await sb.from("executive_office_roster").select("id,position_key,position_label,full_name,notes,updated_at").order("position_key");
+ if(error)throw error;
+ const order=["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer"];
+ executiveRoster=(data||[]).sort((a,b)=>order.indexOf(a.position_key)-order.indexOf(b.position_key));
+ const body=$("executive-roster-rows");body.replaceChildren();
+ const canManage=roleIs("site_admin","president","secretary_general");
+ executiveRoster.forEach(item=>{
+  const tr=document.createElement("tr");safeCell(tr,item.position_label);
+  const nameTd=document.createElement("td");
+  if(canManage){
+   const input=document.createElement("input");input.type="text";input.maxLength=180;input.value=item.full_name||"";input.placeholder="اكتب الاسم كما ورد في المحضر";input.setAttribute("aria-label","اسم شاغل "+item.position_label);
+   input.style.cssText="box-sizing:border-box;width:100%;min-width:180px;padding:.55rem;border:1px solid #b9c9c0;border-radius:7px;font:inherit";
+   nameTd.append(input);item._nameInput=input;
+  }else{nameTd.textContent=item.full_name||"لم يُحدد بعد";}
+  tr.append(nameTd);safeCell(tr,item.notes||"—");
+  const box=rowActions(tr);
+  if(canManage){
+   button(box,"حفظ الاسم",async()=>{
+    const name=item._nameInput.value.trim();
+    if(name.length>180){message("executive-roster-msg","الاسم أطول من الحد المسموح.","error");return}
+    const saveButtons=box.querySelectorAll("button");saveButtons.forEach(b=>b.disabled=true);
+    try{
+     const {error}=await sb.from("executive_office_roster").update({full_name:name||null,updated_by:user.id,updated_at:new Date().toISOString()}).eq("id",item.id);
+     if(error)throw error;
+     message("executive-roster-msg","تم حفظ الاسم في سجل التشكيلة الرسمية. تأكد من وجود محضر أو قرار يثبت أي تغيير.","success");
+     await loadExecutiveRoster();
+    }catch(err){message("executive-roster-msg","تعذر حفظ الاسم: "+(err.message||"خطأ غير معروف"),"error")}
+    finally{saveButtons.forEach(b=>b.disabled=false)}
+   });
+  }else safeCellDummy(box,"عرض فقط");
+  body.append(tr);
+ });
+ if(!executiveRoster.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد سجلات للتشكيلة الرسمية. راجع مدير الموقع.");td.colSpan=4;body.append(tr)}
+}
+async function refreshAll(){
  message("m-message","جارٍ تحديث بيانات التسيير…");
  const failures=[];
  const run=async(label,task)=>{try{await task()}catch(e){failures.push(label+": "+(e?.message||"خطأ غير معروف"));console.error("[Elafak management] "+label,e)}};
@@ -342,6 +378,7 @@ async function reviewDuesPayment(paymentId,decision){
  if(canViewMeetings()){
   await run("الاجتماعات",loadMeetings);
   await run("قائمة الجمعية العامة",loadFoundingRoster);
+  await run("التشكيلة الرسمية للمكتب التنفيذي",loadExecutiveRoster);
  }
  if(failures.length){
   message("m-message","تم تحميل الوحدات التي تعمل، لكن تعذر تحميل: "+failures.join("؛ "),"error");
