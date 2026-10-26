@@ -86,7 +86,7 @@ Deno.serve(async (req: Request) => {
 
   const { data, error } = await admin.from("join_requests").insert({
     full_name, birth_date, municipality, phone, email, interests, experience, consent: true,
-    status: "pending", reviewer_note: null, reviewed_at: null,
+    status: "pending", reviewer_note: null, reviewed_at: null, is_test: true,
   }).select("request_ref").single();
 
   if (error || !data) {

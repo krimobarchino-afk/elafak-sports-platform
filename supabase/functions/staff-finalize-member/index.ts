@@ -38,11 +38,14 @@ Deno.serve(async (req: Request) => {
   if (!fileId) return out({ error: "معرّف ملف الانخراط مطلوب." }, 400);
 
   const { data: file, error: fileError } = await admin.from("join_request_file_submissions")
-    .select("id,request_id,status,payment_confirmed,final_approved_at,final_approved_by,join_requests!inner(id,request_ref,full_name,email,status)")
+    .select("id,request_id,status,payment_confirmed,final_approved_at,final_approved_by,join_requests!inner(id,request_ref,full_name,email,status,is_test)")
     .eq("id", fileId).maybeSingle();
   if (fileError || !file) return out({ error: "ملف الانخراط غير موجود." }, 404);
 
   const request = Array.isArray(file.join_requests) ? file.join_requests[0] : file.join_requests;
+  if (request?.is_test === true) {
+    return out({ error: "هذا الطلب موسوم كتجريبي، ولا يمكن إنشاء عضوية رسمية منه قبل تأكيده في المحادثة وتغيير تصنيفه إداريًا." }, 409);
+  }
   if (!request || request.status !== "approved") {
     return out({ error: "الطلب لم يحصل على القبول المبدئي من الرئيس." }, 409);
   }
