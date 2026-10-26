@@ -3,7 +3,7 @@
 const SUPABASE_URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
 const KEY="sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ";
 const $=id=>document.getElementById(id);
-const ROLE={site_admin:"مدير الموقع",president:"الرئيس",deputy_president:"نائب الرئيس",secretary_general:"الأمين العام",treasurer:"أمين المال",deputy_secretary_general:"نائب الأمين العام",deputy_treasurer:"نائب أمين المال",technical_director:"المدير التقني"};
+const ROLE={site_admin:"مدير الموقع — موظف إداري تقني",president:"الرئيس — عضو المكتب التنفيذي",deputy_president:"نائب الرئيس — عضو المكتب التنفيذي",secretary_general:"الأمين العام — عضو المكتب التنفيذي",treasurer:"أمين المال — عضو المكتب التنفيذي",deputy_secretary_general:"نائب الأمين العام — عضو المكتب التنفيذي",deputy_treasurer:"نائب أمين المال — عضو المكتب التنفيذي",technical_director:"المدير التقني — موظف/مسؤول تقني"};
 const TYPE={income:"إيراد",expense:"مصروف"};
 const PAY={bank:"البنك",cash:"نقدًا",transfer:"تحويل",other:"أخرى"};
 const ACTTYPE={paragliding:"الطيران الشراعي",hiking:"المشي الجبلي",training:"التكوين",volunteering:"التطوع",other:"أخرى"};
