@@ -304,7 +304,7 @@ async function loadPaymentWorkflow(){
   if(p.verification_status==="pending"){
    button(actions,"تأكيد الدفع",()=>reviewDuesPayment(p.id,"verified"),"");
    button(actions,"رفض مع تعليل",()=>reviewDuesPayment(p.id,"rejected"),"danger");
-  }else safeCell(tr,"—");
+  }
   body.append(tr);
  });
  if(!obligations.length){
