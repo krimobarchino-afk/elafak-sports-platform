@@ -263,7 +263,7 @@ function printMeeting(x){
  w.document.close();
 }
 async function loadAudit(showMessage=true){
- if(!roleIs("site_admin","president"))return;
+ if(!roleIs("president"))return;
  const body=$("audit-rows");body.replaceChildren();
  const {data,error}=await sb.from("audit_log").select("id,table_name,record_id,action,changed_at,details").order("changed_at",{ascending:false}).limit(150);
  if(error){if(showMessage)message("archive-msg","تعذر قراءة سجل العمليات: "+error.message,"error");return}
@@ -336,7 +336,7 @@ async function loadExecutiveRoster(){
  const order=["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer"];
  executiveRoster=(data||[]).sort((a,b)=>order.indexOf(a.position_key)-order.indexOf(b.position_key));
  const body=$("executive-roster-rows");body.replaceChildren();
- const canManage=roleIs("site_admin","president","secretary_general");
+ const canManage=roleIs("president","secretary_general");
  executiveRoster.forEach(item=>{
   const tr=document.createElement("tr");safeCell(tr,item.position_label);
   const nameTd=document.createElement("td");
