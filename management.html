@@ -79,6 +79,12 @@
 <div class="m-card"><div class="m-toolbar"><h2>السجل المالي الموحد</h2><div class="m-actions m-no-print"><button id="finance-export" class="m-small">تصدير CSV</button><button id="close-year" class="m-small">إقفال السنة المحددة</button></div></div>
 <p class="m-note">تُسجّل الإيرادات والمصروفات الفعلية فقط. مبالغ الدينار الجزائري بدقتين عشريتين. إقفال السنة يمنع تعديل عملياتها أو حذفها. لا يمكن تسجيل إيراد مصنّف كاشتراك أو رسوم انخراط قبل مصادقة الجمعية العامة.</p>
 <p class="m-note">حالة الاشتراكات: لا يوجد حاليًا مبلغ اشتراك سنوي معتمد ومفعّل في النظام. لا تُحصّل رسوم انخراط ولا تُغيّر أهلية الأعضاء بسبب رسوم غير مصادق عليها. عند صدور قرار صحيح من الجمعية العامة، يجب تسجيله وربطه بمحضر معتمد قبل تفعيل دورة الاشتراكات.</p>
+<div class="m-card m-no-print" id="dues-generation-card">
+<h3>إنشاء استحقاقات الاشتراك السنوي</h3>
+<p class="m-note">هذه العملية لا تعمل إلا عند وجود قاعدة اشتراك نشطة ناتجة عن قرار جمعية عامة معتمد. تنشئ استحقاقًا واحدًا لكل عضو نشط غير تجريبي، وتحافظ على أي استحقاق موجود، وتضيف إشعارًا شخصيًا للعضو. لا تُغيّر حالة العضوية أو أهلية التصويت تلقائيًا.</p>
+<div class="m-grid"><label>سنة الاستحقاق<input id="dues-generation-year" type="number" min="2025" max="2029" step="1" required></label><div class="m-actions" style="align-self:end"><button type="button" id="dues-generate-button" class="btn btn-dark">إنشاء الاستحقاقات</button></div></div>
+<p id="dues-generation-msg" role="status"></p>
+</div>
 <div class="m-grid"><label>السنة المالية<select id="finance-year"></select></label><label>الرصيد الافتتاحي<input id="finance-opening" readonly></label><label>مجموع الإيرادات<input id="finance-income" readonly></label><label>مجموع المصروفات<input id="finance-expense" readonly></label><label>الرصيد الختامي المحسوب<input id="finance-closing" readonly></label><label>حالة السنة<input id="finance-year-status" readonly></label></div>
 <form id="finance-form" class="m-grid m-no-print" style="margin-top:1.2rem">
 <input type="hidden" name="id">
