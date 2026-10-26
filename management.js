@@ -20,13 +20,13 @@ function rowActions(tr){const td=document.createElement("td"),box=document.creat
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
 function canWriteFinance(){return roleIs("president","treasurer");}
-function canViewActivities(){return roleIs("site_admin","president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
+function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
 function canViewEquipment(){return canViewActivities();}
 function canViewMeetings(){return canViewActivities();}
-function canEditActivities(){return roleIs("site_admin","president","technical_director");}
-function canEditEquipment(){return roleIs("site_admin","president","technical_director");}
-function canEditMeetings(){return roleIs("site_admin","president","secretary_general");}
-function canApprove(){return roleIs("site_admin","president");}
+function canEditActivities(){return roleIs("president","technical_director");}
+function canEditEquipment(){return roleIs("president","technical_director");}
+function canEditMeetings(){return roleIs("president","secretary_general");}
+function canApprove(){return roleIs("president");}
 function localToday(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
 function setForm(form,obj={}){form.reset();for(const [k,v] of Object.entries(obj)){const el=form.elements.namedItem(k);if(el)el.value=v??"";}if(form.elements.namedItem("id"))form.elements.namedItem("id").value=obj.id||"";}
 function values(form){const f=new FormData(form),o={};for(const [k,v] of f.entries())o[k]=typeof v==="string"?v.trim():v;return o;}
@@ -60,8 +60,8 @@ function applyPermissions(){
  $("decision-settings-form").classList.toggle("m-hide",!roleIs("president"));
  $("finance-form").classList.toggle("m-hide",!canFinance());
  $("close-year").classList.toggle("m-hide",!canApprove());
- $("backup-json").classList.toggle("m-hide",!roleIs("site_admin","president"));
- $("audit-refresh").classList.toggle("m-hide",!roleIs("site_admin","president"));
+ $("backup-json").classList.toggle("m-hide",!roleIs("president"));
+ $("audit-refresh").classList.toggle("m-hide",!roleIs("president"));
  $("finance-export").classList.toggle("m-hide",!canFinance());
  $("finance-year").closest("label").classList.toggle("m-hide",!canFinance());
  $("finance-opening").closest("label").classList.toggle("m-hide",!canFinance());
@@ -96,7 +96,7 @@ async function loadFinance(){
   const box=rowActions(tr);
   if(!fy?.is_closed&&canWriteFinance()){
    button(box,"تعديل",()=>{setForm($("finance-form"),x);$("finance-form").elements.transaction_date.value=x.transaction_date||localToday();message("finance-msg","تعديل العملية المحددة. احفظ لإتمام التعديل.");$("finance-form").scrollIntoView({behavior:"smooth",block:"center"});});
-   if(roleIs("site_admin","president"))button(box,"حذف",async()=>{if(!confirm("حذف هذه العملية المالية؟ سيُسجّل الحذف في سجل العمليات."))return;try{const {error}=await sb.from("finance_transactions").delete().eq("id",x.id);if(error)throw error;message("finance-msg","تم حذف العملية.","success");await loadFinance();await loadAudit(false)}catch(e){message("finance-msg","تعذر الحذف: "+e.message,"error")}},"danger");
+   if(roleIs("president"))button(box,"حذف",async()=>{if(!confirm("حذف هذه العملية المالية؟ سيُسجّل الحذف في سجل العمليات."))return;try{const {error}=await sb.from("finance_transactions").delete().eq("id",x.id);if(error)throw error;message("finance-msg","تم حذف العملية.","success");await loadFinance();await loadAudit(false)}catch(e){message("finance-msg","تعذر الحذف: "+e.message,"error")}},"danger");
   }else safeCellDummy(box,"سنة مغلقة");
   body.append(tr);
  });
@@ -109,7 +109,7 @@ async function loadActivities(){
  if(error)throw error;activities=data||[];$("stat-activities").textContent=activities.filter(x=>!x.is_test).length;
  const body=$("activity-rows");body.replaceChildren();
  activities.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.title+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,dateFmt(x.activity_date));safeCell(tr,x.location);safeCell(tr,ACTSTATUS[x.status]||x.status);safeCell(tr,x.leader);safeCell(tr,fmt(x.planned_budget));safeCell(tr,fmt(x.actual_budget));const box=rowActions(tr);
- if(canEditActivities()){button(box,"تعديل",()=>{setForm($("activity-form"),x);$("activity-form").scrollIntoView({behavior:"smooth",block:"center"})});if(roleIs("site_admin","president"))button(box,"حذف",async()=>{if(!confirm("حذف سجل النشاط؟"))return;try{const {error}=await sb.from("activities").delete().eq("id",x.id);if(error)throw error;await loadActivities();message("activities-msg","تم حذف النشاط.","success")}catch(e){message("activities-msg","تعذر الحذف: "+e.message,"error")}},"danger")}else safeCellDummy(box,"عرض فقط");body.append(tr)});
+ if(canEditActivities()){button(box,"تعديل",()=>{setForm($("activity-form"),x);$("activity-form").scrollIntoView({behavior:"smooth",block:"center"})});if(roleIs("president"))button(box,"حذف",async()=>{if(!confirm("حذف سجل النشاط؟"))return;try{const {error}=await sb.from("activities").delete().eq("id",x.id);if(error)throw error;await loadActivities();message("activities-msg","تم حذف النشاط.","success")}catch(e){message("activities-msg","تعذر الحذف: "+e.message,"error")}},"danger")}else safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!activities.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد أنشطة مسجلة.");td.colSpan=8;body.append(tr)}
 }
 async function loadEquipment(){
@@ -117,7 +117,7 @@ async function loadEquipment(){
  if(error)throw error;equipment=data||[];$("stat-equipment").textContent=equipment.filter(x=>!x.is_test).reduce((n,x)=>n+Number(x.quantity||0),0);
  const body=$("equipment-rows");body.replaceChildren();
  equipment.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.item_name+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,x.category);safeCell(tr,x.quantity);safeCell(tr,CONDITION[x.condition]||x.condition);safeCell(tr,x.serial_number);safeCell(tr,x.storage_location);const box=rowActions(tr);
- if(canEditEquipment()){button(box,"تعديل",()=>{setForm($("equipment-form"),x);$("equipment-form").scrollIntoView({behavior:"smooth",block:"center"})});if(roleIs("site_admin","president"))button(box,"حذف",async()=>{if(!confirm("حذف هذه المعدة من سجل الجرد؟"))return;try{const {error}=await sb.from("equipment").delete().eq("id",x.id);if(error)throw error;await loadEquipment();message("equipment-msg","تم حذف المعدة.","success")}catch(e){message("equipment-msg","تعذر الحذف: "+e.message,"error")}},"danger")}else safeCellDummy(box,"عرض فقط");body.append(tr)});
+ if(canEditEquipment()){button(box,"تعديل",()=>{setForm($("equipment-form"),x);$("equipment-form").scrollIntoView({behavior:"smooth",block:"center"})});if(roleIs("president"))button(box,"حذف",async()=>{if(!confirm("حذف هذه المعدة من سجل الجرد؟"))return;try{const {error}=await sb.from("equipment").delete().eq("id",x.id);if(error)throw error;await loadEquipment();message("equipment-msg","تم حذف المعدة.","success")}catch(e){message("equipment-msg","تعذر الحذف: "+e.message,"error")}},"danger")}else safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!equipment.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد معدات مسجلة. أدخل الجرد بعد التحقق الفعلي.");td.colSpan=7;body.append(tr)}
 }
 function suggestDecisionFromMeeting(){
@@ -539,6 +539,7 @@ function bind(){
 async function enter(){
  profile=await profileLoad();
  if(!profile){hide("m-app",true);hide("m-login",false);message("m-login-msg","تعذر التحقق من صلاحية الحساب. راجع مدير الموقع.","error");return}
+ if(profile.role==="site_admin"){window.location.replace("/staff.html?entry=site_admin");return}
  hide("m-login",true);hide("m-app",false);applyPermissions();await refreshAll();
 }
 addEventListener("DOMContentLoaded",()=>{
