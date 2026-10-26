@@ -405,10 +405,9 @@ async function loadJoinRequests(){
     finally{save.disabled=false}
    };
   }
-  tr.append(document.createElement("td"));
   body.append(tr);
  }
- if(!(data||[]).length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=8;td.textContent="لا توجد طلبات انخراط حتى الآن.";tr.append(td);body.append(tr)}
+ if(!(data||[]).length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=9;td.textContent="لا توجد طلبات انخراط حتى الآن.";tr.append(td);body.append(tr)}
  message("join-requests-msg","عدد الطلبات: "+(data||[]).length+". القبول المبدئي لا يعني الانخراط النهائي أو إنشاء حساب.");
 }
 
