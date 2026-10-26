@@ -434,7 +434,7 @@ function downloadJSON(filename,data){
 async function backup(){
  message("archive-msg","جارٍ تجهيز نسخة بيانات قابلة للتنزيل…");
  const backup={association:"جمعية الأفق الولائية للرياضات الجوية والجبلية",exported_at:new Date().toISOString(),note:"تتضمن الجداول التي يستطيع الحساب الحالي قراءتها فقط؛ لا تشمل بيانات Auth السرية أو ملفات التخزين الخاصة.",tables:{}};
- const tables=["financial_years","finance_transactions","association_settings","activities","equipment","meetings","join_requests","members","founding_member_roster","staff_profiles","audit_log"];
+ const tables=["financial_years","finance_transactions","association_settings","activities","equipment","meetings","join_requests","members","founding_member_roster","executive_office_roster","staff_profiles","audit_log"];
  for(const t of tables){
   try{const {data,error}=await sb.from(t).select("*").limit(10000);if(error)throw error;backup.tables[t]=data||[];}
   catch(e){backup.tables[t]={not_exported:true,reason:e.message||"غير متاح وفق صلاحيات الحساب"};}
