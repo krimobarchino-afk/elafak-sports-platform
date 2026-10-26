@@ -50,6 +50,7 @@ function applyPermissions(){
  $("m-welcome").textContent="مرحبًا، "+profile.username;
  $("m-permissions").textContent="تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
  $("tab-finance").classList.toggle("m-hide",!canFinance());
+ $("dues-generation-card").classList.toggle("m-hide",!canFinance());
  $("finance-form").classList.toggle("m-hide",!canFinance());
  $("close-year").classList.toggle("m-hide",!canApprove());
  $("backup-json").classList.toggle("m-hide",!roleIs("site_admin","president"));
@@ -350,6 +351,23 @@ function bind(){
   message("meetings-msg","تم تكوين مسودة قابلة للتحرير. راجع الوقائع والأسماء والنصاب والقرارات قبل الحفظ أو الاعتماد.","success");
  };
  $("decision-source-meeting").addEventListener("change",suggestDecisionFromMeeting);
+ $("dues-generation-year").value=String(new Date().getFullYear());
+ $("dues-generation-year").min="2025";
+ $("dues-generation-year").max=String(new Date().getFullYear()+3);
+ $("dues-generate-button").addEventListener("click",async()=>{
+  if(!canFinance()){message("dues-generation-msg","هذه العملية متاحة للرئيس وأمين المال فقط.","error");return}
+  const year=Number($("dues-generation-year").value);
+  if(!Number.isInteger(year)||year<2025||year>new Date().getFullYear()+3){message("dues-generation-msg","اختر سنة ضمن النطاق المسموح.","error");return}
+  if(!confirm("سيتم إنشاء استحقاقات السنة "+year+" للأعضاء النشطين المسجلين فقط، إذا وجدت قاعدة اشتراك معتمدة ونشطة. لن تُغيّر حالة العضوية. هل تريد المتابعة؟"))return;
+  const btn=$("dues-generate-button");btn.disabled=true;
+  try{
+   const {data,error}=await sb.rpc("generate_membership_dues_for_year",{p_year:year});
+   if(error)throw error;
+   const created=Number(data?.obligations_created||0), notices=Number(data?.notifications_created||0);
+   message("dues-generation-msg","اكتملت العملية للسنة "+year+". استحقاقات جديدة: "+created+"؛ إشعارات شخصية: "+notices+". لم تتغير حالات العضوية أو أهلية التصويت.","success");
+  }catch(err){message("dues-generation-msg","لم تُنشأ الاستحقاقات: "+(err.message||"لا توجد قاعدة اشتراك معتمدة ونشطة أو لا يملك الحساب الصلاحية."),"error")}
+  finally{btn.disabled=false}
+ });
  $("ga-invite-source").addEventListener("change",suggestGAInvitationAgenda);
  $("ga-invitations-form").addEventListener("submit",async e=>{e.preventDefault();await createGAInvitationsAndPrint()});
  $("ga-invite-date").value=localToday();
