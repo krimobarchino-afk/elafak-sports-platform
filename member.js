@@ -14,6 +14,40 @@ async function activateEndpoint(){
  if(!response.ok)throw Error(data.error||"تعذر تفعيل الحساب.");
  return data;
 }
+const dueStatus={pending:"مستحق",paid:"مسدد",overdue:"متأخر",reminder_sent:"أُرسل تذكير",warned:"تم الإعذار",loss_review:"قيد المراجعة",closed:"مغلق"};
+const verifyStatus={pending:"بانتظار التحقق",verified:"تم التحقق",rejected:"مرفوض"};
+const fmtMoney=v=>new Intl.NumberFormat("ar-DZ",{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v||0))+" دج";
+function addCell(tr,value){const td=document.createElement("td");td.textContent=String(value??"—");tr.append(td);return td}
+function addEmpty(tbody,cols,text){tbody.replaceChildren();const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=cols;td.textContent=text;tr.append(td);tbody.append(tr)}
+async function loadMemberFinance(){
+ const msg=$("member-finance-msg"),duesBody=$("member-dues-rows"),paymentsBody=$("member-payment-rows"),notices=$("member-finance-notices");
+ msg.textContent="جارٍ تحميل ملفك المالي…";
+ try{
+  const {data:{user},error:userError}=await sb.auth.getUser();if(userError||!user)throw Error("انتهت الجلسة. سجل الدخول مجددًا.");
+  const {data:registry,error:registryError}=await sb.from("association_members").select("id").eq("user_id",user.id).maybeSingle();
+  if(registryError)throw registryError;
+  if(!registry){addEmpty(duesBody,4,"لم يُربط سجل مالي بحسابك بعد.");addEmpty(paymentsBody,4,"لا توجد مدفوعات معروضة.");notices.replaceChildren();msg.textContent="لم يُربط سجل العضو في سجل العضوية المالي بعد. يرجى التواصل مع المكتب.";return}
+  const {data:dues,error:duesError}=await sb.from("membership_dues_obligations").select("id,period_year,amount_due,due_date,status,status_note").eq("association_member_id",registry.id).order("period_year",{ascending:false});
+  if(duesError)throw duesError;
+  duesBody.replaceChildren();
+  if(!dues?.length)addEmpty(duesBody,4,"لا توجد استحقاقات مسجلة حاليًا.");
+  else for(const d of dues){const tr=document.createElement("tr");addCell(tr,d.period_year);addCell(tr,fmtMoney(d.amount_due));addCell(tr,d.due_date?new Date(d.due_date+"T12:00:00").toLocaleDateString("ar-DZ"):"—");addCell(tr,dueStatus[d.status]||d.status);duesBody.append(tr)}
+  paymentsBody.replaceChildren();
+  const ids=(dues||[]).map(d=>d.id);
+  if(ids.length){
+   const {data:payments,error:payError}=await sb.from("membership_dues_payments").select("obligation_id,amount,payment_date,receipt_reference,verification_status").in("obligation_id",ids).order("payment_date",{ascending:false});
+   if(payError)throw payError;
+   if(!payments?.length)addEmpty(paymentsBody,4,"لا توجد مدفوعات مسجلة.");
+   else for(const p of payments){const tr=document.createElement("tr");addCell(tr,p.payment_date?new Date(p.payment_date+"T12:00:00").toLocaleDateString("ar-DZ"):"—");addCell(tr,fmtMoney(p.amount));addCell(tr,verifyStatus[p.verification_status]||p.verification_status);addCell(tr,p.receipt_reference||"—");paymentsBody.append(tr)}
+  }else addEmpty(paymentsBody,4,"لا توجد مدفوعات مسجلة.");
+  const {data:ns,error:nsError}=await sb.from("member_notifications").select("title,body,notification_type,delivery_status,created_at,read_at").eq("association_member_id",registry.id).order("created_at",{ascending:false}).limit(30);
+  if(nsError)throw nsError;
+  notices.replaceChildren();
+  if(!ns?.length){const li=document.createElement("li");li.textContent="لا توجد إشعارات جديدة.";notices.append(li)}
+  else for(const n of ns){const li=document.createElement("li"),strong=document.createElement("strong"),p=document.createElement("p"),small=document.createElement("small");strong.textContent=n.title;p.textContent=n.body;small.textContent=(n.created_at?new Date(n.created_at).toLocaleString("ar-DZ"):"")+" — "+(n.read_at?"مقروء":"غير مقروء");li.append(strong,p,small);li.style.marginBottom="1rem";notices.append(li)}
+  msg.textContent="تم تحميل البيانات المالية المرتبطة بحسابك فقط.";
+ }catch(e){msg.textContent="تعذر تحميل الملف المالي: "+(e.message||"خطأ غير معروف");}
+}
 async function loadDashboard(){
  const {data:{user},error:userError}=await sb.auth.getUser();
  if(userError||!user){show("member-login");message("member-login-msg","يرجى تسجيل الدخول.","error");return}
@@ -27,6 +61,7 @@ async function loadDashboard(){
  $("member-membership-status").textContent=({active:"نشط",suspended:"معلّق",ended:"منتهٍ"})[member.membership_status]||member.membership_status||"—";
  $("member-account-status").textContent=({active:"مفعّل",disabled:"معطّل",invitation_pending:"بانتظار التفعيل",awaiting_account:"بانتظار إنشاء الحساب"})[member.account_status]||member.account_status||"—";
  $("member-start-date").textContent=member.membership_started_at?new Date(member.membership_started_at).toLocaleDateString("ar-DZ"):"—";
+ await loadMemberFinance();
 }
 addEventListener("DOMContentLoaded",async()=>{
  if(!window.supabase){message("member-login-msg","تعذر تحميل خدمة الدخول.","error");return}
@@ -53,6 +88,7 @@ addEventListener("DOMContentLoaded",async()=>{
   }catch(err){message("member-activate-msg",err.message||"تعذر تفعيل الحساب. حاول مجددًا.","error")}
   finally{button.disabled=false}
  };
+ $("member-finance-refresh").onclick=()=>loadMemberFinance();
  $("member-logout").onclick=async()=>{await sb.auth.signOut();show("member-login");$("member-login-form").reset();message("member-login-msg","تم تسجيل الخروج.","success")};
  const {data:{session}}=await sb.auth.getSession();
  if(session){
