@@ -6,7 +6,7 @@ const $=id=>document.getElementById(id);
 const ENTRY=new URLSearchParams(window.location.search).get("entry");
 const EXECUTIVE_ROLES=["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer"];
 function entryAllows(role){return ENTRY==="executive"?EXECUTIVE_ROLES.includes(role):ENTRY==="technical_director"?role==="technical_director":false;}
-const ROLE={site_admin:"مدير الموقع — موظف إداري تقني",president:"الرئيس — عضو المكتب التنفيذي",deputy_president:"نائب الرئيس — عضو المكتب التنفيذي",secretary_general:"الأمين العام — عضو المكتب التنفيذي",treasurer:"أمين المال — عضو المكتب التنفيذي",deputy_secretary_general:"نائب الأمين العام — عضو المكتب التنفيذي",deputy_treasurer:"نائب أمين المال — عضو المكتب التنفيذي",technical_director:"المدير التقني — موظف/مسؤول تقني",inspection_inspector:"مفتش الشباب والرياضة — حساب اطلاع وتفتيش"};
+const ROLE={site_admin:"مدير الموقع — مسؤول تقني",president:"الرئيس — عضو المكتب التنفيذي",deputy_president:"نائب الرئيس — عضو المكتب التنفيذي",secretary_general:"الأمين العام — عضو المكتب التنفيذي",treasurer:"أمين المال — عضو المكتب التنفيذي",deputy_secretary_general:"نائب الأمين العام — عضو المكتب التنفيذي",deputy_treasurer:"نائب أمين المال — عضو المكتب التنفيذي",technical_director:"المدير التقني الولائي",inspection_inspector:"مفتش الشباب والرياضة — حساب اطلاع وتفتيش"};
 const TYPE={income:"إيراد",expense:"مصروف"};
 const PAY={bank:"البنك",cash:"نقدًا",transfer:"تحويل",other:"أخرى"};
 const ACTTYPE={paragliding:"الطيران الشراعي",hiking:"المشي الجبلي",training:"التكوين",volunteering:"التطوع",other:"أخرى"};
