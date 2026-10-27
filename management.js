@@ -29,7 +29,7 @@ function canViewEquipment(){return roleIs("president","treasurer","inspection_in
 function canViewTasks(){return roleIs("president");}
 function canViewInspections(){return roleIs("inspection_inspector","president","secretary_general");}
 function canEditInspections(){return roleIs("inspection_inspector");}
-function canViewMeetings(){return canViewActivities();}
+function canViewMeetings(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
 function canEditActivities(){return roleIs("president","technical_director");}
 function canEditEquipment(){return roleIs("president","treasurer");}
 function canEditMeetings(){return roleIs("president","secretary_general");}
