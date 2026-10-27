@@ -4,26 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#123b32">
-<title>التسيير | جمعية الأفق</title>
+<title>بوابة التسيير | جمعية الأفق</title>
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="/management-portal.js?v=20261027-role-gate" defer></script>
 <style>
-.portal{max-width:1050px;margin:3rem auto;padding:1.25rem}
-.portal-intro{text-align:center;max-width:720px;margin:0 auto 2rem}
-.portal-intro h1{font-size:clamp(2rem,4vw,3.2rem);margin:.6rem 0}
+.portal{max-width:760px;margin:3rem auto;padding:1.25rem}
+.portal-intro{text-align:center;margin:0 auto 2rem}
+.portal-intro h1{font-size:clamp(2rem,4vw,3rem);margin:.6rem 0}
 .portal-intro p{line-height:1.9;color:#52665d}
-.portal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
-.portal-card{display:flex;flex-direction:column;gap:.8rem;min-height:210px;padding:1.4rem;border:1px solid #dce5df;border-radius:18px;background:#fff;color:#17352e;text-decoration:none;box-shadow:0 8px 24px #123b320b;transition:transform .18s,border-color .18s}
-.portal-card:hover{transform:translateY(-3px);border-color:#7e9d8b}
-.portal-card .num{font-size:.85rem;color:#638173;letter-spacing:.08em}
-.portal-card h2{font-size:1.25rem;margin:0}
-.portal-card p{line-height:1.7;color:#52665d;margin:0;flex:1}
-.portal-card .go{font-weight:700;color:#315d48}
-.portal-inspector{border-color:#8bb8a6;background:linear-gradient(145deg,#fff,#f2f8f4)}
-.portal-inspector .num{color:#0f766e}
-.portal-inspector .go{color:#0f766e}
-.portal-note{margin:1.5rem 0 0;padding:1rem;border-radius:12px;background:#f0f5ef;line-height:1.8;color:#41594e}
-@media(max-width:600px){.portal{margin:1.5rem auto;padding:1rem}.portal-card{min-height:175px}}
+.portal-panel{border:1px solid #dce5df;border-radius:18px;background:#fff;padding:1.4rem;box-shadow:0 8px 24px #123b320b}
+.portal-form{display:grid;gap:1rem}
+.portal-form label{display:grid;gap:.4rem;font-weight:600}
+.portal-form input{box-sizing:border-box;width:100%;padding:.8rem;border:1px solid #b9c9c0;border-radius:8px;font:inherit}
+.portal-msg{line-height:1.8;margin:.7rem 0}
+.portal-destination{margin-top:1rem;padding:1rem;border-radius:12px;background:#f0f5ef}
+.portal-destination h2{margin:.3rem 0}
+.portal-destination p{line-height:1.8}
+.portal-actions{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
+.portal-actions a{display:inline-block;text-decoration:none}
+.portal-note{margin-top:1.5rem;padding:1rem;border-radius:12px;background:#f0f5ef;line-height:1.8;color:#41594e}
+[hidden]{display:none!important}
+@media(max-width:600px){.portal{margin:1.5rem auto;padding:1rem}.portal-panel{padding:1rem}}
 </style>
 </head>
 <body>
@@ -32,15 +35,28 @@
 <nav class="nav" style="display:flex"><a href="/">العودة للموقع العام ←</a></nav>
 </div></header>
 <main class="portal">
-<div class="portal-intro"><span class="kicker">بوابة التسيير</span><h1>مرحبًا بكم في <em>فضاء التسيير</em></h1><p>اختر المسار المناسب لمهمتك. يتحدد الوصول الفعلي إلى البيانات والوظائف بحسب الحساب والصلاحيات المعتمدة، وليس بحسب المسار الذي تختاره هنا.</p></div>
-<div class="portal-grid">
-<a class="portal-card" href="/staff.html?entry=site_admin"><span class="num">01 / الإدارة التقنية</span><h2>دخول مدير الموقع</h2><p>إدارة الحسابات والإعدادات والمهام التقنية المخوّلة.</p><span class="go">الانتقال إلى الدخول ←</span></a>
-<a class="portal-card" href="/management.html?entry=executive"><span class="num">02 / الحوكمة</span><h2>دخول المكتب التنفيذي</h2><p>متابعة ملفات الجمعية وفق صلاحيات أعضاء المكتب التنفيذي.</p><span class="go">الانتقال إلى الدخول ←</span></a>
-<a class="portal-card" href="/management.html?entry=technical_director"><span class="num">03 / التأطير الرياضي</span><h2>دخول المدير التقني</h2><p>المسار المهني الخاص بالمهام التقنية والرياضية.</p><span class="go">الانتقال إلى الدخول ←</span></a>
-<a class="portal-card" href="/management.html?entry=general_assembly"><span class="num">04 / الهيئة العامة</span><h2>دخول الجمعية العامة</h2><p>هذا المدخل غير مفعّل حاليًا؛ لن يُسمح بالدخول منه حتى اعتماد صلاحيات الجمعية العامة ووظائفها.</p><span class="go">الانتقال إلى الدخول ←</span></a>
-<a class="portal-card portal-inspector" href="/inspection.html"><span class="num">05 / الرقابة والمتابعة</span><h2>دخول مفتش الشباب والرياضة</h2><p>مسار رقابي مستقل للاطلاع على تقارير التفتيش والمراقبة وإعداد التقارير ومتابعة الردود المرتبطة بها فقط.</p><span class="go">الدخول إلى فضاء التفتيش ←</span></a>
+<div class="portal-intro"><span class="kicker">دخول آمن</span><h1>بوابة <em>التسيير</em></h1><p>سجّل الدخول بحسابك؛ ستظهر لك نافذة واحدة فقط مطابقة للدور المسجل في حسابك. لا يمنح اختيار الرابط صلاحيات إضافية.</p></div>
+<section class="portal-panel" id="portal-login">
+<h2>تسجيل الدخول</h2>
+<form id="portal-login-form" class="portal-form">
+<label>اسم المستخدم<input name="username" autocomplete="username" minlength="3" maxlength="32" required></label>
+<label>كلمة المرور<input name="password" type="password" autocomplete="current-password" required></label>
+<div><button class="btn btn-dark" id="portal-login-btn" type="submit">التحقق من الحساب</button></div>
+</form>
+<p class="portal-msg" id="portal-login-msg" role="status"></p>
+</section>
+<section class="portal-panel" id="portal-destination" hidden>
+<span class="kicker">المسار المصرّح به</span>
+<h2 id="portal-role-title">مسارك</h2>
+<div class="portal-destination">
+<h2 id="portal-route-title"></h2>
+<p id="portal-route-description"></p>
+<div class="portal-actions"><a id="portal-route-link" class="btn btn-dark" href="#">فتح فضاء الحساب ←</a><button id="portal-logout" type="button" class="btn">تسجيل الخروج</button></div>
 </div>
-<p class="portal-note"><strong>تنبيه أمني:</strong> هذه الصفحة تنظّم مداخل التسيير فقط، ولا تمنح أي صلاحية إضافية. مدير الموقع والمدير التقني ليسا عضوين في المكتب التنفيذي بحكم منصبيهما الوظيفيين.</p>
+<p class="portal-msg" id="portal-route-msg" role="status"></p>
+</section>
+<p class="portal-note"><strong>حماية المسارات:</strong> المكتب التنفيذي، والمدير التقني، ومفتش الشباب والرياضة، ومدير الموقع لكل منهم مسار مستقل. لا يوجد حاليًا مسار دخول مفعّل للجمعية العامة أو لعضو الجمعية؛ لن يُنشأ دور غير معتمد.</p>
 </main>
 <footer><div class="container footer-main"><a class="brand" href="/"><img src="/icon.svg" alt="" width="40" height="40"><span><b>جمعية الأفق</b><small>للرياضات الجوية والجبلية</small></span></a><p>نرتقي بالرياضة، ونحترم الطبيعة، ونصنع الفرص.</p><a href="/">الموقع العام ↑</a></div><div class="container footer-bottom"><span>© 2026 جمعية الأفق الولائية للرياضات الجوية والجبلية</span><span>ولاية الشلف · الجزائر</span></div></footer>
-</body></html>
+</body>
+</html>
