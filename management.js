@@ -13,7 +13,7 @@ const ACTTYPE={paragliding:"الطيران الشراعي",hiking:"المشي ا
 const ACTSTATUS={planned:"مبرمج",completed:"منجز",cancelled:"ملغى"};
 const CONDITION={new:"جديدة",good:"صالحة",needs_repair:"تحتاج إصلاحًا",out_of_service:"خارج الخدمة",retired:"مستبعدة"};
 const MEETTYPE={executive:"المكتب التنفيذي",general_assembly:"الجمعية العامة",committee:"لجنة",technical:"تقني",other:"أخرى"};
-let sb,profile,user,years=[],transactions=[],activities=[],equipment=[],meetings=[],executiveRoster=[];
+let sb,profile,user,years=[],transactions=[],activities=[],equipment=[],meetings=[],executiveRoster=[],deliberationOutputs=[];
 const fmt=n=>new Intl.NumberFormat('ar-DZ',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n||0))+" دج";
 const dateFmt=v=>v?new Date(v+"T12:00:00").toLocaleDateString("ar-DZ"):"غير محدد";
 function message(id,text,kind=""){const el=$(id);if(!el)return;el.textContent=text;el.className=kind?"m-msg "+kind:"m-msg";}
@@ -94,6 +94,10 @@ function applyPermissions(){
  $("task-form").classList.toggle("m-hide",!canViewTasks());
  $("inspection-form").classList.toggle("m-hide",!canEditInspections());
  $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
+ $("delib-review-shortcut")?.classList.toggle("m-hide",!canApprove());
+ document.querySelectorAll("[data-delib-new]").forEach(el=>el.classList.toggle("m-hide",!canEditMeetings()));
+ document.querySelector('[data-delib-open="drafts"]')?.classList.toggle("m-hide",!canEditMeetings());
+ document.querySelector('[data-delib-open="meetings"]')?.classList.toggle("m-hide",!canEditMeetings());
  $("tab-join-requests").classList.toggle("m-hide",!roleIs("president","secretary_general"));
  $("join-request-review-card").classList.toggle("m-hide",!roleIs("president","secretary_general"));
  $("requirements-admin")?.classList.add("m-hide");
@@ -348,8 +352,117 @@ async function loadMeetings(){
  if(canApprove())button(box,"حذف",async()=>{if(!confirm("حذف سجل الاجتماع؟"))return;try{const {error}=await sb.from("meetings").delete().eq("id",x.id);if(error)throw error;await loadMeetings();message("meetings-msg","تم حذف الاجتماع.","success")}catch(e){message("meetings-msg","تعذر الحذف: "+e.message,"error")} },"danger");
  if(!canEditMeetings()&&!canApprove())safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!meetings.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد محاضر مسجلة بعد.");td.colSpan=8;body.append(tr)}
+
  refreshGAInvitationSources();
  await loadDecisionSettings();
+ await loadDeliberationOutputs();
+}
+const DELIB_TYPE_LABEL={report:"تقرير",minutes:"محضر",decision:"قرار"};
+const DELIB_STATUS_LABEL={draft:"مسودة",pending_review:"بانتظار مراجعة الرئيس",changes_requested:"مطلوب تعديل",approved:"معتمد ومقيد"};
+function delibRegisterNo(x){return x.register_year&&x.register_number?"م/"+x.register_year+"/"+String(x.register_number).padStart(4,"0"):"—";}
+function showDeliberationView(view){
+ const ids={home:"delib-home",register:"delib-register-view",drafts:"delib-drafts-view",review:"delib-review-view",form:"delib-form-view"};
+ for(const [key,id] of Object.entries(ids))$(id).hidden=key!==view;
+ $("legacy-meeting-tools").classList.toggle("m-hide",view!=="meetings");
+ if(view==="meetings")$("legacy-meeting-tools").scrollIntoView({behavior:"smooth",block:"start"});
+ else $("pane-meetings").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function populateDeliberationMeetingOptions(selected=""){
+ const select=$("delib-meeting-id");if(!select)return;
+ const keep=selected||select.value;select.replaceChildren();
+ const first=document.createElement("option");first.value="";first.textContent="اختر الاجتماع المصدر";select.append(first);
+ for(const m of meetings.filter(x=>!x.is_test)){
+  const o=document.createElement("option");o.value=m.id;o.textContent=(m.title||"اجتماع دون عنوان")+" — "+dateFmt(m.meeting_date)+" — "+(MEETTYPE[m.meeting_type]||m.meeting_type);select.append(o);
+ }
+ select.value=keep;
+}
+function startDeliberationDraft(type){
+ if(!canEditMeetings()){message("delib-home-message","إنشاء المخرجات متاح للرئيس والأمين العام فقط.","error");return}
+ const form=$("deliberation-form");setForm(form,{output_type:type,status:"draft"});
+ $("delib-form-heading").textContent="تحرير "+(DELIB_TYPE_LABEL[type]||"مخرج المداولة");
+ populateDeliberationMeetingOptions("");
+ $("delib-form-message").textContent="";
+ showDeliberationView("form");
+}
+function printDeliberationOutput(x){
+ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const meeting=meetings.find(m=>m.id===x.meeting_id);
+ const meta=[["رقم القيد",delibRegisterNo(x)],["نوع المخرج",DELIB_TYPE_LABEL[x.output_type]||x.output_type],["الاجتماع المصدر",meeting?.title||"غير محدد"],["تاريخ الاجتماع",dateFmt(meeting?.meeting_date)],["حالة الاعتماد",DELIB_STATUS_LABEL[x.status]||x.status],["تاريخ الاعتماد",x.reviewed_at?new Date(x.reviewed_at).toLocaleDateString("ar-DZ"):"—"]].map(([k,v])=>"<div><b>"+esc(k)+":</b> "+esc(v)+"</div>").join("");
+ const w=window.open("","_blank");if(!w){message("delib-home-message","اسمح بالنوافذ المنبثقة لطباعة المخرج.","error");return}
+ w.document.write('<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>'+esc(x.title)+'</title><style>body{font-family:Tahoma,Arial;max-width:850px;margin:30px auto;padding:20px;color:#17352e;line-height:2}h1,h2{text-align:center}h1{font-size:21px}h2{font-size:18px;border-bottom:1px solid #aaa;padding-bottom:10px}.meta{border:1px solid #aaa;padding:12px;margin:20px 0}.content{white-space:pre-wrap;min-height:30px}.sign{display:flex;justify-content:space-between;gap:30px;margin-top:70px}.sign span{min-width:40%}@media print{body{margin:0 auto;padding:10mm}}</style><h1>جمعية الأفق الولائية للرياضات الجوية والجبلية</h1><h2>'+esc(DELIB_TYPE_LABEL[x.output_type]||"مخرج المداولة")+'</h2><h2>'+esc(x.title)+'</h2><div class="meta">'+meta+'</div><div class="content">'+esc(x.content)+'</div><div class="sign"><span>إمضاء الرئيس: ____________________</span><span>إمضاء الأمين العام/المحرر: ____________________</span></div><script>window.onload=()=>window.print()<\/script></html>');
+ w.document.close();
+}
+function addDelibAction(box,label,fn,kind=""){const b=document.createElement("button");b.type="button";b.className="m-small"+(kind==="danger"?" danger":"");b.textContent=label;b.onclick=fn;box.append(b);return b;}
+function renderDeliberationTable(bodyId,rows,mode){
+ const body=$(bodyId);if(!body)return;body.replaceChildren();
+ const emptyText=mode==="register"?"لا توجد مخرجات معتمدة في سجل المداولة بعد.":mode==="review"?"لا توجد مخرجات بانتظار مراجعة الرئيس.":"لا توجد مسودات أو تعديلات مطلوبة لهذا الحساب.";
+ for(const x of rows){
+  const tr=document.createElement("tr"),meeting=meetings.find(m=>m.id===x.meeting_id),actions=document.createElement("td"),box=document.createElement("div");box.className="m-actions";actions.append(box);
+  const cell=v=>safeCell(tr,v);
+  if(mode==="register"){
+   cell(delibRegisterNo(x));cell(DELIB_TYPE_LABEL[x.output_type]||x.output_type);cell(x.title);cell(meeting?.title||"—");cell(dateFmt(meeting?.meeting_date));cell(x.reviewed_at?new Date(x.reviewed_at).toLocaleDateString("ar-DZ"):"—");
+   addDelibAction(box,"عرض / طباعة",()=>printDeliberationOutput(x));
+  }else if(mode==="review"){
+   cell(x.title);cell(DELIB_TYPE_LABEL[x.output_type]||x.output_type);cell(meeting?.title||"—");cell(x.submitted_at?new Date(x.submitted_at).toLocaleString("ar-DZ"):"—");cell(x.created_by===user?.id?"أنت":"الأمين العام/محرر آخر");
+   addDelibAction(box,"معاينة",()=>printDeliberationOutput(x));
+   addDelibAction(box,"اعتماد وقيد",async()=>{if(!confirm("سيُعتمد هذا المخرج رسميًا ويُمنح رقم قيد في سجل المداولة. هل راجعت النص والمرجع؟"))return;try{const {error}=await sb.rpc("review_deliberation_output",{p_output_id:x.id,p_action:"approve",p_note:null});if(error)throw error;await loadDeliberationOutputs();const approved=deliberationOutputs.find(y=>y.id===x.id);message("delib-home-message","تم اعتماد المخرج وقيده في سجل المداولة بالرقم "+delibRegisterNo(approved||x)+".","success")}catch(e){message("delib-home-message","تعذر الاعتماد: "+(e.message||"خطأ غير معروف"),"error")}});
+   addDelibAction(box,"طلب تعديل",async()=>{const note=prompt("اكتب ملاحظة واضحة بالتعديل المطلوب:");if(note===null)return;if(note.trim().length<3){message("delib-home-message","اكتب ملاحظة تعديل واضحة لا تقل عن ثلاثة أحرف.","error");return}try{const {error}=await sb.rpc("review_deliberation_output",{p_output_id:x.id,p_action:"request_changes",p_note:note.trim()});if(error)throw error;await loadDeliberationOutputs();message("delib-home-message","أعيد المخرج إلى المحرر مع ملاحظة التعديل.","success")}catch(e){message("delib-home-message","تعذر إرسال ملاحظة التعديل: "+(e.message||"خطأ غير معروف"),"error")}});
+  }else{
+   cell(x.title);cell(DELIB_TYPE_LABEL[x.output_type]||x.output_type);cell(meeting?.title||"—");
+   const status=cell("");const badge=document.createElement("span");badge.className="delib-status "+x.status;badge.textContent=DELIB_STATUS_LABEL[x.status]||x.status;status.append(badge);
+   cell(x.review_note||"—");
+   if(canEditMeetings()&&x.created_by===user?.id&&["draft","changes_requested"].includes(x.status)){
+    addDelibAction(box,"تحرير",()=>{setForm($("deliberation-form"),x);populateDeliberationMeetingOptions(x.meeting_id);$("delib-form-heading").textContent="تحرير "+(DELIB_TYPE_LABEL[x.output_type]||"المخرج");$("delib-form-message").textContent=x.review_note?"ملاحظة الرئيس: "+x.review_note:"";showDeliberationView("form")});
+    addDelibAction(box,"إرسال للمراجعة",async()=>{if(!confirm("إرسال هذه المسودة إلى الرئيس للمراجعة؟"))return;try{const {error}=await sb.rpc("submit_deliberation_output",{p_output_id:x.id});if(error)throw error;await loadDeliberationOutputs();message("delib-home-message","أُرسلت المسودة إلى الرئيس للمراجعة.","success")}catch(e){message("delib-home-message","تعذر إرسال المسودة: "+(e.message||"خطأ غير معروف"),"error")}});
+   }
+   if(x.status==="approved")addDelibAction(box,"عرض / طباعة",()=>printDeliberationOutput(x));
+  }
+  tr.append(actions);body.append(tr);
+ }
+ if(!rows.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=mode==="register"?7:6;td.textContent=emptyText;tr.append(td);body.append(tr)}
+}
+async function loadDeliberationOutputs(){
+ const {data,error}=await sb.from("deliberation_outputs").select("*").order("created_at",{ascending:false});
+ if(error)throw error;deliberationOutputs=data||[];
+ populateDeliberationMeetingOptions($("delib-meeting-id")?.value||"");
+ const drafts=deliberationOutputs.filter(x=>["draft","changes_requested"].includes(x.status)&&(x.created_by===user?.id||canApprove()));
+ const pending=deliberationOutputs.filter(x=>x.status==="pending_review");
+ const approved=deliberationOutputs.filter(x=>x.status==="approved").sort((a,b)=>(b.register_year||0)-(a.register_year||0)||(b.register_number||0)-(a.register_number||0));
+ $("delib-count-drafts").textContent=String(drafts.length);
+ $("delib-count-review").textContent=String(pending.length);
+ $("delib-count-approved").textContent=String(approved.length);
+ renderDeliberationTable("delib-register-rows",approved,"register");
+ renderDeliberationTable("delib-drafts-rows",drafts,"drafts");
+ renderDeliberationTable("delib-review-rows",canApprove()?pending:[],"review");
+}
+async function saveDeliberationDraft(sendForReview){
+ const form=$("deliberation-form");if(!form.reportValidity())return;
+ const v=values(form),id=v.id||null;
+ if(!canEditMeetings()){message("delib-form-message","لا تملك صلاحية تحرير مخرجات المداولة.","error");return}
+ if(!meetings.some(m=>m.id===v.meeting_id&&!m.is_test)){message("delib-form-message","اختر اجتماعًا رسميًا محفوظًا كمصدر للمخرج.","error");return}
+ const payload={meeting_id:v.meeting_id,output_type:v.output_type,title:v.title,content:v.content,updated_by:user.id,updated_at:new Date().toISOString()};
+ const buttons=[$("delib-save-draft"),$("delib-submit-review")];buttons.forEach(b=>b.disabled=true);
+ try{
+  let outputId=id;
+  if(id){
+   const {data,error}=await sb.from("deliberation_outputs").update(payload).eq("id",id).select("id").maybeSingle();
+   if(error)throw error;if(!data)throw Error("لم يتم تحديث المسودة؛ تحقق من صلاحية الحساب وحالة المخرج.");
+  }else{
+   payload.created_by=user.id;payload.status="draft";
+   const {data,error}=await sb.from("deliberation_outputs").insert(payload).select("id").single();
+   if(error)throw error;outputId=data.id;form.elements.id.value=outputId;form.elements.status.value="draft";
+  }
+  if(sendForReview){
+   const {error}=await sb.rpc("submit_deliberation_output",{p_output_id:outputId});if(error)throw error;
+   message("delib-form-message","تم حفظ المسودة وإرسالها إلى الرئيس للمراجعة. لم تُقيد رسميًا بعد.","success");
+   setForm(form,{output_type:v.output_type,status:"draft"});populateDeliberationMeetingOptions("");showDeliberationView("drafts");
+  }else{
+   message("delib-form-message","تم حفظ المسودة. لا تُقيد في سجل المداولة إلا بعد اعتماد الرئيس.","success");
+   form.elements.id.value=outputId;
+  }
+  await loadDeliberationOutputs();
+ }catch(e){message("delib-form-message","تعذر حفظ المخرج: "+(e.message||"خطأ غير معروف"),"error")}
+ finally{buttons.forEach(b=>b.disabled=false)}
 }
 function printMeeting(x){
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -585,6 +698,14 @@ function bind(){
  $("inspection-cancel").onclick=()=>{setForm($("inspection-form"));$("inspection-form").elements.inspection_date.value=localToday();$("inspection-form").elements.inspected_entity.value="جمعية الأفق الولائية للرياضات الجوية والجبلية"};
  $("inspection-form").addEventListener("submit",e=>{e.preventDefault();submitInspectionReport(e.currentTarget)});
  $("inspection-form").elements.inspection_date.value=localToday();
+
+ document.querySelectorAll("[data-delib-open]").forEach(el=>el.addEventListener("click",()=>showDeliberationView(el.dataset.delibOpen)));
+ document.querySelectorAll("[data-delib-home]").forEach(el=>el.addEventListener("click",()=>showDeliberationView("home")));
+ document.querySelectorAll("[data-delib-new]").forEach(el=>el.addEventListener("click",()=>startDeliberationDraft(el.dataset.delibNew)));
+ $("delib-save-draft").addEventListener("click",()=>saveDeliberationDraft(false));
+ $("delib-submit-review").addEventListener("click",()=>saveDeliberationDraft(true));
+ $("delib-cancel-form").addEventListener("click",()=>{setForm($("deliberation-form"),{output_type:"report",status:"draft"});showDeliberationView("home")});
+
  $("meeting-cancel").onclick=()=>{setForm($("meeting-form"));message("meetings-msg","تم إلغاء التعديل.")};
  $("meeting-build-template").onclick=()=>{
   const f=$("meeting-form"),v=values(f),type=MEETTYPE[v.meeting_type]||v.meeting_type;
