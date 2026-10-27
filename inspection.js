@@ -66,12 +66,12 @@ $("i-report-form").addEventListener("submit",async e=>{
  finally{btn.disabled=false}
 });
 $("i-refresh").addEventListener("click",refresh);
-$("i-logout").addEventListener("click",async()=>{await sb.auth.signOut();user=null;profile=null;showLogin();msg("i-login-msg","تم تسجيل الخروج.","success")});
+$("i-logout").addEventListener("click",async()=>{await sb.auth.signOut();window.location.replace("/")});
 addEventListener("DOMContentLoaded",async()=>{
  if(!window.supabase){msg("i-login-msg","تعذر تحميل خدمة الدخول. تحقق من اتصال الإنترنت.","error");return}
  sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:STORAGE_KEY}});
  $("i-report-form").elements.inspection_date.value=today();
- try{const {data:{session},error}=await sb.auth.getSession();if(error)throw error;if(session){try{await verifyInspector()}catch(err){showLogin();msg("i-login-msg",err.message||"تعذر التحقق من صلاحيات الحساب.","error")}}}
+ try{const {data:{session},error}=await sb.auth.getSession();if(error)throw error;if(session){try{await verifyInspector()}catch(err){await sb.auth.signOut();user=null;profile=null;showLogin();msg("i-login-msg",err.message||"تعذر التحقق من صلاحيات الحساب.","error")}}}
  catch(err){msg("i-login-msg","تعذر استعادة جلسة الدخول: "+(err.message||"خطأ غير معروف"),"error")}
 });
 })();
