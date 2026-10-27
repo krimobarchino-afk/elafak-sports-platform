@@ -1,1 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#0f766e"/><path d="M22 67c25-30 59-30 84 0-25-12-50-12-84 0z" fill="white"/><circle cx="64" cy="53" r="9" fill="white"/><path d="M34 82c20 8 40 8 60 0" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+<title id="title">شعار جمعية الأفق للرياضات الجوية والجبلية</title>
+<desc id="desc">شعار دائري ذهبي وأخضر يضم الجبل والطيران الشراعي والمتنزه والخيمة.</desc>
+<defs>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a0"/><stop offset=".5" stop-color="#e8bb42"/><stop offset="1" stop-color="#b77b1d"/></linearGradient>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#bde9e8"/><stop offset="1" stop-color="#5f9b81"/></linearGradient>
+ <linearGradient id="mountain" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e8c66d"/><stop offset=".45" stop-color="#8fae54"/><stop offset="1" stop-color="#315b39"/></linearGradient>
+ <clipPath id="scene"><circle cx="128" cy="128" r="82"/></clipPath>
+</defs>
+<circle cx="128" cy="128" r="125" fill="#07120e" stroke="url(#gold)" stroke-width="4"/>
+<circle cx="128" cy="128" r="111" fill="#0b2b20" stroke="#d5ad39" stroke-width="2"/>
+<circle cx="128" cy="128" r="91" fill="url(#sky)" stroke="#d5ad39" stroke-width="3"/>
+<g clip-path="url(#scene)">
+ <path d="M35 170 77 120 94 139 128 74 158 119 178 99 224 162 230 205 25 205Z" fill="url(#mountain)"/>
+ <path d="M128 74 112 108 127 101 137 119 149 111 158 133 170 125 184 151 224 183 230 205 25 205 45 170 77 145 94 153 112 127Z" fill="#416e42" opacity=".85"/>
+ <path d="M128 74 116 109 128 101 137 119 148 111 158 134 143 125 134 141 122 117 110 126Z" fill="#f4df9b"/>
+ <path d="M31 179 65 157 82 171 99 157 119 177 145 159 164 174 186 151 225 180 230 210 25 210Z" fill="#1d4930"/>
+ <g stroke="#d8ee86" stroke-width="1.5" fill="none" stroke-linecap="round">
+  <path d="M157 61 Q181 43 204 62 Q183 70 157 61Z" fill="#0c3b2c" stroke="#e8c34d" stroke-width="2"/>
+  <path d="M164 63 181 98 M174 64 183 99 M184 65 185 99 M194 64 187 99 M202 63 189 99"/>
+ </g>
+ <circle cx="186" cy="101" r="3" fill="#07120e"/>
+ <g transform="translate(72 126)" stroke="#07120e" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="0" cy="0" r="7" fill="#d9b75a" stroke-width="2"/>
+  <path d="M-8 -2 Q0 -14 10 -4 L8 0 -7 0Z" fill="#0a1b13" stroke-width="2"/>
+  <path d="M0 8 -3 31 8 46 M-2 17 -15 28 M-3 31 -13 49 M6 31 18 45" fill="none" stroke-width="7"/>
+  <path d="M-4 12 9 16 15 29" fill="none" stroke="#d9b75a" stroke-width="5"/>
+  <path d="M-14 50 -5 50 M15 46 23 46" fill="none" stroke="#e8c34d" stroke-width="3"/>
+  <path d="M-7 10 Q-17 13 -15 30 L-9 38 7 34 8 15Z" fill="#163c2b" stroke="#d9b75a" stroke-width="2"/>
+  <path d="M-14 28 -20 47" fill="none" stroke="#d9b75a" stroke-width="2"/>
+ </g>
+ <path d="M126 182 151 157 176 182Z" fill="#e5b84e" stroke="#102d20" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M151 157 151 182 126 182Z" fill="#f7dc86"/>
+ <path d="M151 157 151 182 176 182Z" fill="#bc8127"/>
+ <path d="M125 184 180 184" stroke="#07120e" stroke-width="4" stroke-linecap="round"/>
+ <g fill="#102d20"><path d="M41 184 51 164 61 184Z"/><path d="M54 188 66 165 78 188Z"/><path d="M190 183 201 161 212 183Z"/><path d="M205 188 216 168 227 188Z"/></g>
+</g>
+<g fill="url(#gold)">
+ <path d="M38 116 42 126 53 126 44 133 47 144 38 137 29 144 32 133 23 126 34 126Z"/>
+ <path d="M218 116 222 126 233 126 224 133 227 144 218 137 209 144 212 133 203 126 214 126Z"/>
+</g>
+<text x="128" y="36" text-anchor="middle" direction="rtl" unicode-bidi="plaintext" font-family="Tahoma,Arial,sans-serif" font-size="14" font-weight="700" fill="#f3d56d">جمعية الأفق الولائية</text>
+<text x="128" y="224" text-anchor="middle" direction="rtl" unicode-bidi="plaintext" font-family="Tahoma,Arial,sans-serif" font-size="10" font-weight="700" fill="#f3d56d">للرياضات الجوية والجبلية</text>
+<text x="128" y="238" text-anchor="middle" direction="rtl" unicode-bidi="plaintext" font-family="Tahoma,Arial,sans-serif" font-size="9" fill="#d9b75a">الشلف · الجزائر</text>
+</svg>
