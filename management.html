@@ -96,7 +96,7 @@
 <button data-pane="equipment" id="tab-equipment">سجل العتاد</button>
 <button data-pane="tasks" id="tab-tasks">المهام والتكليفات</button>
 <button data-pane="inspections" id="tab-inspections">التفتيش والمراقبة</button>
-<button data-pane="meetings">المداولات ومخرجاتها</button>
+<button data-pane="meetings">الاجتماعات والمحاضر والمداولة</button>
 <button data-pane="office-roster" id="tab-office-roster">التشكيلة الرسمية</button>
 <button data-pane="archive">الأرشيف والنسخ</button>
 </nav>
@@ -119,7 +119,7 @@
 <div class="m-card"><h2>تنبيهات التشغيل</h2><ul class="m-note"><li>رصيد 2025 الختامي المثبت: 405 دج؛ السنة مغلقة لحماية السجل.</li><li>رصيد 2026 الافتتاحي: 405 دج، وتُسجّل العمليات الجديدة بتاريخها الفعلي.</li><li>لا توجد معدات محمّلة مسبقًا؛ أدخل الجرد بعد التحقق الميداني.</li><li>لا توجد رسوم أو باقات انخراط مفعّلة أو مفترضة.</li><li>النسخ الاحتياطي من هذه الصفحة يصدر بيانات السجلات المسموح لحسابك بقراءتها، وليس نسخة كاملة من حسابات Supabase أو ملفات التخزين الخاصة.</li></ul></div>
 </section>
 <section class="m-pane" id="pane-finance" hidden>
-<div class="m-card"><div class="m-toolbar"><h2>السجل المالي الموحد</h2><div class="m-actions m-no-print"><button id="finance-export" class="m-small">تصدير CSV</button><button id="close-year" class="m-small">إقفال السنة المحددة</button></div></div>
+<div class="m-card"><div class="m-toolbar"><h2>السجل المحاسبي الرسمي</h2><div class="m-actions m-no-print"><button id="finance-export" class="m-small">تصدير CSV</button><button id="close-year" class="m-small">إقفال السنة المحددة</button></div></div>
 <p class="m-note">تُسجّل الإيرادات والمصروفات الفعلية فقط. مبالغ الدينار الجزائري بدقتين عشريتين. إقفال السنة يمنع تعديل عملياتها أو حذفها. لا يمكن تسجيل إيراد مصنّف كاشتراك أو رسوم انخراط قبل مصادقة الجمعية العامة.</p>
 <p class="m-note">حالة الاشتراكات: لا يوجد حاليًا مبلغ اشتراك سنوي معتمد ومفعّل في النظام. لا تُحصّل رسوم انخراط ولا تُغيّر أهلية الأعضاء بسبب رسوم غير مصادق عليها. عند صدور قرار صحيح من الجمعية العامة، يجب تسجيله وربطه بمحضر معتمد قبل تفعيل دورة الاشتراكات.</p>
 <div class="m-card m-no-print" id="dues-generation-card">
@@ -169,7 +169,7 @@
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>النشاط</th><th>التاريخ</th><th>المكان</th><th>الحالة</th><th>المسؤول</th><th>المخطط</th><th>الفعلي</th><th>إجراءات</th></tr></thead><tbody id="activity-rows"></tbody></table></div>
 </div></section>
 <section class="m-pane" id="pane-equipment" hidden>
-<div class="m-card"><div class="m-toolbar"><h2>سجل المعدات والجرد</h2><button id="equipment-export" class="m-small m-no-print">تصدير CSV</button></div>
+<div class="m-card"><div class="m-toolbar"><h2>سجل الجرد والعتاد</h2><button id="equipment-export" class="m-small m-no-print">تصدير CSV</button></div>
 <p class="m-note">لا تُضاف أي معدّة افتراضيًا. سجّل فقط الموجود فعليًا، مع حالة المعدة والكمية والرقم التسلسلي عند توفره.</p>
 <form id="equipment-form" class="m-grid m-no-print"><input type="hidden" name="id"><input type="hidden" name="draft_id"><label>اسم المعدة<input name="item_name" required maxlength="180"></label><label>الصنف<input name="category" maxlength="120" value="other"></label><label>الكمية<input name="quantity" type="number" min="0" step="1" value="1" required></label><label>الحالة<select name="condition"><option value="good">صالحة</option><option value="new">جديدة</option><option value="needs_repair">تحتاج إصلاحًا</option><option value="out_of_service">خارج الخدمة</option><option value="retired">مستبعدة</option></select></label><label>الرقم التسلسلي<input name="serial_number" maxlength="180"></label><label>تاريخ الاقتناء<input name="acquisition_date" type="date"></label><label>تكلفة الاقتناء (اختياري)<input name="acquisition_cost" type="number" min="0" step=".01"></label><label>مكان التخزين<input name="storage_location" maxlength="180"></label><label style="grid-column:1/-1">ملاحظات<textarea name="notes" maxlength="3000"></textarea></label><div class="m-actions"><button type="submit" class="btn btn-dark">حفظ مسودة العتاد</button><button type="button" id="equipment-cancel" class="m-small">إلغاء التعديل</button></div></form><p id="equipment-msg" role="status"></p>
 <div class="m-card" id="equipment-drafts-card"><div class="m-toolbar"><h3>مسودات الجرد وملاحظات الرئيس</h3><button id="equipment-drafts-refresh" class="m-small m-no-print" type="button">تحديث المسودات</button></div><p class="m-note">أمين المال يحرر مسودة الجرد، والرئيس يدوّن ملاحظة أو يعتمدها. لا يُحدّث سجل العتاد الرسمي إلا بعد الاعتماد.</p><div class="m-tablewrap"><table class="m-table"><thead><tr><th>العملية</th><th>المعدة</th><th>الحالة</th><th>ملاحظة الرئيس</th><th>تاريخ الإنشاء</th><th>الإجراء</th></tr></thead><tbody id="equipment-draft-rows"></tbody></table></div></div>
@@ -224,7 +224,7 @@
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>رقم التقرير</th><th>رد الجمعية</th><th>الإجراء التصحيحي</th><th>المسؤول</th><th>الأجل</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="inspection-followup-rows"></tbody></table></div>
 </div></section>
 <section class="m-pane" id="pane-meetings" hidden>
-<div class="m-card"><div class="m-toolbar"><h2>المداولات ومخرجاتها</h2><button id="meetings-export" class="m-small m-no-print">تصدير سجل الاجتماعات CSV</button></div>
+<div class="m-card"><div class="m-toolbar"><h2>الاجتماعات والمحاضر والمداولة</h2><button id="meetings-export" class="m-small m-no-print">تصدير سجل الاجتماعات CSV</button></div>
 <p class="m-note">فضاء عمل مشترك: ينشئ الأمين العام المسودة ويحفظها مباشرة، ويطلع عليها الرئيس في المكان نفسه. يستطيع الرئيس تدوين ملاحظة تظهر فورًا للأمين العام أو اعتماد المخرج. لا يوجد زر إرسال أو إحالة.</p>
 <div id="delib-home" class="delib-view">
  <div class="delib-home-grid">
@@ -246,7 +246,10 @@
 </div>
 <section id="delib-register-view" class="delib-view" hidden>
  <div class="delib-toolbar"><h3>سجل المداولة الرسمي</h3><button type="button" class="m-small" data-delib-home>العودة إلى خيارات المداولة</button></div>
- <p class="m-note">لا يظهر في هذا السجل إلا المخرج الذي اعتمده الرئيس. رقم القيد يولّد عند الاعتماد ولا يخصص للمسودات.</p>
+ <p class="m-note">يعرض هذا السجل الاجتماعات المعتمدة، ثم التقارير والمحاضر والقرارات التي اعتمدها الرئيس وقُيّدت برقم رسمي. حساب المفتش مخصص للقراءة والطباعة لهذه السجلات فقط ولا يعرض المسودات أو أدوات الإدخال.</p>
+ <h4>سجل الاجتماعات المعتمدة</h4>
+ <div class="m-tablewrap"><table class="m-table"><thead><tr><th>الاجتماع</th><th>النوع</th><th>التاريخ</th><th>المكان</th><th>عدد الحاضرين</th><th>القرارات / المحضر</th><th>الإجراء</th></tr></thead><tbody id="official-meeting-register-rows"></tbody></table></div>
+ <h4>سجل المحاضر والتقارير والقرارات المقيدة</h4>
  <div class="m-tablewrap"><table class="m-table"><thead><tr><th>رقم القيد</th><th>نوع المخرج</th><th>العنوان</th><th>الاجتماع المصدر</th><th>تاريخ الاجتماع</th><th>تاريخ الاعتماد</th><th>الإجراء</th></tr></thead><tbody id="delib-register-rows"></tbody></table></div>
 </section>
 <section id="delib-drafts-view" class="delib-view" hidden>
