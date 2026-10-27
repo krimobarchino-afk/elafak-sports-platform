@@ -233,26 +233,7 @@ create trigger audit_meetings after insert or update or delete on public.meeting
 drop trigger if exists audit_financial_years on public.financial_years;
 create trigger audit_financial_years after insert or update on public.financial_years for each row execute function private.write_management_audit();
 
--- Historical facts provided by the association: 1,000 DZD deposited and 595 DZD bank fees.
--- Dates are left null because the exact transaction dates were not supplied.
-insert into public.financial_years (fiscal_year, opening_balance, is_closed)
-values (2025, 0, false)
-on conflict (fiscal_year) do nothing;
-
-insert into public.finance_transactions
-  (fiscal_year, transaction_date, transaction_type, category, description, amount, payment_method, source_key)
-values
-  (2025, null, 'income', 'مساهمة/إيداع بنكي', 'إيداع موثق في تقرير السنة المالية 2025؛ التاريخ الدقيق غير متوفر', 1000.00, 'bank', 'historical-2025-bank-deposit'),
-  (2025, null, 'expense', 'رسوم بنكية', 'رسوم بنكية موثقة في تقرير السنة المالية 2025؛ التاريخ الدقيق غير متوفر', 595.00, 'bank', 'historical-2025-bank-fees')
-on conflict (source_key) do nothing;
-
-update public.financial_years
-set closing_balance = 405.00, is_closed = true, closed_at = coalesce(closed_at, now())
-where fiscal_year = 2025 and not is_closed;
-
-insert into public.financial_years (fiscal_year, opening_balance, is_closed)
-values (2026, 405.00, false)
-on conflict (fiscal_year) do nothing;
+-- Historical financial data is entered explicitly after deployment; do not preload ledger records.
 
 comment on table public.finance_transactions is 'Association financial ledger. No membership fees or packages are predefined.';
 comment on table public.activities is 'Association activities and planned/actual budgets; activity expenses should also be recorded in the financial ledger when actually incurred.';
