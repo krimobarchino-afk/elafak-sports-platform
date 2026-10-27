@@ -18,7 +18,13 @@ create table if not exists public.official_record_drafts (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint official_record_drafts_operation_target_check
-    check ((operation = 'create' and target_record_id is null) or (operation = 'update' and target_record_id is not null)),
+    check (
+      (operation = 'create' and (
+        (status <> 'approved' and target_record_id is null)
+        or (status = 'approved' and target_record_id is not null)
+      ))
+      or (operation = 'update' and target_record_id is not null)
+    ),
   constraint official_record_drafts_register_check
     check (
       (status = 'approved' and register_year is not null and register_number is not null and target_record_id is not null)
