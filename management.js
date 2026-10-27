@@ -66,6 +66,8 @@ function applyPermissions(){
   document.querySelectorAll(".m-tabs button").forEach(b=>b.classList.toggle("active",b.id==="tab-inspections"));
  }
  $("equipment-form").classList.toggle("m-hide",!canEditEquipment());
+ $("activity-form").classList.toggle("m-hide",!canEditActivities());
+ $("meeting-form").classList.toggle("m-hide",!canEditMeetings());
  $("task-form").classList.toggle("m-hide",!canViewTasks());
  $("inspection-form").classList.toggle("m-hide",!canEditInspections());
  $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
