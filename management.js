@@ -3,6 +3,9 @@
 const SUPABASE_URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
 const KEY="sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ";
 const $=id=>document.getElementById(id);
+const ENTRY=new URLSearchParams(window.location.search).get("entry");
+const EXECUTIVE_ROLES=["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer"];
+function entryAllows(role){return ENTRY==="executive"?EXECUTIVE_ROLES.includes(role):ENTRY==="technical_director"?role==="technical_director":false;}
 const ROLE={site_admin:"مدير الموقع — موظف إداري تقني",president:"الرئيس — عضو المكتب التنفيذي",deputy_president:"نائب الرئيس — عضو المكتب التنفيذي",secretary_general:"الأمين العام — عضو المكتب التنفيذي",treasurer:"أمين المال — عضو المكتب التنفيذي",deputy_secretary_general:"نائب الأمين العام — عضو المكتب التنفيذي",deputy_treasurer:"نائب أمين المال — عضو المكتب التنفيذي",technical_director:"المدير التقني — موظف/مسؤول تقني",inspection_inspector:"مفتش الشباب والرياضة — حساب اطلاع وتفتيش"};
 const TYPE={income:"إيراد",expense:"مصروف"};
 const PAY={bank:"البنك",cash:"نقدًا",transfer:"تحويل",other:"أخرى"};
@@ -39,10 +42,11 @@ async function profileLoad(){
  const {data:{user:u},error}=await sb.auth.getUser();
  if(error)throw new Error("تعذر قراءة جلسة الدخول: "+error.message);
  if(!u)throw new Error("لم يتم العثور على جلسة دخول. سجّل الدخول من واجهة التسيير.");
- const {data,error:e}=await sb.from("staff_profiles").select("user_id,username,role,is_active").eq("user_id",u.id).maybeSingle();
+ const {data,error:e}=await sb.from("staff_profiles").select("user_id,username,role,is_active,is_frozen").eq("user_id",u.id).maybeSingle();
  if(e)throw new Error("الجلسة موجودة لكن تعذر قراءة صلاحيات الحساب من staff_profiles: "+e.message);
  if(!data)throw new Error("الجلسة موجودة، لكن لا يوجد سجل مطابق لهذا المستخدم في staff_profiles.");
  if(!data.is_active)throw new Error("الحساب موجود لكنه غير مفعّل. راجع مدير الموقع.");
+ if(data.is_frozen)throw new Error("هذا الحساب مجمّد مؤقتًا. راجع مدير الموقع.");
  user=u;return data;
 }
 function setupTabs(){
@@ -540,7 +544,7 @@ async function backup(){
 function bind(){
  setupTabs();
  $("m-login-form").addEventListener("submit",async e=>{e.preventDefault();const f=new FormData(e.currentTarget),username=String(f.get("username")||"").trim().toLowerCase(),password=String(f.get("password")||""),b=$("m-login-btn");b.disabled=true;message("m-login-msg","جارٍ التحقق من الحساب…");try{const {error}=await sb.auth.signInWithPassword({email:username+"@staff.elafak.invalid",password});if(error)throw error;await enter()}catch(err){console.error("Management sign-in/profile error:",err);message("m-login-msg",err?.message||"تعذر الدخول. تحقق من بيانات الحساب.","error")}finally{b.disabled=false}});
- $("logout").onclick=async()=>{await sb.auth.signOut();profile=null;user=null;hide("m-app",true);hide("m-login",false);};
+ $("logout").onclick=async()=>{await sb.auth.signOut();window.location.replace("/")};
  $("m-refresh").onclick=refreshAll;
  $("join-refresh").onclick=()=>loadJoinRequests().catch(e=>message("workmsg",e.message,"error"));
  $("refresh-files").onclick=()=>loadJoinFiles().catch(e=>message("filesmsg",e.message,"error"));
@@ -646,12 +650,17 @@ function bind(){
  $("finance-form").elements.transaction_date.value=localToday();
 }
 async function enter(){
+ if(!ENTRY||ENTRY==="general_assembly"||ENTRY==="site_admin"){window.location.replace(ENTRY==="site_admin"?"/staff.html?entry=site_admin":"/management-portal.html");return}
  profile=await profileLoad();
  if(!profile){hide("m-app",true);hide("m-login",false);message("m-login-msg","تعذر التحقق من صلاحية الحساب. راجع مدير الموقع.","error");return}
- if(profile.role==="site_admin"){window.location.replace("/staff.html?entry=site_admin");return}
+ if(!entryAllows(profile.role)){
+  await sb.auth.signOut();profile=null;user=null;hide("m-app",true);hide("m-login",false);
+  message("m-login-msg","هذا الحساب غير مخوّل بالدخول من هذا المسار. تم إنهاء الجلسة؛ افتح بوابة التسيير لاختيار المسار الموافق لحسابك.","error");return;
+ }
  hide("m-login",true);hide("m-app",false);applyPermissions();await refreshAll();
 }
 addEventListener("DOMContentLoaded",()=>{
+ if(!ENTRY||ENTRY==="general_assembly"||ENTRY==="site_admin"){window.location.replace(ENTRY==="site_admin"?"/staff.html?entry=site_admin":"/management-portal.html");return}
  if(!window.supabase){message("m-login-msg","تعذر تحميل خدمة الدخول. تحقق من الاتصال بالإنترنت.");return}
  sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:"sb-lfubzohsbwdoiagfkpkt-auth-token"}});bind();
  sb.auth.getSession().then(({data,error})=>{if(error){message("m-login-msg","تعذر استعادة جلسة الدخول: "+error.message,"error");return}if(data.session){enter().catch(err=>{console.error("Management session restore failed:",err);hide("m-app",true);hide("m-login",false);message("m-login-msg",err?.message||"تم العثور على جلسة لكن تعذر تحميل لوحة الإدارة.","error")})}else{hide("m-app",true);hide("m-login",false)}});
