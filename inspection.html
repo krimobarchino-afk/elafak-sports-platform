@@ -9,7 +9,7 @@
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/inspection.js?v=20261027-inspector-role-guard" defer></script>
+<script src="/inspection.js?v=20261027-inspector-dashboard-1" defer></script>
 <style>
 .i-wrap{max-width:1180px;margin:1.5rem auto;padding:0 1rem 3rem;color:#17352e}
 .i-header{background:#123b32;color:#fff;padding:1.2rem 0}
@@ -35,6 +35,14 @@
 [hidden]{display:none!important}
 @media(max-width:620px){.i-wrap{padding:0 .7rem 2rem}.i-card{padding:.85rem}.i-table{min-width:720px}}
 @media print{.i-header,.i-login,.i-form-card,.i-actions,.i-no-print{display:none!important}.i-wrap{margin:0;padding:0}.i-card{border:0;break-inside:avoid}}
+.i-home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem}
+.i-home-card{display:flex;flex-direction:column;align-items:flex-start;gap:.65rem;min-height:135px;padding:1.1rem;border:1px solid #dce5df;border-radius:14px;background:#fff;color:#17352e;text-align:right;font:inherit;cursor:pointer}
+.i-home-card:hover{border-color:#9ab4a5;background:#f5f9f5}
+.i-home-card strong{font-size:1.05rem}
+.i-home-card span{font-size:.9rem;line-height:1.7;color:#52665d}
+.i-home-back{margin-bottom:1rem}
+[hidden]{display:none!important}
+@media(max-width:620px){.i-home-grid{grid-template-columns:1fr}.i-home-card{min-height:110px}}
 </style>
 </head>
 <body>
@@ -54,7 +62,15 @@
 </section>
 <section id="i-work" hidden>
 <div class="i-card"><div class="i-toolbar"><div><span class="i-pill">حساب رقابي مستقل</span><h2 style="margin:.55rem 0">تقارير التفتيش والمراقبة</h2><p class="i-note">التقارير المرسلة محفوظة كسجلات رسمية ولا يمكن تعديلها من الواجهة. ردود الجمعية وإجراءات التصحيح تظهر في قسم المتابعات أدناه.</p></div><button class="btn btn-dark i-no-print" id="i-refresh" type="button">تحديث التقارير</button></div><p class="i-msg" id="i-work-msg" role="status" aria-live="polite"></p></div>
-<div class="i-card i-form-card">
+<div class="i-card" id="i-dashboard">
+  <h2>الرئيسية الرقابية</h2><p class="i-note">اختر المهمة التي تريد تنفيذها. لن تُعرض جميع النماذج والجداول في وقت واحد.</p>
+  <div class="i-home-grid">
+   <button type="button" class="i-home-card" data-inspector-panel="i-panel-new"><strong>إعداد تقرير جديد</strong><span>تسجيل نتائج التفتيش والتوصيات وإرسال التقرير.</span></button>
+   <button type="button" class="i-home-card" data-inspector-panel="i-panel-reports"><strong>سجل التقارير</strong><span>الاطلاع على التقارير السابقة والجديدة وطباعتها.</span></button>
+   <button type="button" class="i-home-card" data-inspector-panel="i-panel-followups"><strong>المتابعات التصحيحية</strong><span>متابعة ردود الجمعية والإجراءات التصحيحية وآجالها.</span></button>
+  </div>
+ </div>
+ <div class="i-card i-form-card" id="i-panel-new" hidden><button type="button" class="btn i-home-back" data-inspector-home>← العودة إلى الرئيسية الرقابية</button>
 <h2>إعداد تقرير تفتيش جديد</h2>
 <p class="i-note">راجع البيانات قبل الإرسال. بعد الإرسال، يصبح التقرير غير قابل للتعديل حفاظًا على سلامة السجل.</p>
 <form id="i-report-form" class="i-grid">
@@ -68,11 +84,11 @@
 <div class="i-actions" style="grid-column:1/-1"><button class="btn btn-dark" id="i-submit-report" type="submit">حفظ وإرسال التقرير</button><button type="reset" class="btn">مسح الحقول</button></div>
 </form>
 </div>
-<div class="i-card">
+<div class="i-card" id="i-panel-reports" hidden><button type="button" class="btn i-home-back" data-inspector-home>← العودة إلى الرئيسية الرقابية</button>
 <div class="i-toolbar"><h2>سجل تقارير التفتيش السابقة والجديدة</h2><span class="i-pill" id="i-report-count">0 تقرير</span></div>
 <div class="i-tablewrap"><table class="i-table"><thead><tr><th>رقم التقرير</th><th>التاريخ</th><th>الجهة</th><th>الموضوع</th><th>الملاحظات والنتائج</th><th>التوصيات</th><th>الحالة</th><th>طباعة</th></tr></thead><tbody id="i-report-rows"></tbody></table></div>
 </div>
-<div class="i-card">
+<div class="i-card" id="i-panel-followups" hidden><button type="button" class="btn i-home-back" data-inspector-home>← العودة إلى الرئيسية الرقابية</button>
 <h2>ردود الجمعية والمتابعات التصحيحية</h2><p class="i-note">يعرض هذا القسم الردود والإجراءات التصحيحية المرتبطة بتقارير التفتيش، للمتابعة دون تعديل سجلات الجمعية الأصلية.</p>
 <div class="i-tablewrap"><table class="i-table"><thead><tr><th>رقم التقرير</th><th>رد الجمعية</th><th>الإجراء التصحيحي</th><th>المسؤول</th><th>الأجل</th><th>الحالة</th><th>آخر تحديث</th></tr></thead><tbody id="i-followup-rows"></tbody></table></div>
 </div>
