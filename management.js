@@ -728,7 +728,7 @@ async function saveForm(form,table,fields,roleCheck,msgId){
    payload.fiscal_year=Number($("finance-year").value);
    payload.amount=Number(payload.amount);
    const feeLikeIncome=payload.transaction_type==="income"&&/اشتراك|انخراط|رسوم\s*(?:العضوية|الانخراط)|membership\s*(?:fee|dues)|annual\s*(?:subscription|dues)/i.test(String(payload.category||"")+" "+String(payload.description||""));
-   if(feeLikeIncome){
+   if(!id&&feeLikeIncome){
     const {data:feeSetting,error:feeError}=await sb.from("association_settings").select("setting_value,source_meeting_id").eq("setting_key","annual_membership_fee_dzd").maybeSingle();
     const approvedAmount=Number(feeSetting?.setting_value?.amount||0);
     if(feeError||!approvedAmount){message(msgId,"لا يوجد مبلغ اشتراك سنوي معتمد ومربوط بمحضر جمعية عامة. سجّل القرار أولًا من قسم الاجتماعات والقرارات.","error");return}
