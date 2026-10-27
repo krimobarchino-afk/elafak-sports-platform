@@ -79,6 +79,12 @@ function renderDashboardCards(){
 }
 function applyPermissions(){
  $("tab-equipment").classList.toggle("m-hide",!canViewEquipment());
+ document.querySelector('.m-tabs button[data-pane="activities"]')?.classList.toggle("m-hide",!canViewActivities());
+ document.querySelector('.m-tabs button[data-pane="meetings"]')?.classList.toggle("m-hide",!canViewMeetings());
+ $("stat-balance").closest(".m-stat").classList.toggle("m-hide",!canViewFinance());
+ $("stat-activities").closest(".m-stat").classList.toggle("m-hide",!canViewActivities());
+ $("stat-equipment").closest(".m-stat").classList.toggle("m-hide",!canViewEquipment());
+ $("stat-meetings").closest(".m-stat").classList.toggle("m-hide",!canViewMeetings());
  $("tab-tasks").classList.toggle("m-hide",!canViewTasks());
  $("tab-inspections").classList.toggle("m-hide",!canViewInspections());
  document.querySelectorAll('.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.toggle("m-hide",!roleIs("president")));
