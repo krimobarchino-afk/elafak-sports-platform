@@ -2,6 +2,7 @@
 const SUPABASE_URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
 const KEY="sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ";
 const STORAGE_KEY="sb-lfubzohsbwdoiagfkpkt-auth-token";
+const ENTRY=new URLSearchParams(window.location.search).get("entry");
 const $=id=>document.getElementById(id);
 let sb,user=null,profile=null,reports=[],followups=[];
 const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")};
@@ -68,6 +69,7 @@ $("i-report-form").addEventListener("submit",async e=>{
 $("i-refresh").addEventListener("click",refresh);
 $("i-logout").addEventListener("click",async()=>{await sb.auth.signOut();window.location.replace("/")});
 addEventListener("DOMContentLoaded",async()=>{
+ if(ENTRY!=="inspection_inspector"){window.location.replace("/management-portal.html");return}
  if(!window.supabase){msg("i-login-msg","تعذر تحميل خدمة الدخول. تحقق من اتصال الإنترنت.","error");return}
  sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:STORAGE_KEY}});
  $("i-report-form").elements.inspection_date.value=today();
