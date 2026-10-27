@@ -22,16 +22,16 @@ function button(parent,label,fn,kind=""){const b=document.createElement("button"
 function rowActions(tr){const td=document.createElement("td"),box=document.createElement("div");box.className="m-actions";td.append(box);tr.append(td);return box;}
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
-function canViewFinance(){return roleIs("president","treasurer");}
+function canViewFinance(){return roleIs("president","treasurer","inspection_inspector");}
 function canWriteFinance(){return roleIs("treasurer");}
 function canCreateOfficialDraft(table){return table==="finance_transactions"||table==="equipment"?roleIs("treasurer"):table==="activities"?roleIs("technical_director"):false;}
 function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
-function canViewEquipment(){return roleIs("president","treasurer");}
+function canViewEquipment(){return roleIs("president","treasurer","inspection_inspector");}
 function canViewTasks(){return roleIs("president");}
 function canViewInspections(){return roleIs("inspection_inspector",...EXECUTIVE_ROLES);}
 function canEditInspections(){return roleIs("inspection_inspector");}
 function canEditInspectionFollowups(){return roleIs("president","secretary_general");}
-function canViewMeetings(){return roleIs("president","secretary_general","deputy_president","deputy_secretary_general","technical_director");}
+function canViewMeetings(){return roleIs("president","secretary_general","deputy_president","deputy_secretary_general","technical_director","inspection_inspector");}
 function canEditActivities(){return roleIs("technical_director");}
 function canEditEquipment(){return roleIs("treasurer");}
 function canEditMeetings(){return roleIs("president","secretary_general");}
@@ -106,13 +106,14 @@ function applyPermissions(){
  $("join-request-review-card").classList.toggle("m-hide",!roleIs("president","secretary_general"));
  $("requirements-admin")?.classList.add("m-hide");
  $("filepanel").classList.toggle("m-hide",!roleIs("president","secretary_general","treasurer"));
- $("founding-roster-card").classList.toggle("m-hide",!canViewMeetings());
- $("tab-office-roster").classList.toggle("m-hide",!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
+ $("founding-roster-card").classList.toggle("m-hide",roleIs("inspection_inspector")||!canViewMeetings());
+ $("tab-office-roster").classList.toggle("m-hide",roleIs("inspection_inspector")||!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
  $("m-permissions").textContent=roleIs("inspection_inspector")?"صلاحيات رقابية على السجلات التي يجيزها نطاق التفتيش، مع إنشاء تقارير التفتيش ومتابعتها. لا تتيح هذه الصلاحيات تحرير المسودات الإدارية أو اعتمادها أو إدارة حسابات المسيّرين.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
  $("tab-finance").classList.toggle("m-hide",!canViewFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
+ $("payment-workflow-card").classList.toggle("m-hide",!canFinance());
  $("decision-settings-form").classList.toggle("m-hide",!roleIs("president"));
  $("finance-form").classList.toggle("m-hide",!roleIs("treasurer"));
  $("finance-drafts-card").classList.toggle("m-hide",!roleIs("president","treasurer"));
@@ -129,6 +130,10 @@ function applyPermissions(){
  $("finance-expense").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-closing").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-year-status").closest("label").classList.toggle("m-hide",!canViewFinance());
+ $("delib-counts")?.classList.toggle("m-hide",roleIs("inspection_inspector"));
+ $("delib-notifications-heading")?.closest(".delib-notifications")?.classList.toggle("m-hide",roleIs("inspection_inspector"));
+ document.querySelectorAll("[data-delib-new]").forEach(el=>el.classList.toggle("m-hide",roleIs("inspection_inspector")||!roleIs("secretary_general")));
+ document.querySelectorAll("[data-delib-open=\"drafts\"],[data-delib-open=\"meetings\"]").forEach(el=>el.classList.toggle("m-hide",roleIs("inspection_inspector")||!canEditMeetings()));
  renderDashboardCards();
 }
 async function loadYears(){
@@ -142,7 +147,9 @@ async function loadYears(){
 async function loadFinance(){
  if(!canViewFinance())return;
  const year=Number($("finance-year").value||new Date().getFullYear()),fy=years.find(y=>Number(y.fiscal_year)===year);
- const {data,error}=await sb.from("finance_transactions").select("*").eq("fiscal_year",year).order("transaction_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
+ let financeQuery=sb.from("finance_transactions").select("*").eq("fiscal_year",year);
+ if(roleIs("inspection_inspector"))financeQuery=financeQuery.eq("is_test",false);
+ const {data,error}=await financeQuery.order("transaction_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
  if(error)throw error;transactions=data||[];
  const officialTransactions=transactions.filter(x=>!x.is_test);
  const inc=officialTransactions.filter(x=>x.transaction_type==="income").reduce((a,x)=>a+Number(x.amount),0);
@@ -176,7 +183,9 @@ async function loadActivities(){
 }
 async function loadEquipment(){
  if(!canViewEquipment())return;
- const {data,error}=await sb.from("equipment").select("*").order("item_name");
+ let equipmentQuery=sb.from("equipment").select("*");
+ if(roleIs("inspection_inspector"))equipmentQuery=equipmentQuery.eq("is_test",false);
+ const {data,error}=await equipmentQuery.order("item_name");
  if(error)throw error;equipment=data||[];$("stat-equipment").textContent=equipment.filter(x=>!x.is_test).reduce((n,x)=>n+Number(x.quantity||0),0);
  const body=$("equipment-rows");body.replaceChildren();
  equipment.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.item_name+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,x.category);safeCell(tr,x.quantity);safeCell(tr,CONDITION[x.condition]||x.condition);safeCell(tr,x.serial_number);safeCell(tr,x.storage_location);const box=rowActions(tr);
@@ -399,8 +408,33 @@ async function loadDecisionSettings(){
   status.textContent="قاعدة الاشتراك النشطة: "+fmt(data.annual_amount)+" دج سنويًا ابتداءً من "+dateFmt(data.applies_from)+" — المرجع: "+(meetings.find(m=>m.id===data.source_meeting_id)?.title||"محضر جمعية عامة")+". أي تغيير يتطلب قرارًا معتمدًا جديدًا.";
  }else status.textContent="لا توجد قاعدة اشتراك نشطة في سجل الاشتراكات. لن تُنشأ استحقاقات أو تُحصّل رسوم حتى توثيق قرار جمعية عامة معتمد.";
 }
+function renderOfficialMeetingRegister(){
+ const body=$("official-meeting-register-rows");
+ if(!body)return;
+ body.replaceChildren();
+ const officialMeetings=meetings.filter(x=>x.status==="approved"&&!x.is_test)
+  .sort((a,b)=>String(b.meeting_date||"").localeCompare(String(a.meeting_date||"")));
+ for(const x of officialMeetings){
+  const tr=document.createElement("tr");
+  safeCell(tr,x.title);
+  safeCell(tr,MEETTYPE[x.meeting_type]||x.meeting_type);
+  safeCell(tr,dateFmt(x.meeting_date));
+  safeCell(tr,x.location||"—");
+  safeCell(tr,x.attendees_count??"غير محدد");
+  safeCell(tr,[x.decisions,x.minutes_text].filter(Boolean).join(" — ")||"—");
+  const box=rowActions(tr);
+  button(box,"عرض / طباعة",()=>printMeeting(x));
+  body.append(tr);
+ }
+ if(!officialMeetings.length){
+  const tr=document.createElement("tr"),td=safeCell(tr,"لا توجد اجتماعات معتمدة ومقيدة في السجل بعد.");
+  td.colSpan=7;body.append(tr);
+ }
+}
 async function loadMeetings(){
- const {data,error}=await sb.from("meetings").select("*").order("meeting_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
+ let meetingQuery=sb.from("meetings").select("*");
+ if(roleIs("inspection_inspector"))meetingQuery=meetingQuery.eq("status","approved").eq("is_test",false);
+ const {data,error}=await meetingQuery.order("meeting_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
  if(error)throw error;meetings=data||[];$("stat-meetings").textContent=meetings.filter(x=>!x.is_test).length;
  const body=$("meeting-rows");body.replaceChildren();
  meetings.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.title+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,MEETTYPE[x.meeting_type]||x.meeting_type);safeCell(tr,dateFmt(x.meeting_date));safeCell(tr,x.location);safeCell(tr,x.attendees_count??"غير محدد");safeCell(tr,x.status==="approved"?"معتمد":"مسودة");safeCell(tr,[x.decisions,x.minutes_text].filter(Boolean).join(" — ")||"—");const box=rowActions(tr);
@@ -410,11 +444,13 @@ async function loadMeetings(){
  if(canApprove())button(box,"حذف",async()=>{if(!confirm("حذف سجل الاجتماع؟"))return;try{const {error}=await sb.from("meetings").delete().eq("id",x.id);if(error)throw error;await loadMeetings();message("meetings-msg","تم حذف الاجتماع.","success")}catch(e){message("meetings-msg","تعذر الحذف: "+e.message,"error")} },"danger");
  if(!canEditMeetings()&&!canApprove())safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!meetings.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد محاضر مسجلة بعد.");td.colSpan=8;body.append(tr)}
-
- refreshGAInvitationSources();
- await loadDecisionSettings();
+ renderOfficialMeetingRegister();
+ if(!roleIs("inspection_inspector")){
+  refreshGAInvitationSources();
+  await loadDecisionSettings();
+  await loadDeliberationNotifications();
+ }
  await loadDeliberationOutputs();
- await loadDeliberationNotifications();
 }
 const DELIB_TYPE_LABEL={report:"تقرير",minutes:"محضر",decision:"قرار"};
 const DELIB_STATUS_LABEL={draft:"مسودة مشتركة",changes_requested:"ملاحظة من الرئيس / تعديل مطلوب",approved:"معتمد ومقيد"};
@@ -506,7 +542,9 @@ function renderDeliberationTable(bodyId,rows,mode){
  if(!rows.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=mode==="register"?7:7;td.textContent=emptyText;tr.append(td);body.append(tr)}
 }
 async function loadDeliberationOutputs(){
- const {data,error}=await sb.from("deliberation_outputs").select("*").order("created_at",{ascending:false});
+ let outputQuery=sb.from("deliberation_outputs").select("*");
+ if(roleIs("inspection_inspector"))outputQuery=outputQuery.eq("status","approved").not("register_year","is",null).not("register_number","is",null);
+ const {data,error}=await outputQuery.order("created_at",{ascending:false});
  if(error)throw error;deliberationOutputs=data||[];
  populateDeliberationMeetingOptions($("delib-meeting-id")?.value||"");
  const shared=deliberationOutputs.filter(x=>x.status!=="approved");
@@ -701,16 +739,7 @@ const JOIN_FILE_STATUS={awaiting_upload:"بانتظار الإيداع",submitte
 async function fileEdge(body){const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw Error("انتهت الجلسة. يرجى تسجيل الدخول مجددًا.");const r=await fetch(SUPABASE_URL+"/functions/v1/staff-join-files",{method:"POST",headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+session.access_token},body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||"تعذر تنفيذ العملية");return d}
 async function finalizeMember(fileId){const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw Error("انتهت الجلسة. يرجى تسجيل الدخول مجددًا.");const r=await fetch(SUPABASE_URL+"/functions/v1/staff-finalize-member",{method:"POST",headers:{"Content-Type":"application/json","apikey":KEY,"Authorization":"Bearer "+session.access_token},body:JSON.stringify({file_id:fileId})});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||"تعذر الاعتماد النهائي.");return d}async function loadJoinFiles(){const body=$("filerows");if(!body)return;body.replaceChildren();message("filesmsg","جارٍ تحميل الملفات…");try{const result=await fileEdge({action:"list"}),files=Array.isArray(result.files)?result.files:[];for(const f of files){const tr=document.createElement("tr"),cell=v=>{const td=document.createElement("td");td.textContent=String(v??"—");tr.append(td);return td};cell(f.request_ref);cell(f.full_name);cell(f.submitted_at?new Date(f.submitted_at).toLocaleString("ar-DZ"):"—");cell(JOIN_FILE_STATUS[f.status]||f.status);cell(f.payment_confirmed?"مؤكد من أمين المال":"لم يؤكد بعد");cell(f.reviewer_note||"—");const actions=cell("");const btn=(label,fn)=>{const b=document.createElement("button");b.type="button";b.className="btn";b.style.margin=".2rem";b.textContent=label;b.onclick=fn;actions.append(b)};if(profile.role!=="treasurer")btn("عرض PDF (رابط مؤقت)",async()=>{const win=window.open("about:blank","_blank");try{const d=await fileEdge({action:"signed_url",id:f.id});if(win)win.location=d.url;else window.location.href=d.url}catch(e){if(win)win.close();message("filesmsg",e.message||"تعذر فتح الملف.","error")}});if(["president","secretary_general"].includes(profile.role)&&["submitted","in_review","needs_correction","ready_for_final_approval"].includes(f.status)){if(f.status==="submitted")btn("بدء المراجعة",async()=>{try{await fileEdge({action:"review",id:f.id,status:"in_review"});await loadJoinFiles()}catch(e){message("filesmsg",e.message,"error")}});if(["submitted","in_review","ready_for_final_approval"].includes(f.status))btn("طلب تصحيح",async()=>{const note=prompt("اكتب بوضوح ما يجب تصحيحه في الملف:");if(note===null)return;try{await fileEdge({action:"review",id:f.id,status:"needs_correction",note});await loadJoinFiles()}catch(e){message("filesmsg",e.message,"error")}});if(["submitted","in_review"].includes(f.status))btn("جاهز للاعتماد النهائي",async()=>{if(!confirm("هل راجعت الملف كاملًا وتأكدت من استيفاء الوثائق؟"))return;try{await fileEdge({action:"review",id:f.id,status:"ready_for_final_approval"});await loadJoinFiles()}catch(e){message("filesmsg",e.message,"error")}})}if(profile.role==="treasurer"&&!f.payment_confirmed&&["submitted","in_review","ready_for_final_approval"].includes(f.status))btn("تأكيد التسديد",async()=>{if(!confirm("لا تؤكد إلا بعد التحقق من التسديد في السجل المالي. هل تحققت من العملية فعلًا؟"))return;try{await fileEdge({action:"confirm_payment",id:f.id});await loadJoinFiles();message("filesmsg","تم تسجيل تأكيد التسديد بعد إقرارك بالتحقق المالي.","success")}catch(e){message("filesmsg",e.message,"error")}});if(profile.role==="president"&&((f.status==="ready_for_final_approval"&&f.payment_confirmed)||f.status==="finalized"))btn(f.status==="finalized"?"متابعة الاعتماد/الحساب":"اعتماد نهائي وإنشاء حساب",async()=>{const promptText=f.status==="finalized"?"الطلب معتمد نهائيًا. هل تريد متابعة إنشاء/ربط دعوة الحساب؟":"تأكد من مراجعة الملف كاملًا ومن تأكيد أمين المال للتسديد. سيُسجّل الاعتماد النهائي ثم يُنشأ سجل المنخرط وتُرسل دعوة الحساب إلى البريد المسجل. هل تريد المتابعة؟";if(!confirm(promptText))return;try{const result=await finalizeMember(f.id);await loadJoinFiles();message("filesmsg",result.message||"تمت معالجة الاعتماد النهائي.",result.account_created===false||result.account_linked===false?"error":"success")}catch(e){message("filesmsg",e.message||"تعذر الاعتماد النهائي.","error")}});body.append(tr)}if(!files.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=7;td.textContent="لا توجد ملفات مودعة حتى الآن.";tr.append(td);body.append(tr)}message("filesmsg","عدد الملفات: "+files.length+". لا يعني جاهزية الملف اعتمادًا نهائيًا أو إنشاء حساب.");}catch(e){message("filesmsg",e.message||"تعذر تحميل الملفات.","error")}}
 async function loadJoinRequests(){const body=$("requestrows");body.replaceChildren();const {data,error}=await sb.from("join_requests").select("id,request_ref,full_name,birth_date,municipality,phone,email,interests,experience,status,reviewer_note,created_at,is_test").order("created_at",{ascending:false});if(error){message("workmsg","تعذر تحميل الطلبات وفق صلاحيات هذا الحساب.","error");return}for(const x of data||[]){const tr=document.createElement("tr"),cell=v=>{const td=document.createElement("td");td.textContent=v||"—";tr.append(td);return td};cell(x.request_ref+(x.is_test?" — [تجريبي غير رسمي]":""));cell(x.created_at?new Date(x.created_at).toLocaleString("ar-DZ"):"—");cell(x.full_name);cell(x.birth_date||"—");cell(x.municipality);cell(x.phone);cell(x.email);cell((x.interests||[]).map(v=>JOIN_INTERESTS[v]||v).join("، "));cell(x.experience);const st=cell("");const sel=document.createElement("select"),allowed=profile.role==="secretary_general"?["pending","needs_information"]:["pending","needs_information","approved","declined"];const choices=[...allowed];if(x.status&&!choices.includes(x.status))choices.unshift(x.status);choices.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=JOIN_STATUS[v]||v;sel.append(o)});sel.value=x.status||"pending";const canReview=allowed.includes(x.status);if(!canReview)sel.disabled=true;st.append(sel);const nt=cell("");const note=document.createElement("input");note.value=x.reviewer_note||"";note.maxLength=1500;note.disabled=!canReview;nt.append(note);const bt=document.createElement("button");bt.className="btn";bt.textContent="حفظ";bt.disabled=!canReview;bt.onclick=async()=>{if(sel.value==="pending"){message("workmsg","يرجى اختيار نتيجة المراجعة قبل الحفظ: استكمال معلومات أو مقبول مبدئيًا أو مرفوض. تبقى حالة «قيد المراجعة» للطلبات التي لم تُراجع بعد.","error");return}bt.disabled=true;try{const {data,error}=await sb.from("join_requests").update({status:sel.value,reviewer_note:note.value.trim()||null,reviewed_at:new Date().toISOString()}).eq("id",x.id).select("id");if(error)throw error;if(!data||data.length!==1)throw Error("لم يتم تحديث الطلب. قد تكون صلاحيات الحساب غير كافية أو أن الطلب تغيّرت حالته.");message("workmsg","تم حفظ مراجعة "+x.request_ref+" بنجاح.","success");await requests()}catch(error){console.error("Join request review update failed:",error);message("workmsg","تعذر حفظ المراجعة: "+(error.message||"خطأ غير معروف") ,"error")}finally{bt.disabled=false}};cell("").append(bt);if(x.status==="approved"){const printBtn=document.createElement("button");printBtn.type="button";printBtn.className="btn";printBtn.style.marginTop=".35rem";printBtn.textContent="طباعة ورقة الاستكمال";printBtn.onclick=()=>{const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));const interests=(x.interests||[]).map(v=>JOIN_INTERESTS[v]||v).join("، ");const w=window.open("","_blank");if(!w){message("workmsg","يرجى السماح بالنوافذ المنبثقة لطباعة الورقة.","error");return}const doc='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ورقة استكمال ملف طلب الانخراط</title><style>body{font-family:Tahoma,Arial,sans-serif;color:#172f27;max-width:850px;margin:25px auto;padding:20px;line-height:1.8}h1,h2{text-align:center}h1{font-size:22px}h2{font-size:18px;border-bottom:1px solid #777;padding-bottom:8px}.sub{text-align:center;color:#555}.box{border:1px solid #777;padding:12px;margin:14px 0}.row{display:flex;gap:12px;flex-wrap:wrap;border-bottom:1px dotted #aaa;padding:7px 0}.label{font-weight:bold;min-width:145px}.check{margin:12px 0}.line{display:inline-block;min-width:180px;border-bottom:1px solid #777;height:1em}.note{font-size:13px;color:#444}.sign{display:flex;justify-content:space-between;margin-top:50px;gap:30px}.sign div{width:45%;border-top:1px solid #777;padding-top:8px}@media print{body{margin:0 auto;padding:10mm}button{display:none}}</style></head><body><h1>جمعية الأفق الولائية للرياضات الجوية والجبلية — الشلف</h1><h2>ورقة استكمال ملف طلب الانخراط</h2><p class="sub">قبول مبدئي — ليست إثباتًا للانخراط النهائي ولا تنشئ حسابًا في المنصة</p><div class="box"><div class="row"><span class="label">رقم مرجع الطلب:</span><span>'+esc(x.request_ref)+'</span></div><div class="row"><span class="label">الاسم الكامل:</span><span>'+esc(x.full_name)+'</span></div><div class="row"><span class="label">تاريخ الميلاد:</span><span>'+esc(x.birth_date||"غير مدخل")+'</span></div><div class="row"><span class="label">بلدية الإقامة:</span><span>'+esc(x.municipality)+'</span></div><div class="row"><span class="label">رقم الهاتف:</span><span>'+esc(x.phone)+'</span></div><div class="row"><span class="label">البريد الإلكتروني:</span><span>'+esc(x.email||"غير مدخل")+'</span></div><div class="row"><span class="label">مجالات الاهتمام:</span><span>'+esc(interests||"—")+'</span></div></div><h2>استكمال الملف</h2><p>يرجى التنسيق مع الجمعية لمعرفة الوثائق المطلوبة والمعتمدة قبل إيداع الملف. لا تعتبر البنود التالية قائمة إلزامية محددة مسبقًا؛ تُملأ وفق الإجراءات التي تعتمدها الجمعية.</p><div class="check">☐ الوثيقة المطلوبة: <span class="line"></span></div><div class="check">☐ الوثيقة المطلوبة: <span class="line"></span></div><div class="check">☐ الوثيقة المطلوبة: <span class="line"></span></div><div class="check">☐ وثائق أخرى: <span class="line"></span></div><div class="box"><b>ملاحظات استكمال الملف:</b><p style="min-height:55px"></p></div><p class="note">تنبيه: القبول المبدئي لا يمنح صفة المنخرط، ولا يثبت تسديد أي اشتراك، ولا يفعّل حسابًا. تُستكمل إجراءات الانخراط وتُثبت الموافقة النهائية وفق قرارات الجمعية ونظامها المعتمد، دون تطبيق رسوم أو باقات غير مصادق عليها.</p><div class="sign"><div>إمضاء صاحب الطلب</div><div>ملاحظة/تأشير الجمعية</div></div><p class="note">تاريخ تحرير الورقة: '+esc(new Date().toLocaleDateString("ar-DZ"))+'</p><script>window.onload=()=>window.print()<\/script></body></html>';w.document.open();w.document.write(doc);w.document.close()};tr.lastElementChild?.append(printBtn)}body.append(tr)}if(!data?.length)body.innerHTML='<tr><td colspan="12">لا توجد طلبات.</td></tr>'}
-async function refreshAll(){
- message("m-message","جارٍ تحديث بيانات التسيير…");
- const failures=[];
- const run=async(label,task)=>{try{await task()}catch(e){failures.push(label+": "+(e?.message||"خطأ غير معروف"));console.error("[Elafak management] "+label,e)}};
- if(canViewFinance()){
-  await run("السنة المالية",loadYears);
-  await run("السجل المالي",loadFinance);
-  await run("دفعات الاشتراك",loadPaymentWorkflow);
- }
- if(roleIs("president","treasurer"))await run("مسودات العمليات المالية",()=>loadOfficialRecordDrafts("finance_transaction"));
+[object Promise]
  if(roleIs("president","secretary_general")){await run("طلبات الانخراط",loadJoinRequests)}
  if(roleIs("president","secretary_general","treasurer"))await run("ملفات استكمال الانخراط",loadJoinFiles);
  if(canViewActivities())await run("الأنشطة",loadActivities);
@@ -719,11 +748,9 @@ async function refreshAll(){
  if(roleIs("president","treasurer"))await run("مسودات سجل العتاد",()=>loadOfficialRecordDrafts("equipment"));
  if(canViewTasks())await run("المهام والتكليفات",loadTasks);
  if(canViewInspections())await run("تقارير التفتيش",loadInspectionReports);
- if(canViewMeetings()){
-  await run("الاجتماعات",loadMeetings);
-  await run("قائمة الجمعية العامة",loadFoundingRoster);
- }
- if(canViewMeetings()||roleIs("treasurer","deputy_treasurer")){
+ if(canViewMeetings())await run("الاجتماعات والسجل الرسمي للمداولة",loadMeetings);
+ if(canViewMeetings()&&!roleIs("inspection_inspector"))await run("قائمة الجمعية العامة",loadFoundingRoster);
+ if((canViewMeetings()&&!roleIs("inspection_inspector"))||roleIs("treasurer","deputy_treasurer")){
   await run("التشكيلة الرسمية للمكتب التنفيذي",loadExecutiveRoster);
  }
  if(failures.length){
