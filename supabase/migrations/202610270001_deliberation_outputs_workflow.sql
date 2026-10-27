@@ -70,7 +70,7 @@ create policy "Authors edit unapproved deliberation drafts"
     and register_number is null
   );
 
-create or replace function private.submit_deliberation_output(p_output_id uuid)
+create or replace function public.submit_deliberation_output(p_output_id uuid)
 returns void
 language plpgsql
 security definer
@@ -113,7 +113,7 @@ begin
 end;
 $$;
 
-create or replace function private.review_deliberation_output(
+create or replace function public.review_deliberation_output(
   p_output_id uuid,
   p_action text,
   p_note text default null
@@ -187,7 +187,7 @@ begin
 end;
 $$;
 
-revoke all on function private.submit_deliberation_output(uuid) from public, anon;
-revoke all on function private.review_deliberation_output(uuid,text,text) from public, anon;
+revoke all on function public.submit_deliberation_output(uuid) from public, anon;
+revoke all on function public.review_deliberation_output(uuid,text,text) from public, anon;
 grant execute on function private.submit_deliberation_output(uuid) to authenticated;
 grant execute on function private.review_deliberation_output(uuid,text,text) to authenticated;
