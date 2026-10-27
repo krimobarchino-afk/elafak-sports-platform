@@ -21,7 +21,8 @@ declare
     'meetings',
     'membership_dues_obligations',
     'membership_dues_payments',
-    'membership_fee_rules'
+    'membership_fee_rules',
+    'membership_status_events'
   ];
 begin
   foreach v_table in array v_tables loop
