@@ -818,13 +818,14 @@ async function loadOfficialRecordDrafts(recordType){
    button(box,"اعتماد",async()=>{
     if(!confirm("اعتماد هذه المسودة وإدراجها في السجل الرسمي؟ لا يمكن تعديل سجل الاعتماد بعد ذلك."))return;
     try{
-     const {error}=await sb.from("official_record_drafts").update({status:"approved",review_note:null}).eq("id",d.id).select("id").single();
+     const {data:approved,error}=await sb.from("official_record_drafts").update({status:"approved",review_note:null}).eq("id",d.id).select("id,register_year,register_number,target_record_id").single();
      if(error)throw error;
      await loadOfficialRecordDrafts(recordType);
      if(recordType==="finance_transaction"){await loadYears();await loadFinance()}
      if(recordType==="equipment")await loadEquipment();
      if(recordType==="activity")await loadActivities();
-     message(msgId,"تم اعتماد المسودة وإدراجها في السجل الرسمي. احتُفظ بسجل الاعتماد.","success");
+     const register=approved?.register_year&&approved?.register_number?" رقم الاعتماد "+approved.register_year+"/"+String(approved.register_number).padStart(4,"0")+".":"";
+     message(msgId,"تم اعتماد المسودة وإدراجها في السجل الرسمي."+register+" احتُفظ بسجل الاعتماد.","success");
     }catch(e){message(msgId,"تعذر اعتماد المسودة: "+e.message,"error")}
    });
   }else if(d.created_by===user.id){
