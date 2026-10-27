@@ -695,10 +695,13 @@ async function refreshAll(){
   await run("السجل المالي",loadFinance);
   await run("دفعات الاشتراك",loadPaymentWorkflow);
  }
+ if(roleIs("president","treasurer"))await run("مسودات العمليات المالية",()=>loadOfficialRecordDrafts("finance_transaction"));
  if(roleIs("president","secretary_general")){await run("طلبات الانخراط",loadJoinRequests)}
  if(roleIs("president","secretary_general","treasurer"))await run("ملفات استكمال الانخراط",loadJoinFiles);
  if(canViewActivities())await run("الأنشطة",loadActivities);
+ if(roleIs("president","technical_director"))await run("مسودات الأنشطة",()=>loadOfficialRecordDrafts("activity"));
  if(canViewEquipment())await run("سجل العتاد",loadEquipment);
+ if(roleIs("president","treasurer"))await run("مسودات سجل العتاد",()=>loadOfficialRecordDrafts("equipment"));
  if(canViewTasks())await run("المهام والتكليفات",loadTasks);
  if(canViewInspections())await run("تقارير التفتيش",loadInspectionReports);
  if(canViewMeetings()){
@@ -973,6 +976,9 @@ function bind(){
  $("inspections-refresh").setAttribute("aria-label","تحديث تقارير التفتيش");
  $("meetings-export").onclick=()=>exportCSV("elafak-meetings.csv",meetings.filter(x=>!x.is_test));
  $("backup-json").onclick=backup;$("print-page").onclick=()=>window.print();$("audit-refresh").onclick=()=>loadAudit();
+ $("finance-drafts-refresh").onclick=()=>loadOfficialRecordDrafts("finance_transaction").catch(e=>message("finance-msg",e.message,"error"));
+ $("activity-drafts-refresh").onclick=()=>loadOfficialRecordDrafts("activity").catch(e=>message("activities-msg",e.message,"error"));
+ $("equipment-drafts-refresh").onclick=()=>loadOfficialRecordDrafts("equipment").catch(e=>message("equipment-msg",e.message,"error"));
  saveForm($("finance-form"),"finance_transactions",["transaction_date","transaction_type","category","amount","payment_method","reference","description"],()=>roleIs("treasurer"),"finance-msg");
  saveForm($("activity-form"),"activities",["title","activity_date","location","activity_type","status","leader","planned_budget","actual_budget","notes"],canEditActivities,"activities-msg");
  saveForm($("equipment-form"),"equipment",["item_name","category","quantity","condition","serial_number","acquisition_date","acquisition_cost","storage_location","notes"],canEditEquipment,"equipment-msg");
