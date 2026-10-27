@@ -22,10 +22,10 @@ function button(parent,label,fn,kind=""){const b=document.createElement("button"
 function rowActions(tr){const td=document.createElement("td"),box=document.createElement("div");box.className="m-actions";td.append(box);tr.append(td);return box;}
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
-function canViewFinance(){return roleIs("president","treasurer","inspection_inspector");}
+function canViewFinance(){return roleIs("president","treasurer");}
 function canWriteFinance(){return roleIs("president","treasurer");}
-function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director","inspection_inspector");}
-function canViewEquipment(){return roleIs("president","treasurer","inspection_inspector");}
+function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
+function canViewEquipment(){return roleIs("president","treasurer");}
 function canViewTasks(){return roleIs("president");}
 function canViewInspections(){return roleIs("inspection_inspector",...EXECUTIVE_ROLES);}
 function canEditInspections(){return roleIs("inspection_inspector");}
@@ -96,7 +96,7 @@ function applyPermissions(){
  $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
  $("delib-review-shortcut")?.classList.add("m-hide");
  document.querySelectorAll("[data-delib-secretary]").forEach(el=>el.classList.toggle("m-hide",!roleIs("secretary_general")));
- document.querySelectorAll("[data-delib-new]").forEach(el=>el.classList.toggle("m-hide",!canEditMeetings()));
+ document.querySelectorAll("[data-delib-new]").forEach(el=>el.classList.toggle("m-hide",!roleIs("secretary_general")));
  document.querySelector('[data-delib-open="drafts"]')?.classList.toggle("m-hide",!canEditMeetings());
  document.querySelector('[data-delib-open="meetings"]')?.classList.toggle("m-hide",!canEditMeetings());
  $("tab-join-requests").classList.toggle("m-hide",!roleIs("president","secretary_general"));
