@@ -72,6 +72,13 @@ addEventListener("DOMContentLoaded",async()=>{
  if(ENTRY!=="inspection_inspector"){window.location.replace("/management-portal.html");return}
  if(!window.supabase){msg("i-login-msg","تعذر تحميل خدمة الدخول. تحقق من اتصال الإنترنت.","error");return}
  sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:STORAGE_KEY}});
+ const dashboard=$("i-dashboard"),panels=["i-panel-new","i-panel-reports","i-panel-followups"];
+ document.querySelectorAll("[data-inspector-panel]").forEach(btn=>btn.addEventListener("click",()=>{
+  dashboard.hidden=true;panels.forEach(id=>$(id).hidden=id!==btn.dataset.inspectorPanel);
+ }));
+ document.querySelectorAll("[data-inspector-home]").forEach(btn=>btn.addEventListener("click",()=>{
+  panels.forEach(id=>$(id).hidden=true);dashboard.hidden=false;
+ }));
  $("i-report-form").elements.inspection_date.value=today();
  try{const {data:{session},error}=await sb.auth.getSession();if(error)throw error;if(session){try{await verifyInspector()}catch(err){await sb.auth.signOut();user=null;profile=null;showLogin();msg("i-login-msg",err.message||"تعذر التحقق من صلاحيات الحساب.","error")}}}
  catch(err){msg("i-login-msg","تعذر استعادة جلسة الدخول: "+(err.message||"خطأ غير معروف"),"error")}
