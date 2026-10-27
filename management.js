@@ -19,9 +19,10 @@ function button(parent,label,fn,kind=""){const b=document.createElement("button"
 function rowActions(tr){const td=document.createElement("td"),box=document.createElement("div");box.className="m-actions";td.append(box);tr.append(td);return box;}
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
+function canViewFinance(){return roleIs("president","treasurer","inspection_inspector");}
 function canWriteFinance(){return roleIs("president","treasurer");}
-function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
-function canViewEquipment(){return roleIs("president","treasurer");}
+function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director","inspection_inspector");}
+function canViewEquipment(){return roleIs("president","treasurer","inspection_inspector");}
 function canViewTasks(){return roleIs("president");}
 function canViewInspections(){return roleIs("inspection_inspector","president","secretary_general");}
 function canEditInspections(){return roleIs("inspection_inspector");}
@@ -58,8 +59,8 @@ function applyPermissions(){
  $("tab-tasks").classList.toggle("m-hide",!canViewTasks());
  $("tab-inspections").classList.toggle("m-hide",!canViewInspections());
  const inspectorOnly=roleIs("inspection_inspector");
- ["tab-overview","tab-join-requests","tab-finance","tab-office-roster"].forEach(id=>$(id)?.classList.toggle("m-hide",inspectorOnly));
- document.querySelectorAll('.m-tabs button[data-pane="activities"],.m-tabs button[data-pane="meetings"],.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.toggle("m-hide",inspectorOnly));
+ ["tab-overview","tab-join-requests"].forEach(id=>$(id)?.classList.toggle("m-hide",inspectorOnly));
+ document.querySelectorAll('.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.toggle("m-hide",inspectorOnly));
  if(inspectorOnly){
   document.querySelectorAll(".m-pane").forEach(p=>p.hidden=p.id!=="pane-inspections");
   document.querySelectorAll(".m-tabs button").forEach(b=>b.classList.toggle("active",b.id==="tab-inspections"));
@@ -77,23 +78,24 @@ function applyPermissions(){
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
  $("m-permissions").textContent="تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
- $("tab-finance").classList.toggle("m-hide",!canFinance());
+ $("tab-finance").classList.toggle("m-hide",!canViewFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
  $("decision-settings-form").classList.toggle("m-hide",!roleIs("president"));
  $("finance-form").classList.toggle("m-hide",!canFinance());
+ $("dues-payment-form")?.classList.toggle("m-hide",!canFinance());
  $("close-year").classList.toggle("m-hide",!canApprove());
  $("backup-json").classList.toggle("m-hide",!roleIs("president"));
  $("audit-refresh").classList.toggle("m-hide",!roleIs("president"));
  $("finance-export").classList.toggle("m-hide",!canFinance());
- $("finance-year").closest("label").classList.toggle("m-hide",!canFinance());
- $("finance-opening").closest("label").classList.toggle("m-hide",!canFinance());
- $("finance-income").closest("label").classList.toggle("m-hide",!canFinance());
- $("finance-expense").closest("label").classList.toggle("m-hide",!canFinance());
- $("finance-closing").closest("label").classList.toggle("m-hide",!canFinance());
- $("finance-year-status").closest("label").classList.toggle("m-hide",!canFinance());
+ $("finance-year").closest("label").classList.toggle("m-hide",!canViewFinance());
+ $("finance-opening").closest("label").classList.toggle("m-hide",!canViewFinance());
+ $("finance-income").closest("label").classList.toggle("m-hide",!canViewFinance());
+ $("finance-expense").closest("label").classList.toggle("m-hide",!canViewFinance());
+ $("finance-closing").closest("label").classList.toggle("m-hide",!canViewFinance());
+ $("finance-year-status").closest("label").classList.toggle("m-hide",!canViewFinance());
 }
 async function loadYears(){
- if(!canFinance())return;
+ if(!canViewFinance())return;
  const {data,error}=await sb.from("financial_years").select("*").order("fiscal_year",{ascending:false});
  if(error)throw error;years=data||[];
  const sel=$("finance-year"),prior=sel.value;sel.replaceChildren();
@@ -101,7 +103,7 @@ async function loadYears(){
  if(prior&&years.some(y=>String(y.fiscal_year)===prior))sel.value=prior;else if(years.length)sel.value=String(years[0].fiscal_year);
 }
 async function loadFinance(){
- if(!canFinance())return;
+ if(!canViewFinance())return;
  const year=Number($("finance-year").value||new Date().getFullYear()),fy=years.find(y=>Number(y.fiscal_year)===year);
  const {data,error}=await sb.from("finance_transactions").select("*").eq("fiscal_year",year).order("transaction_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
  if(error)throw error;transactions=data||[];
@@ -349,7 +351,7 @@ async function loadAudit(showMessage=true){
 }
 
 async function loadPaymentWorkflow(){
- if(!canFinance())return;
+ if(!canViewFinance())return;
  const form=$("dues-payment-form");if(!form)return;
  hide("payment-workflow-card",false);
  const [or, mr, pr]=await Promise.all([
@@ -383,7 +385,7 @@ async function loadPaymentWorkflow(){
   safeCell(tr,m?.full_name||"عضو غير مرتبط");safeCell(tr,o?.period_year||"—");safeCell(tr,fmt(p.amount));safeCell(tr,dateFmt(p.payment_date));safeCell(tr,PAY[p.payment_method]||p.payment_method||"أخرى");safeCell(tr,p.receipt_reference||"—");
   safeCell(tr,p.verification_status==="verified"?"مثبتة":p.verification_status==="rejected"?"مرفوضة":"بانتظار التحقق");
   const actions=rowActions(tr);
-  if(p.verification_status==="pending"){
+  if(p.verification_status==="pending"&&canFinance()){
    button(actions,"تأكيد الدفع",()=>reviewDuesPayment(p.id,"verified"),"");
    button(actions,"رفض مع تعليل",()=>reviewDuesPayment(p.id,"rejected"),"danger");
   }
@@ -452,7 +454,7 @@ async function refreshAll(){
  message("m-message","جارٍ تحديث بيانات التسيير…");
  const failures=[];
  const run=async(label,task)=>{try{await task()}catch(e){failures.push(label+": "+(e?.message||"خطأ غير معروف"));console.error("[Elafak management] "+label,e)}};
- if(canFinance()){
+ if(canViewFinance()){
   await run("السنة المالية",loadYears);
   await run("السجل المالي",loadFinance);
   await run("دفعات الاشتراك",loadPaymentWorkflow);
