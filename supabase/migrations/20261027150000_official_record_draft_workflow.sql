@@ -328,3 +328,16 @@ drop policy if exists "President deletes equipment" on public.equipment;
 drop policy if exists "Activity leads insert" on public.activities;
 drop policy if exists "Activity leads update" on public.activities;
 drop policy if exists "President deletes activities" on public.activities;
+
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+    and not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'official_record_drafts'
+    ) then
+    alter publication supabase_realtime add table public.official_record_drafts;
+  end if;
+end $$;
