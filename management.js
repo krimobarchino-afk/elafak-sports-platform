@@ -19,10 +19,10 @@ function button(parent,label,fn,kind=""){const b=document.createElement("button"
 function rowActions(tr){const td=document.createElement("td"),box=document.createElement("div");box.className="m-actions";td.append(box);tr.append(td);return box;}
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
-function canViewFinance(){return roleIs("president","treasurer","inspection_inspector");}
+function canViewFinance(){return roleIs("president","treasurer");}
 function canWriteFinance(){return roleIs("president","treasurer");}
-function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director","inspection_inspector");}
-function canViewEquipment(){return roleIs("president","treasurer","inspection_inspector");}
+function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
+function canViewEquipment(){return roleIs("president","treasurer");}
 function canViewTasks(){return roleIs("president");}
 function canViewInspections(){return roleIs("inspection_inspector","president","secretary_general");}
 function canEditInspections(){return roleIs("inspection_inspector");}
@@ -38,7 +38,7 @@ function hide(id,yes){$(id)?.classList.toggle("m-hide",yes);}
 async function profileLoad(){
  const {data:{user:u},error}=await sb.auth.getUser();
  if(error)throw new Error("تعذر قراءة جلسة الدخول: "+error.message);
- if(!u)throw new Error("لم يتم العثور على جلسة دخول محفوظة لهذا النطاق. سجّل الدخول من بوابة الموظفين على الرابط نفسه.");
+ if(!u)throw new Error("لم يتم العثور على جلسة دخول. سجّل الدخول من واجهة التسيير.");
  const {data,error:e}=await sb.from("staff_profiles").select("user_id,username,role,is_active").eq("user_id",u.id).maybeSingle();
  if(e)throw new Error("الجلسة موجودة لكن تعذر قراءة صلاحيات الحساب من staff_profiles: "+e.message);
  if(!data)throw new Error("الجلسة موجودة، لكن لا يوجد سجل مطابق لهذا المستخدم في staff_profiles.");
