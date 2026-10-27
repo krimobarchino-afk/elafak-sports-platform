@@ -57,6 +57,9 @@ function applyPermissions(){
  $("tab-equipment").classList.toggle("m-hide",!canViewEquipment());
  $("tab-tasks").classList.toggle("m-hide",!canViewTasks());
  $("tab-inspections").classList.toggle("m-hide",!canViewInspections());
+ const inspectorOnly=roleIs("inspection_inspector");
+ ["tab-overview","tab-join-requests","tab-finance","tab-office-roster"].forEach(id=>$(id)?.classList.toggle("m-hide",inspectorOnly));
+ document.querySelectorAll('.m-tabs button[data-pane="activities"],.m-tabs button[data-pane="meetings"],.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.toggle("m-hide",inspectorOnly));
  $("equipment-form").classList.toggle("m-hide",!canEditEquipment());
  $("task-form").classList.toggle("m-hide",!canViewTasks());
  $("inspection-form").classList.toggle("m-hide",!canEditInspections());
