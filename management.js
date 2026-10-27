@@ -546,7 +546,7 @@ function subscribeDeliberationUpdates(){
     if(type==="finance_transaction"&&canViewFinance())await loadFinance();
     if(type==="equipment"&&canViewEquipment())await loadEquipment();
     if(type==="activity"&&canViewActivities())await loadActivities();
-    if(row.created_by!==user.id){
+    if((row.updated_by||row.created_by)!==user.id){
      const label=type==="finance_transaction"?"مسودة مالية":type==="equipment"?"مسودة عتاد":"مسودة نشاط";
      message("m-message","إشعار: حدث تحديث في "+label+" ضمن مساحة العمل المشتركة.","success");
     }
