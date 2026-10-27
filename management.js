@@ -60,6 +60,10 @@ function applyPermissions(){
  const inspectorOnly=roleIs("inspection_inspector");
  ["tab-overview","tab-join-requests","tab-finance","tab-office-roster"].forEach(id=>$(id)?.classList.toggle("m-hide",inspectorOnly));
  document.querySelectorAll('.m-tabs button[data-pane="activities"],.m-tabs button[data-pane="meetings"],.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.toggle("m-hide",inspectorOnly));
+ if(inspectorOnly){
+  document.querySelectorAll(".m-pane").forEach(p=>p.hidden=p.id!=="pane-inspections");
+  document.querySelectorAll(".m-tabs button").forEach(b=>b.classList.toggle("active",b.id==="tab-inspections"));
+ }
  $("equipment-form").classList.toggle("m-hide",!canEditEquipment());
  $("task-form").classList.toggle("m-hide",!canViewTasks());
  $("inspection-form").classList.toggle("m-hide",!canEditInspections());
