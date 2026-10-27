@@ -299,7 +299,6 @@
       if (buttonEl) { buttonEl.disabled = false; buttonEl.textContent = 'متابعة طلبي'; }
     }
   };
-  const getSavedTrack = () => null;
   if (trackForm && trackMessage && trackSubmit) {
     trackForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -311,6 +310,4 @@
   const closeSuccess = document.querySelector('#join-success-close');
   if (closeSuccess) closeSuccess.addEventListener('click', () => { if (modal) modal.hidden = true; });
 
-  if (modal) modal.addEventListener('click', e => { if (e.target === modal) close(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal && !modal.hidden) close(); });
 })();
