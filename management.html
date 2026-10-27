@@ -204,6 +204,21 @@
 <div class="m-actions"><button class="btn btn-dark" type="submit">حفظ وإرسال التقرير</button><button class="m-small" id="inspection-cancel" type="button">مسح الحقول</button></div>
 </form><p id="inspections-msg" role="status"></p>
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>رقم التقرير</th><th>التاريخ</th><th>الجهة</th><th>الموضوع</th><th>النتائج</th><th>التوصيات</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="inspection-rows"></tbody></table></div>
+<hr>
+<div class="m-toolbar"><h3>متابعة الردود والإجراءات التصحيحية</h3><button id="inspection-followups-refresh" class="m-small m-no-print" type="button">تحديث المتابعات</button></div>
+<p class="m-note">تُحفظ ردود الجمعية والإجراءات التصحيحية كسجلات مستقلة مرتبطة بتقرير التفتيش، ولا تعدّل نص التقرير الأصلي. يطّلع المكتب التنفيذي والمفتش على المتابعات، ويحررها الرئيس أو الأمين العام.</p>
+<form id="inspection-followup-form" class="m-grid m-no-print">
+<input type="hidden" name="id">
+<label>تقرير التفتيش المرتبط<select name="report_id" id="inspection-followup-report" required><option value="">اختر تقريرًا مرسلًا</option></select></label>
+<label>المسؤول عن الإجراء<input name="responsible_person" maxlength="180"></label>
+<label>أجل التنفيذ<input name="due_date" type="date"></label>
+<label>حالة المتابعة<select name="status" required><option value="open">مفتوحة</option><option value="in_progress">قيد التنفيذ</option><option value="completed">مكتملة</option></select></label>
+<label style="grid-column:1/-1">رد الجمعية<textarea name="response_text" required minlength="3" maxlength="20000"></textarea></label>
+<label style="grid-column:1/-1">الإجراء التصحيحي المتفق عليه<textarea name="corrective_action" maxlength="20000"></textarea></label>
+<div class="m-actions"><button class="btn btn-dark" type="submit">حفظ المتابعة</button><button class="m-small" id="inspection-followup-cancel" type="button">إلغاء التعديل</button></div>
+</form>
+<p id="inspection-followups-msg" role="status"></p>
+<div class="m-tablewrap"><table class="m-table"><thead><tr><th>رقم التقرير</th><th>رد الجمعية</th><th>الإجراء التصحيحي</th><th>المسؤول</th><th>الأجل</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="inspection-followup-rows"></tbody></table></div>
 </div></section>
 <section class="m-pane" id="pane-meetings" hidden>
 <div class="m-card"><div class="m-toolbar"><h2>المداولات ومخرجاتها</h2><button id="meetings-export" class="m-small m-no-print">تصدير سجل الاجتماعات CSV</button></div>
