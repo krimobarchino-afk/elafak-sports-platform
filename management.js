@@ -158,7 +158,7 @@ async function loadFinance(){
   if(!fy?.is_closed&&canWriteFinance()){
    button(box,"تعديل",()=>{setForm($("finance-form"),x);$("finance-form").elements.transaction_date.value=x.transaction_date||localToday();message("finance-msg","تعديل العملية المحددة. احفظ لإتمام التعديل.");$("finance-form").scrollIntoView({behavior:"smooth",block:"center"});});
    if(roleIs("president"))button(box,"حذف",async()=>{if(!confirm("حذف هذه العملية المالية؟ سيُسجّل الحذف في سجل العمليات."))return;try{const {error}=await sb.from("finance_transactions").delete().eq("id",x.id);if(error)throw error;message("finance-msg","تم حذف العملية.","success");await loadFinance();await loadAudit(false)}catch(e){message("finance-msg","تعذر الحذف: "+e.message,"error")}},"danger");
-  }else safeCellDummy(box,"سنة مغلقة");
+  }else safeCellDummy(box,fy?.is_closed?"سنة مغلقة":"عرض فقط");
   body.append(tr);
  });
  if(!transactions.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد عمليات مسجلة لهذه السنة.");td.colSpan=7;body.append(tr);}
@@ -746,7 +746,7 @@ async function saveForm(form,table,fields,roleCheck,msgId){
     const draftPayload={...payload};
     const draftRow={payload:draftPayload,updated_by:user.id,updated_at:new Date().toISOString()};
     if(draftId){
-     const {error}=await sb.from("official_record_drafts").update(draftRow).eq("id",draftId).in("status",["draft","changes_requested"]);
+     const {error}=await sb.from("official_record_drafts").update(draftRow).eq("id",draftId).in("status",["draft","changes_requested"]).select("id").single();
      if(error)throw error;
     }else{
      const {error}=await sb.from("official_record_drafts").insert({
@@ -831,7 +831,7 @@ async function loadOfficialRecordDrafts(recordType){
    button(box,"تحرير المسودة",()=>{
     const form=$(formId),values={...(d.payload||{}),id:d.target_record_id||"",draft_id:d.id};
     setForm(form,values);
-    if(recordType==="finance_transaction"&&d.payload?.transaction_date)form.elements.transaction_date.value=d.payload.transaction_date;
+    if(recordType==="finance_transaction"){if(d.payload?.transaction_date)form.elements.transaction_date.value=d.payload.transaction_date;if(d.payload?.fiscal_year&&years.some(y=>Number(y.fiscal_year)===Number(d.payload.fiscal_year)))$("finance-year").value=String(d.payload.fiscal_year);}
     form.scrollIntoView({behavior:"smooth",block:"center"});
     message(msgId,"تحرير المسودة المشتركة؛ سيظل السجل الرسمي دون تغيير حتى يعتمدها الرئيس.");
    });
