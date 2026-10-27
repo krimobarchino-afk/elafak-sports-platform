@@ -189,5 +189,5 @@ $$;
 
 revoke all on function public.submit_deliberation_output(uuid) from public, anon;
 revoke all on function public.review_deliberation_output(uuid,text,text) from public, anon;
-grant execute on function private.submit_deliberation_output(uuid) to authenticated;
-grant execute on function private.review_deliberation_output(uuid,text,text) to authenticated;
+grant execute on function public.submit_deliberation_output(uuid) to authenticated;
+grant execute on function public.review_deliberation_output(uuid,text,text) to authenticated;
