@@ -13,7 +13,7 @@ const ACTTYPE={paragliding:"الطيران الشراعي",hiking:"المشي ا
 const ACTSTATUS={planned:"مبرمج",completed:"منجز",cancelled:"ملغى"};
 const CONDITION={new:"جديدة",good:"صالحة",needs_repair:"تحتاج إصلاحًا",out_of_service:"خارج الخدمة",retired:"مستبعدة"};
 const MEETTYPE={executive:"المكتب التنفيذي",general_assembly:"الجمعية العامة",committee:"لجنة",technical:"تقني",other:"أخرى"};
-let sb,profile,user,years=[],transactions=[],activities=[],equipment=[],meetings=[],executiveRoster=[],deliberationOutputs=[];
+let sb,profile,user,years=[],transactions=[],activities=[],equipment=[],meetings=[],executiveRoster=[],deliberationOutputs=[],inspectionReports=[],inspectionFollowups=[];
 const fmt=n=>new Intl.NumberFormat('ar-DZ',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n||0))+" دج";
 const dateFmt=v=>v?new Date(v+"T12:00:00").toLocaleDateString("ar-DZ"):"غير محدد";
 function message(id,text,kind=""){const el=$(id);if(!el)return;el.textContent=text;el.className=kind?"m-msg "+kind:"m-msg";}
@@ -29,6 +29,7 @@ function canViewEquipment(){return roleIs("president","treasurer");}
 function canViewTasks(){return roleIs("president");}
 function canViewInspections(){return roleIs("inspection_inspector",...EXECUTIVE_ROLES);}
 function canEditInspections(){return roleIs("inspection_inspector");}
+function canEditInspectionFollowups(){return roleIs("president","secretary_general");}
 function canViewMeetings(){return roleIs("president","secretary_general","deputy_president","deputy_secretary_general","technical_director");}
 function canEditActivities(){return roleIs("president","technical_director");}
 function canEditEquipment(){return roleIs("president","treasurer");}
@@ -93,6 +94,7 @@ function applyPermissions(){
  $("meeting-form").classList.toggle("m-hide",!canEditMeetings());
  $("task-form").classList.toggle("m-hide",!canViewTasks());
  $("inspection-form").classList.toggle("m-hide",!canEditInspections());
+ $("inspection-followup-form").classList.toggle("m-hide",!canEditInspectionFollowups());
  $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
  $("delib-review-shortcut")?.classList.add("m-hide");
  document.querySelectorAll("[data-delib-secretary]").forEach(el=>el.classList.toggle("m-hide",!roleIs("secretary_general")));
@@ -194,20 +196,70 @@ async function loadTasks(){
  });
  if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد مهام أو تكليفات مسجلة.");td.colSpan=7;rows.append(tr)}
 }
+function populateInspectionFollowupReportOptions(selected=""){
+ const select=$("inspection-followup-report");if(!select)return;
+ const keep=selected||select.value;select.replaceChildren();
+ const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="اختر تقريرًا مرسلًا";select.append(placeholder);
+ for(const report of inspectionReports.filter(x=>x.status==="submitted")){
+  const option=document.createElement("option");option.value=report.id;
+  option.textContent=report.report_number+" — "+dateFmt(report.inspection_date)+" — "+report.subject;
+  select.append(option);
+ }
+ select.value=keep;
+}
 async function loadInspectionReports(){
  if(!canViewInspections())return;
  const {data,error}=await sb.from("inspection_reports").select("*").order("inspection_date",{ascending:false}).order("created_at",{ascending:false});
  if(error)throw error;
+ inspectionReports=data||[];
+ populateInspectionFollowupReportOptions($("inspection-followup-report")?.value||"");
  const rows=$("inspection-rows");rows.replaceChildren();
- (data||[]).forEach(r=>{
+ inspectionReports.forEach(r=>{
   const tr=document.createElement("tr");
   safeCell(tr,r.report_number);safeCell(tr,dateFmt(r.inspection_date));safeCell(tr,r.inspected_entity);safeCell(tr,r.subject);
   safeCell(tr,r.findings);safeCell(tr,r.recommendations||"—");safeCell(tr,r.status==="submitted"?"مرسل رسميًا":"مسودة");
-  const box=rowActions(tr);
-  button(box,"طباعة",()=>printInspectionReport(r));
-  rows.append(tr);
+  const box=rowActions(tr);button(box,"طباعة",()=>printInspectionReport(r));rows.append(tr);
  });
- if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد تقارير تفتيش مسجلة في النظام حتى الآن.");td.colSpan=8;rows.append(tr)}
+ if(!inspectionReports.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد تقارير تفتيش مسجلة في النظام حتى الآن.");td.colSpan=8;rows.append(tr)}
+ await loadInspectionFollowups();
+}
+async function loadInspectionFollowups(){
+ if(!canViewInspections())return;
+ const {data,error}=await sb.from("inspection_followups").select("*").order("created_at",{ascending:false});
+ if(error)throw error;
+ inspectionFollowups=data||[];
+ const reportMap=new Map(inspectionReports.map(r=>[r.id,r]));
+ const body=$("inspection-followup-rows");body.replaceChildren();
+ for(const f of inspectionFollowups){
+  const tr=document.createElement("tr"),report=reportMap.get(f.report_id);
+  safeCell(tr,report?.report_number||"تقرير "+f.report_id.slice(0,8));
+  safeCell(tr,f.response_text);safeCell(tr,f.corrective_action||"—");safeCell(tr,f.responsible_person||"—");safeCell(tr,dateFmt(f.due_date));
+  safeCell(tr,({open:"مفتوحة",in_progress:"قيد التنفيذ",completed:"مكتملة"})[f.status]||f.status);
+  const box=rowActions(tr);
+  if(canEditInspectionFollowups())button(box,"تعديل",()=>{
+   setForm($("inspection-followup-form"),f);
+   populateInspectionFollowupReportOptions(f.report_id);
+   $("inspection-followup-form").scrollIntoView({behavior:"smooth",block:"center"});
+  });
+  else safeCellDummy(box,"اطلاع");
+  body.append(tr);
+ }
+ if(!inspectionFollowups.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد متابعات مسجلة لتقارير التفتيش.");td.colSpan=7;body.append(tr)}
+}
+async function saveInspectionFollowup(form){
+ if(!canEditInspectionFollowups()){message("inspection-followups-msg","تحرير المتابعات من صلاحية الرئيس والأمين العام فقط.","error");return}
+ const v=values(form),id=v.id;delete v.id;
+ const payload={report_id:v.report_id,response_text:v.response_text,corrective_action:v.corrective_action||"",responsible_person:v.responsible_person||"",due_date:v.due_date||null,status:v.status||"open",updated_at:new Date().toISOString()};
+ if(!payload.report_id||!payload.response_text||payload.response_text.length<3){message("inspection-followups-msg","اختر تقريرًا مرسلًا وأدخل ردًا واضحًا.","error");return}
+ const submit=form.querySelector('button[type="submit"]');if(submit)submit.disabled=true;
+ try{
+  if(id){const {error}=await sb.from("inspection_followups").update(payload).eq("id",id);if(error)throw error}
+  else{payload.created_by=user.id;const {error}=await sb.from("inspection_followups").insert(payload);if(error)throw error}
+  setForm(form);populateInspectionFollowupReportOptions("");
+  await loadInspectionFollowups();
+  message("inspection-followups-msg",id?"تم تحديث المتابعة مع الاحتفاظ بتقرير التفتيش الأصلي.":"تم حفظ المتابعة وربطها بتقرير التفتيش.","success");
+ }catch(e){message("inspection-followups-msg","تعذر حفظ المتابعة: "+(e.message||"خطأ غير معروف"),"error")}
+ finally{if(submit)submit.disabled=false}
 }
 function printInspectionReport(r){
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -736,6 +788,10 @@ function bind(){
   try{const q=id?sb.from("executive_tasks").update(payload).eq("id",id):sb.from("executive_tasks").insert(payload);const {error}=await q;if(error)throw error;setForm($("task-form"));await loadTasks();message("tasks-msg","تم حفظ التكليف.","success")}catch(err){message("tasks-msg","تعذر حفظ التكليف: "+err.message,"error")}
  });
  $("inspections-refresh").onclick=()=>loadInspectionReports().catch(e=>message("inspections-msg",e.message,"error"));
+ $("inspection-followups-refresh").onclick=()=>loadInspectionFollowups().catch(e=>message("inspection-followups-msg",e.message,"error"));
+ $("inspection-followup-form").addEventListener("submit",e=>{e.preventDefault();saveInspectionFollowup(e.currentTarget)});
+ $("inspection-followup-cancel").onclick=()=>{setForm($("inspection-followup-form"));populateInspectionFollowupReportOptions("");message("inspection-followups-msg","تم إلغاء التحرير.")};
+
  $("inspection-cancel").onclick=()=>{setForm($("inspection-form"));$("inspection-form").elements.inspection_date.value=localToday();$("inspection-form").elements.inspected_entity.value="جمعية الأفق الولائية للرياضات الجوية والجبلية"};
  $("inspection-form").addEventListener("submit",e=>{e.preventDefault();submitInspectionReport(e.currentTarget)});
  $("inspection-form").elements.inspection_date.value=localToday();
