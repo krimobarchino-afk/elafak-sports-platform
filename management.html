@@ -7,7 +7,7 @@
 <title>فضاء تسيير جمعية الأفق</title>
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/management.js?v=20261027-direct-management-login-inspector-scope" defer></script>
+<script src="/management.js?v=20261027-role-guard" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -53,7 +53,7 @@
 </div></header>
 <main class="m-wrap">
 <section id="m-login" class="m-card">
-<h2>دخول فضاء تسيير الجمعية</h2><p class="m-note">هذا فضاء مهني للحسابات المخوّلة، ويشمل أعضاء المكتب التنفيذي والموظفين المعيّنين. وجود حساب لا يمنح صفة العضوية في المكتب التنفيذي.</p>
+<h2>دخول فضاء تسيير الجمعية</h2><p class="m-note">هذا فضاء مهني للحسابات المخوّلة، ويشمل أعضاء المكتب التنفيذي والمسيّرين المعيّنين. وجود حساب لا يمنح صفة العضوية في المكتب التنفيذي.</p>
 <form id="m-login-form" class="m-grid"><label>اسم المستخدم<input name="username" autocomplete="username" minlength="3" maxlength="32" required></label><label>كلمة المرور<input name="password" type="password" autocomplete="current-password" required></label><div style="align-self:end"><button class="btn btn-dark" id="m-login-btn">دخول آمن</button></div></form><p id="m-login-msg" role="status"></p>
 </section>
 <section id="m-app" class="m-hide">
