@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123b32">
+<meta name="description" content="فضاء مستقل للتفتيش والمراقبة — جمعية الأفق">
+<title>التفتيش والمراقبة | جمعية الأفق</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="/inspection.js?v=20261027-inspector-entry" defer></script>
+<style>
+.i-wrap{max-width:1180px;margin:1.5rem auto;padding:0 1rem 3rem;color:#17352e}
+.i-header{background:#123b32;color:#fff;padding:1.2rem 0}
+.i-header .container{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.i-header a{color:#e0efb3}
+.i-card{background:#fff;border:1px solid #dce5df;border-radius:15px;padding:1.1rem;margin:1rem 0}
+.i-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.85rem}
+.i-grid label{display:grid;gap:.35rem;font-size:.92rem;font-weight:600}
+.i-grid input,.i-grid textarea{box-sizing:border-box;width:100%;min-width:0;padding:.7rem;border:1px solid #b9c9c0;border-radius:8px;background:#fff;color:#17352e;font:inherit}
+.i-grid textarea{min-height:100px;resize:vertical}
+.i-note{color:#617369;line-height:1.9;font-size:.92rem}
+.i-msg{padding:.7rem;border-radius:8px;margin:.7rem 0;line-height:1.7}
+.i-msg.error{background:#fff0ef;color:#8c231b}.i-msg.success{background:#e9f7ed;color:#1d6032}
+.i-tablewrap{overflow:auto;border:1px solid #dce5df;border-radius:9px}
+.i-table{border-collapse:collapse;width:100%;min-width:800px}
+.i-table th,.i-table td{padding:.65rem .7rem;border-bottom:1px solid #dce5df;text-align:right;vertical-align:top;font-size:.88rem;white-space:pre-wrap}
+.i-table th{background:#f1f5ed;white-space:nowrap}
+.i-table tr:last-child td{border-bottom:0}
+.i-toolbar{display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap}
+.i-pill{display:inline-block;padding:.25rem .6rem;border-radius:999px;background:#e7f2ec;color:#175c47;font-size:.82rem}
+.i-actions{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.i-actions button{border:1px solid #b9c9c0;background:#fff;border-radius:7px;padding:.45rem .7rem;font:inherit;cursor:pointer;color:#17352e}
+[hidden]{display:none!important}
+@media(max-width:620px){.i-wrap{padding:0 .7rem 2rem}.i-card{padding:.85rem}.i-table{min-width:720px}}
+@media print{.i-header,.i-login,.i-form-card,.i-actions,.i-no-print{display:none!important}.i-wrap{margin:0;padding:0}.i-card{border:0;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="i-header"><div class="container">
+<div><a href="/management-portal.html">← العودة إلى مداخل التسيير</a><h1 style="margin:.5rem 0">التفتيش والمراقبة</h1><p style="margin:0;color:#d4e2d8">فضاء رقابي مستقل — جمعية الأفق الولائية للرياضات الجوية والجبلية</p></div>
+<div class="i-actions"><span class="i-pill" id="i-user-label" hidden>المفتش</span><button class="btn" id="i-logout" type="button" hidden>تسجيل الخروج</button></div>
+</div></header>
+<main class="i-wrap">
+<section class="i-card i-login" id="i-login">
+<span class="kicker">دخول آمن</span><h2>دخول مفتش الشباب والرياضة</h2>
+<p class="i-note">هذا المسار مخصص لحساب المفتش فقط. بعد التحقق من الصلاحية، يتيح الاطلاع على تقارير التفتيش والمراقبة السابقة والجديدة، وإعداد التقارير، والاطلاع على الردود والمتابعات المرتبطة بها. لا يمنح وصولًا إلى بقية سجلات الجمعية.</p>
+<form id="i-login-form" class="i-grid">
+<label>اسم المستخدم<input name="username" autocomplete="username" minlength="3" maxlength="32" required></label>
+<label>كلمة المرور<input name="password" type="password" autocomplete="current-password" required></label>
+<div style="align-self:end"><button class="btn btn-dark" id="i-login-btn" type="submit">دخول آمن</button></div>
+</form><p class="i-msg" id="i-login-msg" role="status" aria-live="polite"></p>
+</section>
+<section id="i-work" hidden>
+<div class="i-card"><div class="i-toolbar"><div><span class="i-pill">حساب رقابي مستقل</span><h2 style="margin:.55rem 0">تقارير التفتيش والمراقبة</h2><p class="i-note">التقارير المرسلة محفوظة كسجلات رسمية ولا يمكن تعديلها من الواجهة. ردود الجمعية وإجراءات التصحيح تظهر في قسم المتابعات أدناه.</p></div><button class="btn btn-dark i-no-print" id="i-refresh" type="button">تحديث التقارير</button></div><p class="i-msg" id="i-work-msg" role="status" aria-live="polite"></p></div>
+<div class="i-card i-form-card">
+<h2>إعداد تقرير تفتيش جديد</h2>
+<p class="i-note">راجع البيانات قبل الإرسال. بعد الإرسال، يصبح التقرير غير قابل للتعديل حفاظًا على سلامة السجل.</p>
+<form id="i-report-form" class="i-grid">
+<label>رقم التقرير<input name="report_number" required minlength="3" maxlength="80"></label>
+<label>تاريخ التفتيش<input name="inspection_date" type="date" required></label>
+<label style="grid-column:1/-1">الجهة محل التفتيش<input name="inspected_entity" required minlength="2" maxlength="240" value="جمعية الأفق الولائية للرياضات الجوية والجبلية"></label>
+<label style="grid-column:1/-1">موضوع التفتيش<input name="subject" required minlength="3" maxlength="240"></label>
+<label style="grid-column:1/-1">نطاق التفتيش<textarea name="scope" maxlength="5000"></textarea></label>
+<label style="grid-column:1/-1">الملاحظات والنتائج<textarea name="findings" required minlength="3" maxlength="20000"></textarea></label>
+<label style="grid-column:1/-1">التوصيات<textarea name="recommendations" maxlength="10000"></textarea></label>
+<div class="i-actions" style="grid-column:1/-1"><button class="btn btn-dark" id="i-submit-report" type="submit">حفظ وإرسال التقرير</button><button type="reset" class="btn">مسح الحقول</button></div>
+</form>
+</div>
+<div class="i-card">
+<div class="i-toolbar"><h2>سجل تقارير التفتيش السابقة والجديدة</h2><span class="i-pill" id="i-report-count">0 تقرير</span></div>
+<div class="i-tablewrap"><table class="i-table"><thead><tr><th>رقم التقرير</th><th>التاريخ</th><th>الجهة</th><th>الموضوع</th><th>الملاحظات والنتائج</th><th>التوصيات</th><th>الحالة</th><th>طباعة</th></tr></thead><tbody id="i-report-rows"></tbody></table></div>
+</div>
+<div class="i-card">
+<h2>ردود الجمعية والمتابعات التصحيحية</h2><p class="i-note">يعرض هذا القسم الردود والإجراءات التصحيحية المرتبطة بتقارير التفتيش، للمتابعة دون تعديل سجلات الجمعية الأصلية.</p>
+<div class="i-tablewrap"><table class="i-table"><thead><tr><th>رقم التقرير</th><th>رد الجمعية</th><th>الإجراء التصحيحي</th><th>المسؤول</th><th>الأجل</th><th>الحالة</th><th>آخر تحديث</th></tr></thead><tbody id="i-followup-rows"></tbody></table></div>
+</div>
+</section>
+</main>
+<footer><div class="container">جمعية الأفق الولائية للرياضات الجوية والجبلية — ولاية الشلف</div></footer>
+</body></html>
