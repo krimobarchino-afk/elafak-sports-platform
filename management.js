@@ -23,7 +23,8 @@ function rowActions(tr){const td=document.createElement("td"),box=document.creat
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
 function canViewFinance(){return roleIs("president","treasurer");}
-function canWriteFinance(){return roleIs("president","treasurer");}
+function canWriteFinance(){return roleIs("treasurer");}
+function canCreateOfficialDraft(table){return table==="finance_transactions"||table==="equipment"?roleIs("treasurer"):table==="activities"?roleIs("technical_director"):false;}
 function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
 function canViewEquipment(){return roleIs("president","treasurer");}
 function canViewTasks(){return roleIs("president");}
@@ -31,8 +32,8 @@ function canViewInspections(){return roleIs("inspection_inspector",...EXECUTIVE_
 function canEditInspections(){return roleIs("inspection_inspector");}
 function canEditInspectionFollowups(){return roleIs("president","secretary_general");}
 function canViewMeetings(){return roleIs("president","secretary_general","deputy_president","deputy_secretary_general","technical_director");}
-function canEditActivities(){return roleIs("president","technical_director");}
-function canEditEquipment(){return roleIs("president","treasurer");}
+function canEditActivities(){return roleIs("technical_director");}
+function canEditEquipment(){return roleIs("treasurer");}
 function canEditMeetings(){return roleIs("president","secretary_general");}
 function canApprove(){return roleIs("president");}
 function localToday(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
@@ -113,7 +114,10 @@ function applyPermissions(){
  $("tab-finance").classList.toggle("m-hide",!canViewFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
  $("decision-settings-form").classList.toggle("m-hide",!roleIs("president"));
- $("finance-form").classList.toggle("m-hide",!canFinance());
+ $("finance-form").classList.toggle("m-hide",!roleIs("treasurer"));
+ $("finance-drafts-card").classList.toggle("m-hide",!roleIs("president","treasurer"));
+ $("activity-drafts-card").classList.toggle("m-hide",!roleIs("president","technical_director"));
+ $("equipment-drafts-card").classList.toggle("m-hide",!roleIs("president","treasurer"));
  $("dues-payment-form")?.classList.toggle("m-hide",!canFinance());
  $("close-year").classList.toggle("m-hide",!canApprove());
  $("backup-json").classList.toggle("m-hide",!roleIs("president"));
@@ -712,32 +716,54 @@ async function refreshAll(){
 }
 async function saveForm(form,table,fields,roleCheck,msgId){
  form.addEventListener("submit",async e=>{
-  e.preventDefault();if(!roleCheck()){message(msgId,"هذا الحساب لا يملك صلاحية التعديل.","error");return}
-  const raw=values(form),id=raw.id;delete raw.id;
+  e.preventDefault();
+  const draftTable=["finance_transactions","activities","equipment"].includes(table);
+  if(draftTable?!canCreateOfficialDraft(table):!roleCheck()){message(msgId,"هذا الحساب لا يملك صلاحية إنشاء هذه المسودة أو تعديلها.","error");return}
+  const raw=values(form),id=raw.id,draftId=raw.draft_id;delete raw.id;delete raw.draft_id;
   const payload={};fields.forEach(k=>{if(raw[k]!==undefined)payload[k]=raw[k]===""?null:raw[k]});
-  if("entered_by" in payload)delete payload.entered_by;
-  if(!id&&["finance_transactions","activities","equipment","meetings"].includes(table))payload.is_test=true;
   if(table==="finance_transactions"){
-   payload.fiscal_year=Number($("finance-year").value);payload.amount=Number(payload.amount);payload.entered_by=user.id;
+   payload.fiscal_year=Number($("finance-year").value);
+   payload.amount=Number(payload.amount);
    const feeLikeIncome=payload.transaction_type==="income"&&/اشتراك|انخراط|رسوم\s*(?:العضوية|الانخراط)|membership\s*(?:fee|dues)|annual\s*(?:subscription|dues)/i.test(String(payload.category||"")+" "+String(payload.description||""));
-   if(!id&&feeLikeIncome){
+   if(feeLikeIncome){
     const {data:feeSetting,error:feeError}=await sb.from("association_settings").select("setting_value,source_meeting_id").eq("setting_key","annual_membership_fee_dzd").maybeSingle();
     const approvedAmount=Number(feeSetting?.setting_value?.amount||0);
-    if(feeError||!approvedAmount){message(msgId,"لا يوجد مبلغ اشتراك سنوي معتمد ومربوط بمحضر جمعية عامة. سجّل القرار أولًا من قسم الاجتماعات والقرارات.","error");return;}
-    if(Math.abs(Number(payload.amount)-approvedAmount)>0.001){message(msgId,"مبلغ العملية لا يطابق الاشتراك السنوي المعتمد ("+fmt(approvedAmount)+").","error");return;}
+    if(feeError||!approvedAmount){message(msgId,"لا يوجد مبلغ اشتراك سنوي معتمد ومربوط بمحضر جمعية عامة. سجّل القرار أولًا من قسم الاجتماعات والقرارات.","error");return}
+    if(Math.abs(Number(payload.amount)-approvedAmount)>0.001){message(msgId,"مبلغ العملية لا يطابق الاشتراك السنوي المعتمد ("+fmt(approvedAmount)+").","error");return}
    }
   }
-  if(table==="activities"){payload.planned_budget=Number(payload.planned_budget||0);payload.actual_budget=Number(payload.actual_budget||0);payload.entered_by=user.id;}
-  if(table==="equipment"){payload.quantity=Number(payload.quantity||0);payload.acquisition_cost=payload.acquisition_cost===null?null:Number(payload.acquisition_cost);payload.entered_by=user.id;}
-  if(table==="meetings"){payload.attendees_count=payload.attendees_count===null?null:Number(payload.attendees_count);payload.entered_by=user.id;payload.status="draft";payload.approved_by=null;payload.approved_at=null;}
+  if(table==="activities"){payload.planned_budget=Number(payload.planned_budget||0);payload.actual_budget=Number(payload.actual_budget||0)}
+  if(table==="equipment"){payload.quantity=Number(payload.quantity||0);payload.acquisition_cost=payload.acquisition_cost===null?null:Number(payload.acquisition_cost)}
+  if(table==="meetings"){payload.attendees_count=payload.attendees_count===null?null:Number(payload.attendees_count);payload.entered_by=user.id;payload.status="draft";payload.approved_by=null;payload.approved_at=null}
   if(payload.transaction_date==="")payload.transaction_date=null;
   const submit=form.querySelector('button[type="submit"],button:not([type])');if(submit)submit.disabled=true;
   try{
-   if(id){payload.updated_at=new Date().toISOString();if(table==="finance_transactions")delete payload.entered_by;
-    const {error}=await sb.from(table).update(payload).eq("id",id);if(error)throw error;
-   }else{const {error}=await sb.from(table).insert(payload);if(error)throw error;}
+   if(draftTable){
+    const recordType=table==="finance_transactions"?"finance_transaction":table==="equipment"?"equipment":"activity";
+    const draftPayload={...payload};
+    const draftRow={payload:draftPayload,updated_by:user.id,updated_at:new Date().toISOString()};
+    if(draftId){
+     const {error}=await sb.from("official_record_drafts").update(draftRow).eq("id",draftId).in("status",["draft","changes_requested"]);
+     if(error)throw error;
+    }else{
+     const {error}=await sb.from("official_record_drafts").insert({
+      record_type:recordType,operation:id?"update":"create",target_record_id:id||null,
+      payload:draftPayload,status:"draft",created_by:user.id,updated_by:user.id
+     });
+     if(error)throw error;
+    }
+    form.reset();if(form.elements.namedItem("id"))form.elements.namedItem("id").value="";
+    if(form.elements.namedItem("draft_id"))form.elements.namedItem("draft_id").value="";
+    if(table==="finance_transactions")form.elements.transaction_date.value=localToday();
+    await loadOfficialRecordDrafts(recordType);
+    message(msgId,draftId?"تم تحديث المسودة في مساحة العمل المشتركة.":"حُفظت المسودة بانتظار مراجعة الرئيس؛ لم تُدرج في السجل الرسمي بعد.","success");
+    return;
+   }
+   if(!id&&table==="meetings")payload.is_test=true;
+   if(id){payload.updated_at=new Date().toISOString();const {error}=await sb.from(table).update(payload).eq("id",id);if(error)throw error}
+   else{const {error}=await sb.from(table).insert(payload);if(error)throw error}
    form.reset();if(form.elements.namedItem("id"))form.elements.namedItem("id").value="";
-   if(table==="finance_transactions"){$("finance-form").elements.transaction_date.value=localToday();await loadFinance();}
+   if(table==="finance_transactions"){$("finance-form").elements.transaction_date.value=localToday();await loadFinance()}
    if(table==="activities")await loadActivities();
    if(table==="equipment")await loadEquipment();
    if(table==="meetings")await loadMeetings();
@@ -745,6 +771,71 @@ async function saveForm(form,table,fields,roleCheck,msgId){
   }catch(err){message(msgId,"تعذر حفظ السجل: "+(err.message||"خطأ غير معروف"),"error")}
   finally{if(submit)submit.disabled=false}
  });
+}
+async function loadOfficialRecordDrafts(recordType){
+ const tableId=recordType==="finance_transaction"?"finance-draft-rows":recordType==="equipment"?"equipment-draft-rows":"activity-draft-rows";
+ const body=$(tableId);if(!body)return;
+ const canRead=roleIs("president")||
+  (recordType==="finance_transaction"&&roleIs("treasurer"))||
+  (recordType==="equipment"&&roleIs("treasurer"))||
+  (recordType==="activity"&&roleIs("technical_director"));
+ if(!canRead)return;
+ const {data,error}=await sb.from("official_record_drafts").select("*").eq("record_type",recordType).in("status",["draft","changes_requested"]).order("created_at",{ascending:false});
+ if(error)throw error;
+ body.replaceChildren();
+ const formId=recordType==="finance_transaction"?"finance-form":recordType==="equipment"?"equipment-form":"activity-form";
+ const msgId=recordType==="finance_transaction"?"finance-msg":recordType==="equipment"?"equipment-msg":"activities-msg";
+ const summary=d=>{
+  const p=d.payload||{};
+  if(recordType==="finance_transaction")return (TYPE[p.transaction_type]||p.transaction_type||"عملية")+" — "+(p.category||"دون تصنيف")+" — "+fmt(p.amount);
+  if(recordType==="equipment")return (p.item_name||"معدة دون اسم")+" × "+(p.quantity??1);
+  return (p.title||"نشاط دون عنوان")+" — "+dateFmt(p.activity_date);
+ };
+ const statusLabel=s=>s==="changes_requested"?"ملاحظة من الرئيس — تعديل مطلوب":"مسودة مشتركة";
+ for(const d of data||[]){
+  const tr=document.createElement("tr");
+  safeCell(tr,d.operation==="update"?"تعديل سجل":"إضافة سجل");
+  safeCell(tr,summary(d));
+  safeCell(tr,statusLabel(d.status));
+  safeCell(tr,d.review_note||"—");
+  safeCell(tr,new Date(d.created_at).toLocaleString("ar-DZ"));
+  const box=rowActions(tr);
+  if(roleIs("president")){
+   button(box,"ملاحظة",async()=>{
+    const note=prompt("اكتب ملاحظة التعديل التي ستظهر للمسؤول المختص:",d.review_note||"");
+    if(note===null)return;
+    if(note.trim().length<3){message(msgId,"اكتب ملاحظة واضحة لا تقل عن ثلاثة أحرف.","error");return}
+    try{
+     const {error}=await sb.from("official_record_drafts").update({status:"changes_requested",review_note:note.trim()}).eq("id",d.id).select("id").single();
+     if(error)throw error;
+     await loadOfficialRecordDrafts(recordType);
+     message(msgId,"حُفظت ملاحظة الرئيس في المساحة المشتركة.","success");
+    }catch(e){message(msgId,"تعذر حفظ الملاحظة: "+e.message,"error")}
+   });
+   button(box,"اعتماد",async()=>{
+    if(!confirm("اعتماد هذه المسودة وإدراجها في السجل الرسمي؟ لا يمكن تعديل سجل الاعتماد بعد ذلك."))return;
+    try{
+     const {error}=await sb.from("official_record_drafts").update({status:"approved",review_note:null}).eq("id",d.id).select("id").single();
+     if(error)throw error;
+     await loadOfficialRecordDrafts(recordType);
+     if(recordType==="finance_transaction"){await loadYears();await loadFinance()}
+     if(recordType==="equipment")await loadEquipment();
+     if(recordType==="activity")await loadActivities();
+     message(msgId,"تم اعتماد المسودة وإدراجها في السجل الرسمي. احتُفظ بسجل الاعتماد.","success");
+    }catch(e){message(msgId,"تعذر اعتماد المسودة: "+e.message,"error")}
+   });
+  }else if(d.created_by===user.id){
+   button(box,"تحرير المسودة",()=>{
+    const form=$(formId),values={...(d.payload||{}),id:d.target_record_id||"",draft_id:d.id};
+    setForm(form,values);
+    if(recordType==="finance_transaction"&&d.payload?.transaction_date)form.elements.transaction_date.value=d.payload.transaction_date;
+    form.scrollIntoView({behavior:"smooth",block:"center"});
+    message(msgId,"تحرير المسودة المشتركة؛ سيظل السجل الرسمي دون تغيير حتى يعتمدها الرئيس.");
+   });
+  }
+  body.append(tr);
+ }
+ if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد مسودات بانتظار المراجعة.");td.colSpan=6;body.append(tr)}
 }
 function exportCSV(filename,rows){
  if(!rows||!rows.length){message("m-message","لا توجد بيانات لتصديرها.");return}
@@ -882,7 +973,7 @@ function bind(){
  $("inspections-refresh").setAttribute("aria-label","تحديث تقارير التفتيش");
  $("meetings-export").onclick=()=>exportCSV("elafak-meetings.csv",meetings.filter(x=>!x.is_test));
  $("backup-json").onclick=backup;$("print-page").onclick=()=>window.print();$("audit-refresh").onclick=()=>loadAudit();
- saveForm($("finance-form"),"finance_transactions",["transaction_date","transaction_type","category","amount","payment_method","reference","description"],canFinance,"finance-msg");
+ saveForm($("finance-form"),"finance_transactions",["transaction_date","transaction_type","category","amount","payment_method","reference","description"],()=>roleIs("treasurer"),"finance-msg");
  saveForm($("activity-form"),"activities",["title","activity_date","location","activity_type","status","leader","planned_budget","actual_budget","notes"],canEditActivities,"activities-msg");
  saveForm($("equipment-form"),"equipment",["item_name","category","quantity","condition","serial_number","acquisition_date","acquisition_cost","storage_location","notes"],canEditEquipment,"equipment-msg");
  saveForm($("meeting-form"),"meetings",["title","meeting_type","meeting_date","meeting_start_time","meeting_end_time","location","meeting_chair","attendees_count","quorum_note","meeting_attendees","meeting_agenda","meeting_discussion","decisions","meeting_attachments","minutes_text"],canEditMeetings,"meetings-msg");
