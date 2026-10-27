@@ -27,7 +27,7 @@ function canWriteFinance(){return roleIs("president","treasurer");}
 function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director","inspection_inspector");}
 function canViewEquipment(){return roleIs("president","treasurer","inspection_inspector");}
 function canViewTasks(){return roleIs("president");}
-function canViewInspections(){return roleIs("inspection_inspector","president","secretary_general");}
+function canViewInspections(){return roleIs("inspection_inspector",...EXECUTIVE_ROLES);}
 function canEditInspections(){return roleIs("inspection_inspector");}
 function canViewMeetings(){return roleIs("president","secretary_general","deputy_president","deputy_secretary_general","technical_director");}
 function canEditActivities(){return roleIs("president","technical_director");}
@@ -107,7 +107,7 @@ function applyPermissions(){
  $("tab-office-roster").classList.toggle("m-hide",!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
- $("m-permissions").textContent=roleIs("inspection_inspector")?"صلاحيات رقابية للقراءة على السجلات الإدارية والمالية والتقنية ذات الصلة، مع منع تعديل السجلات الأصلية أو إدارة الحسابات. تُفرض الصلاحيات من قاعدة البيانات أيضًا.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
+ $("m-permissions").textContent=roleIs("inspection_inspector")?"صلاحيات رقابية على السجلات التي يجيزها نطاق التفتيش، مع إنشاء تقارير التفتيش ومتابعتها. لا تتيح هذه الصلاحيات تحرير المسودات الإدارية أو اعتمادها أو إدارة حسابات المسيّرين.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
  $("tab-finance").classList.toggle("m-hide",!canViewFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
  $("decision-settings-form").classList.toggle("m-hide",!roleIs("president"));
