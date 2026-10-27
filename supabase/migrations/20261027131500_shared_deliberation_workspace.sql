@@ -1,4 +1,13 @@
 -- Shared deliberation workspace: secretary general drafts, president comments or approves.
+-- Site administrators manage the website only and are not association staff.
+drop policy if exists "Bureau reads deliberation outputs" on public.deliberation_outputs;
+create policy "Bureau reads deliberation outputs"
+  on public.deliberation_outputs for select to authenticated
+  using ((select private.current_staff_role()) in (
+    'president','secretary_general','deputy_president',
+    'deputy_secretary_general','technical_director'
+  ));
+
 alter table public.deliberation_outputs
   drop constraint if exists deliberation_outputs_status_check;
 alter table public.deliberation_outputs
