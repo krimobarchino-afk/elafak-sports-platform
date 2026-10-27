@@ -7,7 +7,7 @@
 <title>فضاء تسيير جمعية الأفق</title>
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/management.js?v=20261027-role-guard-2" defer></script>
+<script src="/management.js?v=20261027-dashboard-cards-1" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -17,7 +17,18 @@
 .m-grid label{display:grid;gap:.35rem;font-size:.9rem;font-weight:600}
 .m-grid input,.m-grid select,.m-grid textarea{box-sizing:border-box;width:100%;min-width:0;padding:.7rem;border:1px solid #b9c9c0;border-radius:8px;background:white;color:#17352e;font:inherit}
 .m-grid textarea{min-height:88px;resize:vertical}
-.m-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0}
+.m-tabs{display:none!important}
+.m-dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.9rem;margin:1.2rem 0}
+.m-dashboard-card{display:flex;flex-direction:column;align-items:flex-start;gap:.65rem;min-height:145px;padding:1.1rem;border:1px solid var(--m-line);border-radius:14px;background:#fff;color:#17352e;text-align:right;font:inherit;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
+.m-dashboard-card:hover{transform:translateY(-2px);border-color:#8da99b;box-shadow:0 8px 20px #123b3210}
+.m-dashboard-card:focus-visible{outline:3px solid #8aa99a;outline-offset:2px}
+.m-dashboard-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:11px;background:#edf4ef;color:#123b32;font-size:1.25rem;font-weight:700}
+.m-dashboard-title{font-weight:750;font-size:1.03rem}
+.m-dashboard-description{font-size:.88rem;line-height:1.7;color:#5c7066}
+.m-homebar{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap;margin:0 0 1rem}
+.m-homebar button{border:1px solid var(--m-line);background:#f5f8f5;color:#17352e;border-radius:8px;padding:.55rem .8rem;font:inherit;cursor:pointer}
+.m-dashboard-empty{padding:1rem;border:1px dashed var(--m-line);border-radius:12px;color:#52665d}
+@media(max-width:620px){.m-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}.m-dashboard-card{padding:.8rem;min-height:135px}.m-dashboard-title{font-size:.92rem}.m-dashboard-description{font-size:.8rem}}
 .m-tabs button{border:1px solid var(--m-line);background:#fff;color:#17352e;padding:.7rem 1rem;border-radius:8px;font:inherit;cursor:pointer}
 .m-tabs button.active{background:#123b32;color:#fff;border-color:#123b32}
 .m-pane[hidden],.m-hide{display:none!important}
@@ -85,6 +96,7 @@
 <div class="m-stat"><small>المعدات المسجلة</small><strong id="stat-equipment">—</strong></div>
 <div class="m-stat"><small>الاجتماعات والمحاضر</small><strong id="stat-meetings">—</strong></div>
 </div>
+<div id="m-dashboard-cards" class="m-dashboard-grid" aria-label="خيارات الحساب"></div>
 <div class="m-card"><h2>تنبيهات التشغيل</h2><ul class="m-note"><li>رصيد 2025 الختامي المثبت: 405 دج؛ السنة مغلقة لحماية السجل.</li><li>رصيد 2026 الافتتاحي: 405 دج، وتُسجّل العمليات الجديدة بتاريخها الفعلي.</li><li>لا توجد معدات محمّلة مسبقًا؛ أدخل الجرد بعد التحقق الميداني.</li><li>لا توجد رسوم أو باقات انخراط مفعّلة أو مفترضة.</li><li>النسخ الاحتياطي من هذه الصفحة يصدر بيانات السجلات المسموح لحسابك بقراءتها، وليس نسخة كاملة من حسابات Supabase أو ملفات التخزين الخاصة.</li></ul></div>
 </section>
 <section class="m-pane" id="pane-finance" hidden>
