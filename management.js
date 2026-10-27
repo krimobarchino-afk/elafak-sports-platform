@@ -66,7 +66,7 @@ function setupTabs(){
  });
 }
 function renderDashboardCards(){
- const descriptions={"join-requests":"مراجعة الطلبات ومتابعة ملفات استكمال الانخراط وفق الصلاحيات.","finance":"عرض السجل المالي والعمليات والتقارير المالية المتاحة لحسابك.","activities":"متابعة برامج الجمعية وأنشطتها وخططها.","equipment":"جرد المعدات ومتابعة حالتها وسجلها.","tasks":"متابعة المهام والتكليفات التي تدخل ضمن صلاحية الرئيس.","inspections":"إعداد تقارير التفتيش ومراجعة التقارير والمتابعات المسموح بها.","meetings":"الاجتماعات والمحاضر والقرارات والسجلات المرتبطة بها.","office-roster":"الاطلاع على التشكيلة الرسمية للمكتب التنفيذي عند السماح بذلك.","archive":"الأرشيف وسجل العمليات والنسخ المسموح بها."};
+ const descriptions={"join-requests":"مراجعة الطلبات ومتابعة ملفات استكمال الانخراط وفق الصلاحيات.","finance":"عرض السجل المالي والعمليات والتقارير المالية المتاحة لحسابك.","activities":"متابعة برامج الجمعية وأنشطتها وخططها.","equipment":"جرد المعدات ومتابعة حالتها وسجلها.","tasks":"متابعة المهام والتكليفات التي تدخل ضمن صلاحية الرئيس.","inspections":"إعداد تقارير التفتيش ومراجعة التقارير والمتابعات المسموح بها.","meetings":"سجل المداولة ومحرر التقارير والمحاضر والقرارات ومسار مراجعة الرئيس.","office-roster":"الاطلاع على التشكيلة الرسمية للمكتب التنفيذي عند السماح بذلك.","archive":"الأرشيف وسجل العمليات والنسخ المسموح بها."};
  const icons={"join-requests":"↗",finance:"دج",activities:"✦",equipment:"◇",tasks:"✓",inspections:"⌕",meetings:"▤","office-roster":"♙",archive:"▣"};
  const grid=$("m-dashboard-cards");if(!grid)return;grid.replaceChildren();
  const tabs=[...document.querySelectorAll(".m-tabs button[data-pane]")].filter(b=>b.dataset.pane!=="overview"&&!b.classList.contains("m-hide"));
