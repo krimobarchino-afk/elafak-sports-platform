@@ -52,7 +52,7 @@ function applyPermissions(){
  $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
  $("tab-join-requests").classList.toggle("m-hide",!roleIs("president","secretary_general","treasurer"));
  $("join-request-review-card").classList.toggle("m-hide",!roleIs("president","secretary_general"));
- $("requirements-admin").classList.toggle("m-hide",!roleIs("president","secretary_general"));
+ $("requirements-admin")?.classList.add("m-hide");
  $("filepanel").classList.toggle("m-hide",!roleIs("president","secretary_general","treasurer"));
  $("founding-roster-card").classList.toggle("m-hide",!canViewMeetings());
  $("tab-office-roster").classList.toggle("m-hide",!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
@@ -410,7 +410,7 @@ async function refreshAll(){
   await run("السجل المالي",loadFinance);
   await run("دفعات الاشتراك",loadPaymentWorkflow);
  }
- if(roleIs("president","secretary_general")){await run("طلبات الانخراط",loadJoinRequests);await run("متطلبات ملف الانخراط",loadRequirements)}
+ if(roleIs("president","secretary_general")){await run("طلبات الانخراط",loadJoinRequests)}
  if(roleIs("president","secretary_general","treasurer"))await run("ملفات استكمال الانخراط",loadJoinFiles);
  if(canViewActivities())await run("الأنشطة",loadActivities);
  if(canViewEquipment())await run("المعدات",loadEquipment);
