@@ -50,6 +50,18 @@ async function profileLoad(){
  user=u;return data;
 }
 function setupTabs(){
+ const descriptions={
+  "join-requests":"مراجعة الطلبات ومتابعة ملفات استكمال الانخراط وفق الصلاحيات.",
+  finance:"عرض السجل المالي والعمليات والتقارير المالية المتاحة لحسابك.",
+  activities:"متابعة برامج الجمعية وأنشطتها وخططها.",
+  equipment:"جرد المعدات ومتابعة حالتها وسجلها.",
+  tasks:"متابعة المهام والتكليفات التي تدخل ضمن صلاحية الرئيس.",
+  inspections:"إعداد تقارير التفتيش ومراجعة التقارير والمتابعات المسموح بها.",
+  meetings:"الاجتماعات والمحاضر والقرارات والسجلات المرتبطة بها.",
+  "office-roster":"الاطلاع على التشكيلة الرسمية للمكتب التنفيذي عند السماح بذلك.",
+  archive:"الأرشيف وسجل العمليات والنسخ المسموح بها."
+ };
+ const icons={"join-requests":"↗",finance:"دج",activities:"✦",equipment:"◇",tasks:"✓",inspections:"⌕",meetings:"▤","office-roster":"♙",archive:"▣"};
  document.querySelectorAll(".m-tabs button").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll(".m-tabs button").forEach(x=>x.classList.toggle("active",x===b));
   document.querySelectorAll(".m-pane").forEach(x=>x.hidden=x.id!=="pane-"+b.dataset.pane);
@@ -57,6 +69,28 @@ function setupTabs(){
   if(b.dataset.pane==="tasks")loadTasks().catch(e=>message("tasks-msg",e.message,"error"));
   if(b.dataset.pane==="inspections")loadInspectionReports().catch(e=>message("inspections-msg",e.message,"error"));
  }));
+ const grid=$("m-dashboard-cards");
+ if(grid)grid.replaceChildren();
+ document.querySelectorAll(".m-pane").forEach(pane=>{
+  if(pane.id==="pane-overview")return;
+  if(!pane.querySelector(".m-homebar")){
+   const bar=document.createElement("div");bar.className="m-homebar m-no-print";
+   const label=document.createElement("span");label.className="m-note";label.textContent="اختر العودة إلى الرئيسية للانتقال إلى خيار آخر.";
+   const back=document.createElement("button");back.type="button";back.textContent="← العودة إلى الرئيسية";back.addEventListener("click",()=>$("tab-overview").click());
+   bar.append(label,back);pane.prepend(bar);
+  }
+ });
+ if(grid){
+  const tabs=[...document.querySelectorAll(".m-tabs button[data-pane]")].filter(b=>b.dataset.pane!=="overview"&&!b.classList.contains("m-hide"));
+  for(const b of tabs){
+   const card=document.createElement("button");card.type="button";card.className="m-dashboard-card";
+   const icon=document.createElement("span");icon.className="m-dashboard-icon";icon.setAttribute("aria-hidden","true");icon.textContent=icons[b.dataset.pane]||"•";
+   const title=document.createElement("span");title.className="m-dashboard-title";title.textContent=b.textContent.trim();
+   const desc=document.createElement("span");desc.className="m-dashboard-description";desc.textContent=descriptions[b.dataset.pane]||"فتح القسم المسموح به لحسابك.";
+   card.append(icon,title,desc);card.addEventListener("click",()=>b.click());grid.append(card);
+  }
+  if(!tabs.length){const empty=document.createElement("p");empty.className="m-dashboard-empty";empty.textContent="لا توجد أقسام إضافية مفعّلة لهذا الحساب حاليًا.";grid.append(empty)}
+ }
 }
 function applyPermissions(){
  $("tab-equipment").classList.toggle("m-hide",!canViewEquipment());
