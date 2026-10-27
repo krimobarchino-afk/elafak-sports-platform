@@ -176,7 +176,7 @@ begin
         ) then raise exception 'لا يمكن اعتماد عملية مالية لسنة غير مفتوحة'; end if;
 
         v_transaction_text := coalesce(new.payload->>'category','') || ' ' || coalesce(new.payload->>'description','');
-        if coalesce(new.payload->>'transaction_type','') = 'income'
+        if new.operation = 'create' and coalesce(new.payload->>'transaction_type','') = 'income'
           and v_transaction_text ~* '(اشتراك|انخراط|رسوم[[:space:]]*(العضوية|الانخراط)|membership[[:space:]]*(fee|dues)|annual[[:space:]]*(subscription|dues))' then
           select setting_value into v_fee_setting from public.association_settings where setting_key = 'annual_membership_fee_dzd';
           v_fee_amount := nullif(v_fee_setting->>'amount','')::numeric;
@@ -212,8 +212,7 @@ begin
             reference = nullif(new.payload->>'reference',''),
             updated_at = now()
           where id = new.target_record_id and is_test = false
-            and fiscal_year = (new.payload->>'fiscal_year')::integer
-            and exists (select 1 from public.financial_years fy where fy.fiscal_year = finance_transactions.fiscal_year and fy.is_closed = false);
+            and fiscal_year = (new.payload->>'fiscal_year')::integer;
           get diagnostics v_count = row_count;
           if v_count <> 1 then raise exception 'العملية غير موجودة أو أن سنتها المالية مغلقة'; end if;
         end if;
