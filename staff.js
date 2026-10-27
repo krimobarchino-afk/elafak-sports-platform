@@ -27,7 +27,7 @@ async function loadRequirements(){
   if(reference.trim().length<3){msg("requirements-msg","مرجع الأمر/القرار مطلوب ويجب ألا يقل عن 3 أحرف.","error");return null}
   const date=prompt("أدخل تاريخ أمر/قرار المكتب التنفيذي بصيغة YYYY-MM-DD:",new Date().toISOString().slice(0,10));
   if(date===null)return null;
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)){msg("requirements-msg","أدخل التاريخ بصيغة YYYY-MM-DD.","error");return null}
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){msg("requirements-msg","أدخل التاريخ بصيغة YYYY-MM-DD.","error");return null}
   return {bureau_order_reference:reference.trim(),bureau_order_date:date};
  };
  for(const item of data||[]){
