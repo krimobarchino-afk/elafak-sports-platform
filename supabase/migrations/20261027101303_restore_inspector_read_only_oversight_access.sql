@@ -1,0 +1,12 @@
+create policy "Inspector oversight read activities" on public.activities for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read association_members" on public.association_members for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read equipment" on public.equipment for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read executive_office_roster" on public.executive_office_roster for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read finance_transactions" on public.finance_transactions for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read financial_years" on public.financial_years for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read founding_member_roster" on public.founding_member_roster for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read meetings" on public.meetings for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read membership_dues_obligations" on public.membership_dues_obligations for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read membership_dues_payments" on public.membership_dues_payments for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read membership_fee_rules" on public.membership_fee_rules for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
+create policy "Inspector oversight read membership_status_events" on public.membership_status_events for select to authenticated using ((select private.current_staff_role()) = 'inspection_inspector');
