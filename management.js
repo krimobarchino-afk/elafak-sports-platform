@@ -151,6 +151,7 @@ async function loadFinance(){
  $("finance-opening").value=fmt(opening);$("finance-income").value=fmt(inc);$("finance-expense").value=fmt(exp);$("finance-closing").value=fmt(closing);$("finance-year-status").value=fy?(fy.is_closed?"مغلقة — للقراءة فقط":"مفتوحة"):"غير مهيأة";
  $("stat-balance").textContent=fmt(closing);
  $("close-year").disabled=!fy||fy.is_closed;
+ const financeSave=$("finance-save");if(financeSave)financeSave.disabled=!fy||fy.is_closed;
  const body=$("finance-rows");body.replaceChildren();
  transactions.forEach(x=>{
   const tr=document.createElement("tr");safeCell(tr,dateFmt(x.transaction_date));safeCell(tr,TYPE[x.transaction_type]);safeCell(tr,x.category+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,x.description);safeCell(tr,fmt(x.amount));safeCell(tr,PAY[x.payment_method]||x.payment_method);
@@ -740,6 +741,8 @@ async function saveForm(form,table,fields,roleCheck,msgId){
   const payload={};fields.forEach(k=>{if(raw[k]!==undefined)payload[k]=raw[k]===""?null:raw[k]});
   if(table==="finance_transactions"){
    payload.fiscal_year=Number($("finance-year").value);
+   const selectedYear=years.find(y=>Number(y.fiscal_year)===payload.fiscal_year);
+   if(!selectedYear||selectedYear.is_closed){message(msgId,"لا يمكن إعداد مسودة لعملية مالية دون سنة مالية مفتوحة.","error");return}
    payload.amount=Number(payload.amount);
    const feeLikeIncome=payload.transaction_type==="income"&&/اشتراك|انخراط|رسوم\s*(?:العضوية|الانخراط)|membership\s*(?:fee|dues)|annual\s*(?:subscription|dues)/i.test(String(payload.category||"")+" "+String(payload.description||""));
    if(!id&&feeLikeIncome){
