@@ -22,10 +22,10 @@ function button(parent,label,fn,kind=""){const b=document.createElement("button"
 function rowActions(tr){const td=document.createElement("td"),box=document.createElement("div");box.className="m-actions";td.append(box);tr.append(td);return box;}
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
-function canViewFinance(){return roleIs("president","treasurer");}
+function canViewFinance(){return roleIs("president","treasurer","inspection_inspector");}
 function canWriteFinance(){return roleIs("president","treasurer");}
-function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
-function canViewEquipment(){return roleIs("president","treasurer");}
+function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director","inspection_inspector");}
+function canViewEquipment(){return roleIs("president","treasurer","inspection_inspector");}
 function canViewTasks(){return roleIs("president");}
 function canViewInspections(){return roleIs("inspection_inspector","president","secretary_general");}
 function canEditInspections(){return roleIs("inspection_inspector");}
@@ -62,13 +62,7 @@ function applyPermissions(){
  $("tab-equipment").classList.toggle("m-hide",!canViewEquipment());
  $("tab-tasks").classList.toggle("m-hide",!canViewTasks());
  $("tab-inspections").classList.toggle("m-hide",!canViewInspections());
- const inspectorOnly=roleIs("inspection_inspector");
- ["tab-overview","tab-join-requests"].forEach(id=>$(id)?.classList.toggle("m-hide",inspectorOnly));
- document.querySelectorAll('.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.toggle("m-hide",inspectorOnly));
- if(inspectorOnly){
-  document.querySelectorAll(".m-pane").forEach(p=>p.hidden=p.id!=="pane-inspections");
-  document.querySelectorAll(".m-tabs button").forEach(b=>b.classList.toggle("active",b.id==="tab-inspections"));
- }
+ document.querySelectorAll('.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.toggle("m-hide",!roleIs("president")));
  $("equipment-form").classList.toggle("m-hide",!canEditEquipment());
  $("activity-form").classList.toggle("m-hide",!canEditActivities());
  $("meeting-form").classList.toggle("m-hide",!canEditMeetings());
@@ -83,7 +77,7 @@ function applyPermissions(){
  $("tab-office-roster").classList.toggle("m-hide",!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
- $("m-permissions").textContent="تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
+ $("m-permissions").textContent=roleIs("inspection_inspector")?"صلاحيات رقابية للقراءة على السجلات الإدارية والمالية والتقنية ذات الصلة، مع منع تعديل السجلات الأصلية أو إدارة الحسابات. تُفرض الصلاحيات من قاعدة البيانات أيضًا.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
  $("tab-finance").classList.toggle("m-hide",!canViewFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
  $("decision-settings-form").classList.toggle("m-hide",!roleIs("president"));
@@ -92,14 +86,13 @@ function applyPermissions(){
  $("close-year").classList.toggle("m-hide",!canApprove());
  $("backup-json").classList.toggle("m-hide",!roleIs("president"));
  $("audit-refresh").classList.toggle("m-hide",!roleIs("president"));
- $("finance-export").classList.toggle("m-hide",!canFinance());
+ $("finance-export").classList.toggle("m-hide",!canViewFinance());
  $("finance-year").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-opening").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-income").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-expense").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-closing").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-year-status").closest("label").classList.toggle("m-hide",!canViewFinance());
- if(inspectorOnly){document.querySelectorAll(".m-tabs button").forEach(b=>b.classList.toggle("m-hide",b.id!=="tab-inspections"));}
 }
 async function loadYears(){
  if(!canViewFinance())return;
