@@ -50,7 +50,7 @@ function setupTabs(){
 }
 function applyPermissions(){
  $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
- $("tab-join-requests").classList.toggle("m-hide",!roleIs("president","secretary_general","treasurer"));
+ $("tab-join-requests").classList.toggle("m-hide",!roleIs("president","secretary_general"));
  $("join-request-review-card").classList.toggle("m-hide",!roleIs("president","secretary_general"));
  $("requirements-admin")?.classList.add("m-hide");
  $("filepanel").classList.toggle("m-hide",!roleIs("president","secretary_general","treasurer"));
