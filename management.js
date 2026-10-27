@@ -846,10 +846,14 @@ async function loadOfficialRecordDrafts(recordType){
     }catch(e){message(msgId,"تعذر اعتماد المسودة: "+e.message,"error")}
    });
   }else if(d.created_by===user.id){
-   button(box,"تحرير المسودة",()=>{
+   button(box,"تحرير المسودة",async()=>{
     const form=$(formId),values={...(d.payload||{}),id:d.target_record_id||"",draft_id:d.id};
     setForm(form,values);
-    if(recordType==="finance_transaction"){if(d.payload?.transaction_date)form.elements.transaction_date.value=d.payload.transaction_date;if(d.payload?.fiscal_year&&years.some(y=>Number(y.fiscal_year)===Number(d.payload.fiscal_year)))$("finance-year").value=String(d.payload.fiscal_year);}
+    if(recordType==="finance_transaction"){
+     if(d.payload?.transaction_date)form.elements.transaction_date.value=d.payload.transaction_date;
+     if(d.payload?.fiscal_year&&years.some(y=>Number(y.fiscal_year)===Number(d.payload.fiscal_year)))$("finance-year").value=String(d.payload.fiscal_year);
+     await loadFinance();
+    }
     form.scrollIntoView({behavior:"smooth",block:"center"});
     message(msgId,"تحرير المسودة المشتركة؛ سيظل السجل الرسمي دون تغيير حتى يعتمدها الرئيس.");
    });
