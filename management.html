@@ -7,7 +7,7 @@
 <title>فضاء تسيير جمعية الأفق</title>
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/management.js?v=20261027-role-guard" defer></script>
+<script src="/management.js?v=20261027-role-guard-2" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -57,7 +57,7 @@
 <form id="m-login-form" class="m-grid"><label>اسم المستخدم<input name="username" autocomplete="username" minlength="3" maxlength="32" required></label><label>كلمة المرور<input name="password" type="password" autocomplete="current-password" required></label><div style="align-self:end"><button class="btn btn-dark" id="m-login-btn">دخول آمن</button></div></form><p id="m-login-msg" role="status"></p>
 </section>
 <section id="m-app" class="m-hide">
-<div class="m-card"><div class="m-toolbar"><div><span class="m-badge" id="m-role">موظف</span><h2 id="m-welcome">لوحة التسيير</h2><p class="m-note" id="m-permissions"></p></div><button id="m-refresh" class="btn btn-dark m-no-print">تحديث البيانات</button></div><p id="m-message" role="status"></p></div>
+<div class="m-card"><div class="m-toolbar"><div><span class="m-badge" id="m-role">مسيّر</span><h2 id="m-welcome">لوحة التسيير</h2><p class="m-note" id="m-permissions"></p></div><button id="m-refresh" class="btn btn-dark m-no-print">تحديث البيانات</button></div><p id="m-message" role="status"></p></div>
 <nav class="m-tabs m-no-print" aria-label="وحدات التسيير">
 <button data-pane="overview" id="tab-overview" class="active">الرئيسية</button>
 <button data-pane="join-requests" id="tab-join-requests">طلبات الانخراط</button>
@@ -76,7 +76,7 @@
 <p id="workmsg" role="status"></p>
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>المرجع</th><th>تاريخ الإرسال</th><th>الاسم الكامل</th><th>تاريخ الميلاد</th><th>البلدية</th><th>الهاتف</th><th>البريد الإلكتروني</th><th>الاهتمامات</th><th>الخبرة</th><th>حالة الطلب</th><th>ملاحظة المراجعة</th><th>حفظ / طباعة</th></tr></thead><tbody id="requestrows"></tbody></table></div>
 </div>
-<div id="filepanel" class="m-card"><div class="m-toolbar"><h2>ملفات استكمال الانخراط</h2><button class="m-small" id="refresh-files" type="button">تحديث الملفات</button></div><p class="m-note">الملفات تحفظ في مساحة خاصة. رابط العرض مؤقت ومتاح للموظفين المخولين فقط. لا يُعتمد وصل الدفع إلا بعد تحقق أمين المال من السجل المالي.</p><p id="filesmsg" role="status"></p><div class="m-tablewrap"><table class="m-table"><thead><tr><th>مرجع الطلب</th><th>الاسم</th><th>تاريخ الإيداع</th><th>حالة الملف</th><th>التسديد</th><th>ملاحظة المراجعة</th><th>الإجراءات</th></tr></thead><tbody id="filerows"></tbody></table></div></div>
+<div id="filepanel" class="m-card"><div class="m-toolbar"><h2>ملفات استكمال الانخراط</h2><button class="m-small" id="refresh-files" type="button">تحديث الملفات</button></div><p class="m-note">الملفات تحفظ في مساحة خاصة. رابط العرض مؤقت ومتاح للمسيّرين المخولين فقط. لا يُعتمد وصل الدفع إلا بعد تحقق أمين المال من السجل المالي.</p><p id="filesmsg" role="status"></p><div class="m-tablewrap"><table class="m-table"><thead><tr><th>مرجع الطلب</th><th>الاسم</th><th>تاريخ الإيداع</th><th>حالة الملف</th><th>التسديد</th><th>ملاحظة المراجعة</th><th>الإجراءات</th></tr></thead><tbody id="filerows"></tbody></table></div></div>
 </section>
 <section class="m-pane" id="pane-overview">
 <div class="m-statgrid">
