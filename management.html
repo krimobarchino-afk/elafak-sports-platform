@@ -7,7 +7,7 @@
 <title>فضاء تسيير جمعية الأفق</title>
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/management.js?v=20261027-unified-membership-workflow-v3" defer></script>
+<script src="/management.js?v=20261027-site-admin-requirements" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -74,9 +74,6 @@
 <p id="workmsg" role="status"></p>
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>المرجع</th><th>تاريخ الإرسال</th><th>الاسم الكامل</th><th>تاريخ الميلاد</th><th>البلدية</th><th>الهاتف</th><th>البريد الإلكتروني</th><th>الاهتمامات</th><th>الخبرة</th><th>حالة الطلب</th><th>ملاحظة المراجعة</th><th>حفظ / طباعة</th></tr></thead><tbody id="requestrows"></tbody></table></div>
 </div>
-<div id="requirements-admin" class="m-card"><h2>متطلبات استكمال ملف الانخراط</h2><p class="m-note">أضف فقط المتطلبات التي تعتمدها الجمعية رسميًا. اترك القائمة فارغة إلى حين اعتمادها. إدارة القائمة متاحة للرئيس، ويستطيع الأمين العام الاطلاع عليها.</p>
-<form id="requirement-form" class="m-grid"><label>اسم الوثيقة أو المتطلب<input name="title" minlength="3" maxlength="160" required placeholder="اسم المتطلب المعتمد"></label><label>توضيح اختياري<input name="description" maxlength="500" placeholder="تعليمات مختصرة لصاحب الطلب"></label><label style="display:flex;align-items:center;gap:.5rem"><input type="checkbox" name="is_required" style="width:auto"> إلزامي بعد اعتماد القائمة</label><div><button class="m-small" id="requirement-add" type="submit">إضافة متطلب</button></div></form>
-<p id="requirements-msg" role="status"></p><div class="m-tablewrap"><table class="m-table"><thead><tr><th>المتطلب</th><th>التوضيح</th><th>الصفة</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="requirement-rows"></tbody></table></div></div>
 <div id="filepanel" class="m-card"><div class="m-toolbar"><h2>ملفات استكمال الانخراط</h2><button class="m-small" id="refresh-files" type="button">تحديث الملفات</button></div><p class="m-note">الملفات تحفظ في مساحة خاصة. رابط العرض مؤقت ومتاح للموظفين المخولين فقط. لا يُعتمد وصل الدفع إلا بعد تحقق أمين المال من السجل المالي.</p><p id="filesmsg" role="status"></p><div class="m-tablewrap"><table class="m-table"><thead><tr><th>مرجع الطلب</th><th>الاسم</th><th>تاريخ الإيداع</th><th>حالة الملف</th><th>التسديد</th><th>ملاحظة المراجعة</th><th>الإجراءات</th></tr></thead><tbody id="filerows"></tbody></table></div></div>
 </section>
 <section class="m-pane" id="pane-overview">
