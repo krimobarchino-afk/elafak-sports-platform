@@ -7,7 +7,7 @@
 <title>فضاء تسيير جمعية الأفق</title>
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/management.js?v=20261027-join-request-role-fix" defer></script>
+<script src="/management.js?v=20261027-role-specific-modules" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -63,7 +63,9 @@
 <button data-pane="join-requests" id="tab-join-requests">طلبات الانخراط</button>
 <button data-pane="finance" id="tab-finance">المالية</button>
 <button data-pane="activities">الأنشطة</button>
-<button data-pane="equipment">المعدات</button>
+<button data-pane="equipment" id="tab-equipment">سجل العتاد</button>
+<button data-pane="tasks" id="tab-tasks">المهام والتكليفات</button>
+<button data-pane="inspections" id="tab-inspections">التفتيش والمراقبة</button>
 <button data-pane="meetings">الاجتماعات والمحاضر</button>
 <button data-pane="office-roster" id="tab-office-roster">التشكيلة الرسمية</button>
 <button data-pane="archive">الأرشيف والنسخ</button>
@@ -138,6 +140,39 @@
 <p class="m-note">لا تُضاف أي معدّة افتراضيًا. سجّل فقط الموجود فعليًا، مع حالة المعدة والكمية والرقم التسلسلي عند توفره.</p>
 <form id="equipment-form" class="m-grid m-no-print"><input type="hidden" name="id"><label>اسم المعدة<input name="item_name" required maxlength="180"></label><label>الصنف<input name="category" maxlength="120" value="other"></label><label>الكمية<input name="quantity" type="number" min="0" step="1" value="1" required></label><label>الحالة<select name="condition"><option value="good">صالحة</option><option value="new">جديدة</option><option value="needs_repair">تحتاج إصلاحًا</option><option value="out_of_service">خارج الخدمة</option><option value="retired">مستبعدة</option></select></label><label>الرقم التسلسلي<input name="serial_number" maxlength="180"></label><label>تاريخ الاقتناء<input name="acquisition_date" type="date"></label><label>تكلفة الاقتناء (اختياري)<input name="acquisition_cost" type="number" min="0" step=".01"></label><label>مكان التخزين<input name="storage_location" maxlength="180"></label><label style="grid-column:1/-1">ملاحظات<textarea name="notes" maxlength="3000"></textarea></label><div class="m-actions"><button class="btn btn-dark">حفظ المعدة</button><button type="button" id="equipment-cancel" class="m-small">إلغاء التعديل</button></div></form><p id="equipment-msg" role="status"></p>
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>المعدة</th><th>الصنف</th><th>الكمية</th><th>الحالة</th><th>الرقم التسلسلي</th><th>مكان التخزين</th><th>إجراءات</th></tr></thead><tbody id="equipment-rows"></tbody></table></div>
+</div></section>
+<section class="m-pane" id="pane-tasks" hidden>
+<div class="m-card">
+<div class="m-toolbar"><h2>المهام والتكليفات — صلاحية الرئيس</h2><button id="tasks-refresh" class="m-small m-no-print" type="button">تحديث</button></div>
+<p class="m-note">هذا السجل مخصص للرئيس لإسناد المهام ومتابعة آجالها وحالتها. لا يمنح التكليف أي صفة في المكتب التنفيذي أو حق التصويت.</p>
+<form id="task-form" class="m-grid m-no-print">
+<input type="hidden" name="id">
+<label>عنوان المهمة<input name="title" required minlength="3" maxlength="180"></label>
+<label>المكلّف بالمهمة<input name="assigned_to" maxlength="180" placeholder="الاسم أو الصفة"></label>
+<label>الأولوية<select name="priority"><option value="low">منخفضة</option><option value="normal" selected>عادية</option><option value="high">عالية</option><option value="urgent">عاجلة</option></select></label>
+<label>الحالة<select name="status"><option value="pending">معلّقة</option><option value="in_progress">قيد التنفيذ</option><option value="completed">منجزة</option><option value="cancelled">ملغاة</option></select></label>
+<label>آخر أجل<input name="due_date" type="date"></label>
+<label style="grid-column:1/-1">تفاصيل المهمة<textarea name="description" maxlength="5000"></textarea></label>
+<label style="grid-column:1/-1">ملاحظة الإنجاز<textarea name="completion_note" maxlength="3000"></textarea></label>
+<div class="m-actions"><button class="btn btn-dark" type="submit">حفظ التكليف</button><button class="m-small" id="task-cancel" type="button">إلغاء التعديل</button></div>
+</form><p id="tasks-msg" role="status"></p>
+<div class="m-tablewrap"><table class="m-table"><thead><tr><th>المهمة</th><th>المكلّف</th><th>الأولوية</th><th>الحالة</th><th>آخر أجل</th><th>ملاحظة الإنجاز</th><th>إجراءات</th></tr></thead><tbody id="task-rows"></tbody></table></div>
+</div></section>
+<section class="m-pane" id="pane-inspections" hidden>
+<div class="m-card">
+<div class="m-toolbar"><h2>تقارير التفتيش والمراقبة</h2><button id="inspections-refresh" class="m-small m-no-print" type="button">تحديث التقارير</button></div>
+<p class="m-note">سجل مستقل للتقارير الرسمية. يمكن لمفتش الشباب والرياضة الاطلاع على جميع التقارير السابقة والجديدة. التقارير المرسلة لا تعدّل؛ وتُسجل ردود الجمعية وإجراءات التصحيح في سجل متابعة منفصل.</p>
+<form id="inspection-form" class="m-grid m-no-print">
+<label>رقم التقرير<input name="report_number" required minlength="3" maxlength="80"></label>
+<label>تاريخ التفتيش<input name="inspection_date" type="date" required></label>
+<label>الجهة محل التفتيش<input name="inspected_entity" required minlength="2" maxlength="240" value="جمعية الأفق الولائية للرياضات الجوية والجبلية"></label>
+<label>موضوع التفتيش<input name="subject" required minlength="3" maxlength="240"></label>
+<label style="grid-column:1/-1">نطاق التفتيش<textarea name="scope" maxlength="5000"></textarea></label>
+<label style="grid-column:1/-1">الملاحظات والنتائج<textarea name="findings" required minlength="3" maxlength="20000"></textarea></label>
+<label style="grid-column:1/-1">التوصيات<textarea name="recommendations" maxlength="10000"></textarea></label>
+<div class="m-actions"><button class="btn btn-dark" type="submit">حفظ وإرسال التقرير</button><button class="m-small" id="inspection-cancel" type="button">مسح الحقول</button></div>
+</form><p id="inspections-msg" role="status"></p>
+<div class="m-tablewrap"><table class="m-table"><thead><tr><th>رقم التقرير</th><th>التاريخ</th><th>الجهة</th><th>الموضوع</th><th>النتائج</th><th>التوصيات</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="inspection-rows"></tbody></table></div>
 </div></section>
 <section class="m-pane" id="pane-meetings" hidden>
 <div class="m-card"><div class="m-toolbar"><h2>الاجتماعات والمحاضر والقرارات</h2><button id="meetings-export" class="m-small m-no-print">تصدير CSV</button></div>
