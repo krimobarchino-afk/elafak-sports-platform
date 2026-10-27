@@ -7,7 +7,7 @@
 <title>فضاء تسيير جمعية الأفق</title>
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/management.js?v=20261027-dashboard-cards-3" defer></script>
+<script src="/management.js?v=20261027-deliberation-1" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -54,6 +54,25 @@
 .m-header h1{font-size:clamp(1.3rem,3vw,2rem);margin:0}.m-header p{margin:.4rem 0 0;color:#d4e2d8;font-size:.9rem}
 .m-header a{color:#e0efb3}
 @media(max-width:620px){.m-wrap{padding:0 .7rem 2rem}.m-card{padding:.85rem}.m-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.m-tabs button{font-size:.85rem;padding:.6rem .4rem}.m-table{min-width:680px}}
+/* Deliberation workspace */
+.delib-home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;margin:1rem 0}
+.delib-route{display:flex;flex-direction:column;align-items:flex-start;gap:.5rem;min-height:130px;padding:1rem;border:1px solid var(--m-line);border-radius:12px;background:#fff;color:var(--m-ink);font:inherit;text-align:right;cursor:pointer}
+.delib-route:hover{border-color:#829f8f;box-shadow:0 5px 16px #123b3210}
+.delib-route strong{font-size:1rem}
+.delib-route span{font-size:.86rem;line-height:1.7;color:#60746a}
+.delib-route-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#edf4ef;color:#123b32;font-weight:800;font-size:1.1rem}
+.delib-view[hidden]{display:none!important}
+.delib-counts{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:.65rem;margin:1rem 0}
+.delib-count{border:1px solid var(--m-line);background:#f7faf6;border-radius:10px;padding:.8rem}
+.delib-count small{display:block;color:#617369;margin-bottom:.25rem}
+.delib-count strong{font-size:1.3rem;color:#123b32}
+.delib-status{display:inline-block;padding:.2rem .5rem;border-radius:6px;background:#eef2ed;font-size:.8rem;white-space:nowrap}
+.delib-status.approved{background:#e5f5e9;color:#1d6032}
+.delib-status.pending_review{background:#fff4d9;color:#805a00}
+.delib-status.changes_requested{background:#fff0ef;color:#8c231b}
+.delib-toolbar{display:flex;justify-content:space-between;align-items:center;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem}
+.delib-content{min-height:260px}
+@media(max-width:620px){.delib-home-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem}.delib-route{padding:.75rem;min-height:145px}.delib-route strong{font-size:.9rem}.delib-route span{font-size:.78rem}.delib-counts{grid-template-columns:repeat(3,minmax(0,1fr))}.delib-count{padding:.6rem}.delib-count strong{font-size:1.1rem}}
 @media print{.m-header,.m-tabs,.m-no-print,form{display:none!important}.m-wrap{max-width:none;margin:0;padding:0}.m-card{border:0;break-inside:avoid}}
 </style>
 </head>
@@ -187,8 +206,53 @@
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>رقم التقرير</th><th>التاريخ</th><th>الجهة</th><th>الموضوع</th><th>النتائج</th><th>التوصيات</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="inspection-rows"></tbody></table></div>
 </div></section>
 <section class="m-pane" id="pane-meetings" hidden>
-<div class="m-card"><div class="m-toolbar"><h2>الاجتماعات والمحاضر والقرارات</h2><button id="meetings-export" class="m-small m-no-print">تصدير CSV</button></div>
-<p class="m-note">يمكن للأمين العام إنشاء المحاضر وحفظ المسودات؛ اعتماد المحضر النهائي متاح للرئيس أو مدير الموقع. لا تُحذف المحاضر المعتمدة إلا من الرئيس أو مدير الموقع.</p>
+<div class="m-card"><div class="m-toolbar"><h2>المداولات ومخرجاتها</h2><button id="meetings-export" class="m-small m-no-print">تصدير سجل الاجتماعات CSV</button></div>
+<p class="m-note">مسار موحد لتوثيق مخرجات الاجتماعات: يحرر الأمين العام المسودة، ثم يرسلها إلى الرئيس للمراجعة. للرئيس اعتمادها أو إعادتها للتعديل مع ملاحظة واضحة. لا تدخل المخرجات سجل المداولة الرسمي ولا تحصل على رقم قيد إلا بعد اعتماد الرئيس.</p>
+<div id="delib-home" class="delib-view">
+ <div class="delib-home-grid">
+  <button type="button" class="delib-route" data-delib-open="register"><span class="delib-route-icon">▤</span><strong>سجل المداولة</strong><span>المخرجات التي أكدها الرئيس وقُيدت رسميًا بأرقام مرجعية.</span></button>
+  <button type="button" class="delib-route" data-delib-new="report"><span class="delib-route-icon">▧</span><strong>تحرير التقارير</strong><span>إعداد تقرير مرتبط باجتماع وإرساله للمراجعة.</span></button>
+  <button type="button" class="delib-route" data-delib-new="minutes"><span class="delib-route-icon">▤</span><strong>تحرير المحاضر</strong><span>تحرير محضر الاجتماع ومراجعته قبل اعتماده.</span></button>
+  <button type="button" class="delib-route" data-delib-new="decision"><span class="delib-route-icon">✓</span><strong>تحرير القرارات</strong><span>توثيق قرار محدد مرتبط بالمداولة ومصدره.</span></button>
+  <button type="button" class="delib-route" data-delib-open="drafts"><span class="delib-route-icon">✎</span><strong>مسوداتي وملاحظات الرئيس</strong><span>متابعة المسودات، وإتمام التعديلات المطلوبة وإعادة الإرسال.</span></button>
+  <button type="button" class="delib-route" id="delib-review-shortcut" data-delib-open="review"><span class="delib-route-icon">☑</span><strong>مراجعة الرئيس</strong><span>مراجعة المخرجات المرسلة واعتمادها أو طلب تعديلها.</span></button>
+  <button type="button" class="delib-route" data-delib-open="meetings"><span class="delib-route-icon">◷</span><strong>إدارة الاجتماعات</strong><span>إنشاء سجل الاجتماع الأساسي والحضور وجدول الأعمال والنصاب.</span></button>
+ </div>
+ <div class="delib-counts">
+  <div class="delib-count"><small>مسودات</small><strong id="delib-count-drafts">0</strong></div>
+  <div class="delib-count"><small>بانتظار الرئيس</small><strong id="delib-count-review">0</strong></div>
+  <div class="delib-count"><small>مخرجات معتمدة</small><strong id="delib-count-approved">0</strong></div>
+ </div>
+ <p class="m-note" id="delib-home-message" role="status">تُعرض هنا حالة مسار المداولة وفق صلاحيات حسابك.</p>
+</div>
+<section id="delib-register-view" class="delib-view" hidden>
+ <div class="delib-toolbar"><h3>سجل المداولة الرسمي</h3><button type="button" class="m-small" data-delib-home>العودة إلى خيارات المداولة</button></div>
+ <p class="m-note">لا يظهر في هذا السجل إلا المخرج الذي اعتمده الرئيس. رقم القيد يولّد عند الاعتماد ولا يخصص للمسودات.</p>
+ <div class="m-tablewrap"><table class="m-table"><thead><tr><th>رقم القيد</th><th>نوع المخرج</th><th>العنوان</th><th>الاجتماع المصدر</th><th>تاريخ الاجتماع</th><th>تاريخ الاعتماد</th><th>الإجراء</th></tr></thead><tbody id="delib-register-rows"></tbody></table></div>
+</section>
+<section id="delib-drafts-view" class="delib-view" hidden>
+ <div class="delib-toolbar"><h3>المسودات وملاحظات المراجعة</h3><button type="button" class="m-small" data-delib-home>العودة إلى خيارات المداولة</button></div>
+ <p class="m-note">المسودة التي يعيدها الرئيس تظهر معها ملاحظة التعديل. بعد تعديلها تُرسل مجددًا للمراجعة.</p>
+ <div class="m-tablewrap"><table class="m-table"><thead><tr><th>العنوان</th><th>النوع</th><th>الاجتماع</th><th>الحالة</th><th>ملاحظة الرئيس</th><th>الإجراءات</th></tr></thead><tbody id="delib-drafts-rows"></tbody></table></div>
+</section>
+<section id="delib-review-view" class="delib-view" hidden>
+ <div class="delib-toolbar"><h3>مخرجات بانتظار مراجعة الرئيس</h3><button type="button" class="m-small" data-delib-home>العودة إلى خيارات المداولة</button></div>
+ <p class="m-note">الاعتماد إجراء رسمي: بعد التأكيد يُمنح المخرج رقم قيد ويظهر في سجل المداولة. إذا طُلب التعديل، يجب كتابة ملاحظة تشرح المطلوب.</p>
+ <div class="m-tablewrap"><table class="m-table"><thead><tr><th>العنوان</th><th>النوع</th><th>الاجتماع</th><th>تاريخ الإرسال</th><th>المحرر</th><th>الإجراءات</th></tr></thead><tbody id="delib-review-rows"></tbody></table></div>
+</section>
+<section id="delib-form-view" class="delib-view" hidden>
+ <div class="delib-toolbar"><h3 id="delib-form-heading">تحرير مخرج المداولة</h3><button type="button" class="m-small" data-delib-home>العودة إلى خيارات المداولة</button></div>
+ <p class="m-note">اكتب النص على أساس ما جرى فعلًا في الاجتماع، واربطه بمحضر/اجتماع محفوظ. الحفظ ينشئ مسودة فقط ولا يعني اعتمادًا رسميًا.</p>
+ <form id="deliberation-form" class="m-grid">
+  <input type="hidden" name="id"><input type="hidden" name="output_type"><input type="hidden" name="status" value="draft">
+  <label style="grid-column:1/-1">الاجتماع المصدر<select name="meeting_id" id="delib-meeting-id" required><option value="">اختر الاجتماع المصدر</option></select></label>
+  <label style="grid-column:1/-1">عنوان المخرج<input name="title" required minlength="3" maxlength="240" placeholder="عنوان واضح ومحدد"></label>
+  <label style="grid-column:1/-1">النص الكامل<textarea name="content" class="delib-content" required minlength="5" maxlength="30000" placeholder="حرّر النص بدقة. لا تضف وقائع أو قرارات لم تثبت في الاجتماع."></textarea></label>
+  <div class="m-actions"><button type="button" id="delib-save-draft" class="btn btn-dark">حفظ المسودة</button><button type="button" id="delib-submit-review" class="btn btn-dark">حفظ وإرسال إلى الرئيس</button><button type="button" id="delib-cancel-form" class="m-small">إلغاء</button></div>
+ </form>
+ <p id="delib-form-message" role="status"></p>
+</section>
+<div id="legacy-meeting-tools" class="m-hide">
 <div class="m-card" id="decision-settings-card">
 <h3>القرارات التي تتحكم في إعدادات المنصة</h3>
 <p class="m-note">لا يُفعّل أي قرار تلقائيًا بمجرد ذكره في النص. بعد اعتماد محضر الجمعية العامة، يستطيع الرئيس توثيق القرار وربطه بإعداد المنصة. يُحفظ المرجع والتاريخ والنص الذي ورد فيه القرار.</p>
@@ -236,7 +300,7 @@
 </div>
 <form id="meeting-form" class="m-grid m-no-print"><input type="hidden" name="id"><label>عنوان الاجتماع<input name="title" required maxlength="180"></label><label>النوع<select name="meeting_type"><option value="executive">المكتب التنفيذي</option><option value="general_assembly">الجمعية العامة</option><option value="committee">لجنة</option><option value="technical">تقني</option><option value="other">أخرى</option></select></label><label>التاريخ<input name="meeting_date" type="date"></label><label>ساعة البداية<input name="meeting_start_time" type="time"></label><label>ساعة الرفع<input name="meeting_end_time" type="time"></label><label>المكان<input name="location" maxlength="180"></label><label>رئيس الاجتماع<input name="meeting_chair" maxlength="180" placeholder="الاسم والصفة"></label><label>عدد الحاضرين<input name="attendees_count" type="number" min="0" step="1"></label><label>ملاحظة النصاب<input name="quorum_note" maxlength="500"></label><label style="grid-column:1/-1">الحاضرون وصفاتهم (كل اسم في سطر)<textarea name="meeting_attendees" maxlength="5000" placeholder="01 — الاسم واللقب — الصفة"></textarea></label><label style="grid-column:1/-1">جدول الأعمال (كل نقطة في سطر)<textarea name="meeting_agenda" maxlength="5000" placeholder="1- ..."></textarea></label><label style="grid-column:1/-1">مجريات الاجتماع والمناقشات<textarea name="meeting_discussion" maxlength="5000"></textarea></label><label style="grid-column:1/-1">القرارات<textarea name="decisions" maxlength="5000"></textarea></label><label style="grid-column:1/-1">المرفقات والإشارات المرجعية<textarea name="meeting_attachments" maxlength="2000" placeholder="القوائم أو الوثائق المرفقة، إن وجدت"></textarea></label><label style="grid-column:1/-1">نص المحضر النهائي القابل للتحرير والطباعة<textarea name="minutes_text" maxlength="12000" placeholder="أنشئ مسودة من الحقول أعلاه ثم راجع النص وعدّله قبل الحفظ."></textarea></label><div class="m-actions"><button type="button" id="meeting-build-template" class="m-small">تكوين نص المحضر من الحقول</button><button type="submit" class="btn btn-dark">حفظ المسودة</button><button type="button" id="meeting-cancel" class="m-small">إلغاء التعديل</button></div></form><p id="meetings-msg" role="status"></p>
 <div class="m-tablewrap"><table class="m-table"><thead><tr><th>الاجتماع</th><th>النوع</th><th>التاريخ</th><th>المكان</th><th>الحضور</th><th>الحالة</th><th>القرارات/المحضر</th><th>إجراءات</th></tr></thead><tbody id="meeting-rows"></tbody></table></div>
-</div></section>
+</div></div></section>
 <section class="m-pane" id="pane-office-roster" hidden>
 <div class="m-card" id="executive-roster-card">
 <div class="m-toolbar"><h2>التشكيلة الرسمية للمكتب التنفيذي</h2><span class="m-badge">سجل رسمي مستقل عن حسابات الدخول</span></div>
