@@ -69,7 +69,8 @@ $("i-report-form").addEventListener("submit",async e=>{
 $("i-refresh").addEventListener("click",refresh);
 $("i-logout").addEventListener("click",async()=>{await sb.auth.signOut();window.location.replace("/")});
 addEventListener("DOMContentLoaded",async()=>{
- if(ENTRY!=="inspection_inspector"){window.location.replace("/management-portal.html");return}
+ if(ENTRY==="inspection_inspector"){window.location.replace("/management.html?entry=inspection_inspector");return}
+ window.location.replace("/management-portal.html");return;
  if(!window.supabase){msg("i-login-msg","تعذر تحميل خدمة الدخول. تحقق من اتصال الإنترنت.","error");return}
  sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:STORAGE_KEY}});
  const dashboard=$("i-dashboard"),panels=["i-panel-new","i-panel-reports","i-panel-followups"];
