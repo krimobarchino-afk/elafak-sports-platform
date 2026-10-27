@@ -57,6 +57,6 @@ addEventListener("DOMContentLoaded",async()=>{
  sb=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:STORAGE_KEY}});
  $("portal-login-form").addEventListener("submit",login);
  $("portal-logout").addEventListener("click",async()=>{await sb.auth.signOut();window.location.replace("/")});
- try{await resolveCurrentSession()}catch(err){message(err?.message||"تعذر التحقق من الجلسة.","error")}
+ try{await resolveCurrentSession()}catch(err){await sb.auth.signOut();message(err?.message||"تعذر التحقق من الجلسة.","error")}
 });
 })();
