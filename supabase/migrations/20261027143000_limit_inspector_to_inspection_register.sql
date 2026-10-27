@@ -22,7 +22,9 @@ begin
       'create policy %I on public.%I as restrictive for all to authenticated using (coalesce((select private.current_staff_role()), %L) <> %L) with check (coalesce((select private.current_staff_role()), %L) <> %L)',
       'Exclude inspection inspector from non-inspection records',
       v_table,
+      '',
       'inspection_inspector',
+      '',
       'inspection_inspector'
     );
   end loop;
