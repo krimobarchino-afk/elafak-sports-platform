@@ -7,7 +7,7 @@
 <title>فضاء تسيير جمعية الأفق</title>
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="/management.js?v=20261027-deliberation-1" defer></script>
+<script src="/management.js?v=20261027-deliberation-shared-2" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -207,15 +207,15 @@
 </div></section>
 <section class="m-pane" id="pane-meetings" hidden>
 <div class="m-card"><div class="m-toolbar"><h2>المداولات ومخرجاتها</h2><button id="meetings-export" class="m-small m-no-print">تصدير سجل الاجتماعات CSV</button></div>
-<p class="m-note">مسار موحد لتوثيق مخرجات الاجتماعات: يحرر الأمين العام المسودة، ثم يرسلها إلى الرئيس للمراجعة. للرئيس اعتمادها أو إعادتها للتعديل مع ملاحظة واضحة. لا تدخل المخرجات سجل المداولة الرسمي ولا تحصل على رقم قيد إلا بعد اعتماد الرئيس.</p>
+<p class="m-note">فضاء عمل مشترك: ينشئ الأمين العام المسودة ويحفظها مباشرة، ويطلع عليها الرئيس في المكان نفسه. يستطيع الرئيس تدوين ملاحظة تظهر فورًا للأمين العام أو اعتماد المخرج. لا يوجد زر إرسال أو إحالة.</p>
 <div id="delib-home" class="delib-view">
  <div class="delib-home-grid">
   <button type="button" class="delib-route" data-delib-open="register"><span class="delib-route-icon">▤</span><strong>سجل المداولة</strong><span>المخرجات التي أكدها الرئيس وقُيدت رسميًا بأرقام مرجعية.</span></button>
-  <button type="button" class="delib-route" data-delib-new="report"><span class="delib-route-icon">▧</span><strong>تحرير التقارير</strong><span>إعداد تقرير مرتبط باجتماع وإرساله للمراجعة.</span></button>
-  <button type="button" class="delib-route" data-delib-new="minutes"><span class="delib-route-icon">▤</span><strong>تحرير المحاضر</strong><span>تحرير محضر الاجتماع ومراجعته قبل اعتماده.</span></button>
-  <button type="button" class="delib-route" data-delib-new="decision"><span class="delib-route-icon">✓</span><strong>تحرير القرارات</strong><span>توثيق قرار محدد مرتبط بالمداولة ومصدره.</span></button>
-  <button type="button" class="delib-route" data-delib-open="drafts"><span class="delib-route-icon">✎</span><strong>مسوداتي وملاحظات الرئيس</strong><span>متابعة المسودات، وإتمام التعديلات المطلوبة وإعادة الإرسال.</span></button>
-  <button type="button" class="delib-route" id="delib-review-shortcut" data-delib-open="review"><span class="delib-route-icon">☑</span><strong>مراجعة الرئيس</strong><span>مراجعة المخرجات المرسلة واعتمادها أو طلب تعديلها.</span></button>
+  <button type="button" class="delib-route" data-delib-new="report" data-delib-secretary><span class="delib-route-icon">▧</span><strong>تحرير التقارير</strong><span>إنشاء مسودة مشتركة يحفظها الأمين العام في مكان العمل نفسه.</span></button>
+  <button type="button" class="delib-route" data-delib-new="minutes" data-delib-secretary><span class="delib-route-icon">▤</span><strong>تحرير المحاضر</strong><span>إنشاء محضر ومتابعة ملاحظات الرئيس في المساحة المشتركة.</span></button>
+  <button type="button" class="delib-route" data-delib-new="decision" data-delib-secretary><span class="delib-route-icon">✓</span><strong>تحرير القرارات</strong><span>توثيق قرار مرتبط بالاجتماع، دون صلاحية تأكيده للمحرر.</span></button>
+  <button type="button" class="delib-route" data-delib-open="drafts"><span class="delib-route-icon">✎</span><strong>مسودات العمل المشتركة</strong><span>المسودات وملاحظات الرئيس وحالة كل مخرج في مكان واحد.</span></button>
+  
   <button type="button" class="delib-route" data-delib-open="meetings"><span class="delib-route-icon">◷</span><strong>إدارة الاجتماعات</strong><span>إنشاء سجل الاجتماع الأساسي والحضور وجدول الأعمال والنصاب.</span></button>
  </div>
  <div class="delib-counts">
@@ -223,6 +223,7 @@
   <div class="delib-count"><small>بانتظار الرئيس</small><strong id="delib-count-review">0</strong></div>
   <div class="delib-count"><small>مخرجات معتمدة</small><strong id="delib-count-approved">0</strong></div>
  </div>
+ <section class="delib-notifications m-card" aria-labelledby="delib-notifications-heading"><div class="delib-toolbar"><h3 id="delib-notifications-heading">إشعارات حركة العمل</h3><button type="button" id="delib-notifications-refresh" class="m-small">تحديث الإشعارات</button></div><p class="m-note">يظهر هنا نشاط الطرف الآخر: إنشاء المسودة أو تحديثها، ملاحظات الرئيس، والاعتماد النهائي.</p><div id="delib-notifications-list" class="delib-notifications-list"><p class="m-note">جارٍ تحميل الإشعارات…</p></div></section>
  <p class="m-note" id="delib-home-message" role="status">تُعرض هنا حالة مسار المداولة وفق صلاحيات حسابك.</p>
 </div>
 <section id="delib-register-view" class="delib-view" hidden>
@@ -232,23 +233,23 @@
 </section>
 <section id="delib-drafts-view" class="delib-view" hidden>
  <div class="delib-toolbar"><h3>المسودات وملاحظات المراجعة</h3><button type="button" class="m-small" data-delib-home>العودة إلى خيارات المداولة</button></div>
- <p class="m-note">المسودة التي يعيدها الرئيس تظهر معها ملاحظة التعديل. بعد تعديلها تُرسل مجددًا للمراجعة.</p>
- <div class="m-tablewrap"><table class="m-table"><thead><tr><th>العنوان</th><th>النوع</th><th>الاجتماع</th><th>الحالة</th><th>ملاحظة الرئيس</th><th>الإجراءات</th></tr></thead><tbody id="delib-drafts-rows"></tbody></table></div>
+ <p class="m-note">هذه مساحة مشتركة للطرفين. ينشئ الأمين العام المسودة ويعدلها، ويكتب الرئيس ملاحظة تظهر هنا مباشرة أو يعتمدها. لا يوجد إرسال أو إحالة بين الطرفين.</p>
+ <div class="m-tablewrap"><table class="m-table"><thead><tr><th>العنوان</th><th>النوع</th><th>الاجتماع</th><th>الحالة</th><th>ملاحظة الرئيس</th><th>آخر تحديث</th><th>الإجراءات</th></tr></thead><tbody id="delib-drafts-rows"></tbody></table></div>
 </section>
 <section id="delib-review-view" class="delib-view" hidden>
  <div class="delib-toolbar"><h3>مخرجات بانتظار مراجعة الرئيس</h3><button type="button" class="m-small" data-delib-home>العودة إلى خيارات المداولة</button></div>
- <p class="m-note">الاعتماد إجراء رسمي: بعد التأكيد يُمنح المخرج رقم قيد ويظهر في سجل المداولة. إذا طُلب التعديل، يجب كتابة ملاحظة تشرح المطلوب.</p>
+ <p class="m-note">هذه المساحة لم تعد تستخدم؛ تُدار المراجعة داخل مسودات العمل المشتركة.</p>
  <div class="m-tablewrap"><table class="m-table"><thead><tr><th>العنوان</th><th>النوع</th><th>الاجتماع</th><th>تاريخ الإرسال</th><th>المحرر</th><th>الإجراءات</th></tr></thead><tbody id="delib-review-rows"></tbody></table></div>
 </section>
 <section id="delib-form-view" class="delib-view" hidden>
  <div class="delib-toolbar"><h3 id="delib-form-heading">تحرير مخرج المداولة</h3><button type="button" class="m-small" data-delib-home>العودة إلى خيارات المداولة</button></div>
- <p class="m-note">اكتب النص على أساس ما جرى فعلًا في الاجتماع، واربطه بمحضر/اجتماع محفوظ. الحفظ ينشئ مسودة فقط ولا يعني اعتمادًا رسميًا.</p>
+ <p class="m-note">اكتب النص على أساس ما جرى فعلًا في الاجتماع. الحفظ يجعل المسودة ظاهرة للطرفين في مساحة العمل المشتركة، ولا يعني اعتمادها رسميًا.</p>
  <form id="deliberation-form" class="m-grid">
   <input type="hidden" name="id"><input type="hidden" name="output_type"><input type="hidden" name="status" value="draft">
   <label style="grid-column:1/-1">الاجتماع المصدر<select name="meeting_id" id="delib-meeting-id" required><option value="">اختر الاجتماع المصدر</option></select></label>
   <label style="grid-column:1/-1">عنوان المخرج<input name="title" required minlength="3" maxlength="240" placeholder="عنوان واضح ومحدد"></label>
   <label style="grid-column:1/-1">النص الكامل<textarea name="content" class="delib-content" required minlength="5" maxlength="30000" placeholder="حرّر النص بدقة. لا تضف وقائع أو قرارات لم تثبت في الاجتماع."></textarea></label>
-  <div class="m-actions"><button type="button" id="delib-prefill-from-meeting" class="m-small">استيراد مسودة من الاجتماع</button><button type="button" id="delib-save-draft" class="btn btn-dark">حفظ المسودة</button><button type="button" id="delib-submit-review" class="btn btn-dark">حفظ وإرسال إلى الرئيس</button><button type="button" id="delib-cancel-form" class="m-small">إلغاء</button></div>
+  <div class="m-actions"><button type="button" id="delib-prefill-from-meeting" class="m-small">استيراد مسودة من الاجتماع</button><button type="button" id="delib-save-draft" class="btn btn-dark">حفظ المسودة المشتركة</button><button type="button" id="delib-cancel-form" class="m-small">إلغاء</button></div>
  </form>
  <p id="delib-form-message" role="status"></p>
 </section>
