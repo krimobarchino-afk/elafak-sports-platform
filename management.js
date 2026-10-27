@@ -538,6 +538,20 @@ function subscribeDeliberationUpdates(){
  window.__delibRealtime=sb.channel("deliberation-shared-workspace")
   .on("postgres_changes",{event:"*",schema:"public",table:"deliberation_outputs"},async()=>{await loadDeliberationOutputs();await loadDeliberationNotifications()})
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"deliberation_notifications",filter:"recipient_user_id=eq."+user.id},()=>loadDeliberationNotifications())
+  .on("postgres_changes",{event:"*",schema:"public",table:"official_record_drafts"},async event=>{
+   const row=event.new&&Object.keys(event.new).length?event.new:event.old;
+   const type=row?.record_type;if(!type)return;
+   try{
+    await loadOfficialRecordDrafts(type);
+    if(type==="finance_transaction"&&canViewFinance())await loadFinance();
+    if(type==="equipment"&&canViewEquipment())await loadEquipment();
+    if(type==="activity"&&canViewActivities())await loadActivities();
+    if(row.created_by!==user.id){
+     const label=type==="finance_transaction"?"مسودة مالية":type==="equipment"?"مسودة عتاد":"مسودة نشاط";
+     message("m-message","إشعار: حدث تحديث في "+label+" ضمن مساحة العمل المشتركة.","success");
+    }
+   }catch(e){console.error("[Elafak official drafts realtime]",e)}
+  })
   .subscribe();
 }
 async function saveDeliberationDraft(){
