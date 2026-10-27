@@ -95,6 +95,7 @@ function applyPermissions(){
  $("finance-expense").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-closing").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-year-status").closest("label").classList.toggle("m-hide",!canViewFinance());
+ if(inspectorOnly){document.querySelectorAll(".m-tabs button").forEach(b=>b.classList.toggle("m-hide",b.id!=="tab-inspections"));}
 }
 async function loadYears(){
  if(!canViewFinance())return;
