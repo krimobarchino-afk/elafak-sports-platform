@@ -3,7 +3,7 @@
 const SUPABASE_URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
 const KEY="sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ";
 const $=id=>document.getElementById(id);
-const ROLE={site_admin:"مدير الموقع — موظف إداري تقني",president:"الرئيس — عضو المكتب التنفيذي",deputy_president:"نائب الرئيس — عضو المكتب التنفيذي",secretary_general:"الأمين العام — عضو المكتب التنفيذي",treasurer:"أمين المال — عضو المكتب التنفيذي",deputy_secretary_general:"نائب الأمين العام — عضو المكتب التنفيذي",deputy_treasurer:"نائب أمين المال — عضو المكتب التنفيذي",technical_director:"المدير التقني — موظف/مسؤول تقني"};
+const ROLE={site_admin:"مدير الموقع — موظف إداري تقني",president:"الرئيس — عضو المكتب التنفيذي",deputy_president:"نائب الرئيس — عضو المكتب التنفيذي",secretary_general:"الأمين العام — عضو المكتب التنفيذي",treasurer:"أمين المال — عضو المكتب التنفيذي",deputy_secretary_general:"نائب الأمين العام — عضو المكتب التنفيذي",deputy_treasurer:"نائب أمين المال — عضو المكتب التنفيذي",technical_director:"المدير التقني — موظف/مسؤول تقني",inspection_inspector:"مفتش الشباب والرياضة — حساب اطلاع وتفتيش"};
 const TYPE={income:"إيراد",expense:"مصروف"};
 const PAY={bank:"البنك",cash:"نقدًا",transfer:"تحويل",other:"أخرى"};
 const ACTTYPE={paragliding:"الطيران الشراعي",hiking:"المشي الجبلي",training:"التكوين",volunteering:"التطوع",other:"أخرى"};
@@ -21,10 +21,13 @@ function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
 function canWriteFinance(){return roleIs("president","treasurer");}
 function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
-function canViewEquipment(){return canViewActivities();}
+function canViewEquipment(){return roleIs("president","treasurer");}
+function canViewTasks(){return roleIs("president");}
+function canViewInspections(){return roleIs("inspection_inspector","president","secretary_general");}
+function canEditInspections(){return roleIs("inspection_inspector");}
 function canViewMeetings(){return canViewActivities();}
 function canEditActivities(){return roleIs("president","technical_director");}
-function canEditEquipment(){return roleIs("president","technical_director");}
+function canEditEquipment(){return roleIs("president","treasurer");}
 function canEditMeetings(){return roleIs("president","secretary_general");}
 function canApprove(){return roleIs("president");}
 function localToday(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
@@ -46,9 +49,17 @@ function setupTabs(){
   document.querySelectorAll(".m-tabs button").forEach(x=>x.classList.toggle("active",x===b));
   document.querySelectorAll(".m-pane").forEach(x=>x.hidden=x.id!=="pane-"+b.dataset.pane);
   if(b.dataset.pane==="archive")loadAudit();
+  if(b.dataset.pane==="tasks")loadTasks().catch(e=>message("tasks-msg",e.message,"error"));
+  if(b.dataset.pane==="inspections")loadInspectionReports().catch(e=>message("inspections-msg",e.message,"error"));
  }));
 }
 function applyPermissions(){
+ $("tab-equipment").classList.toggle("m-hide",!canViewEquipment());
+ $("tab-tasks").classList.toggle("m-hide",!canViewTasks());
+ $("tab-inspections").classList.toggle("m-hide",!canViewInspections());
+ $("equipment-form").classList.toggle("m-hide",!canEditEquipment());
+ $("task-form").classList.toggle("m-hide",!canViewTasks());
+ $("inspection-form").classList.toggle("m-hide",!canEditInspections());
  $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
  $("tab-join-requests").classList.toggle("m-hide",!roleIs("president","secretary_general"));
  $("join-request-review-card").classList.toggle("m-hide",!roleIs("president","secretary_general"));
@@ -117,12 +128,66 @@ async function loadActivities(){
  if(!activities.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد أنشطة مسجلة.");td.colSpan=8;body.append(tr)}
 }
 async function loadEquipment(){
+ if(!canViewEquipment())return;
  const {data,error}=await sb.from("equipment").select("*").order("item_name");
  if(error)throw error;equipment=data||[];$("stat-equipment").textContent=equipment.filter(x=>!x.is_test).reduce((n,x)=>n+Number(x.quantity||0),0);
  const body=$("equipment-rows");body.replaceChildren();
  equipment.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.item_name+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,x.category);safeCell(tr,x.quantity);safeCell(tr,CONDITION[x.condition]||x.condition);safeCell(tr,x.serial_number);safeCell(tr,x.storage_location);const box=rowActions(tr);
  if(canEditEquipment()){button(box,"تعديل",()=>{setForm($("equipment-form"),x);$("equipment-form").scrollIntoView({behavior:"smooth",block:"center"})});if(roleIs("president"))button(box,"حذف",async()=>{if(!confirm("حذف هذه المعدة من سجل الجرد؟"))return;try{const {error}=await sb.from("equipment").delete().eq("id",x.id);if(error)throw error;await loadEquipment();message("equipment-msg","تم حذف المعدة.","success")}catch(e){message("equipment-msg","تعذر الحذف: "+e.message,"error")}},"danger")}else safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!equipment.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد معدات مسجلة. أدخل الجرد بعد التحقق الفعلي.");td.colSpan=7;body.append(tr)}
+}
+async function loadTasks(){
+ if(!canViewTasks())return;
+ const {data,error}=await sb.from("executive_tasks").select("*").order("due_date",{ascending:true,nullsFirst:false}).order("created_at",{ascending:false});
+ if(error)throw error;
+ const rows=$("task-rows");rows.replaceChildren();
+ (data||[]).forEach(t=>{
+  const tr=document.createElement("tr");
+  safeCell(tr,t.title);safeCell(tr,t.assigned_to||"—");
+  safeCell(tr,({low:"منخفضة",normal:"عادية",high:"عالية",urgent:"عاجلة"})[t.priority]||t.priority);
+  safeCell(tr,({pending:"معلّقة",in_progress:"قيد التنفيذ",completed:"منجزة",cancelled:"ملغاة"})[t.status]||t.status);
+  safeCell(tr,dateFmt(t.due_date));safeCell(tr,t.completion_note||"—");
+  const box=rowActions(tr);
+  button(box,"تعديل",()=>{setForm($("task-form"),t);$("task-form").scrollIntoView({behavior:"smooth",block:"center"})});
+  button(box,"حذف",async()=>{if(!confirm("حذف هذا التكليف؟"))return;try{const {error}=await sb.from("executive_tasks").delete().eq("id",t.id);if(error)throw error;await loadTasks();message("tasks-msg","تم حذف التكليف.","success")}catch(e){message("tasks-msg","تعذر الحذف: "+e.message,"error")}},"danger");
+  rows.append(tr);
+ });
+ if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد مهام أو تكليفات مسجلة.");td.colSpan=7;rows.append(tr)}
+}
+async function loadInspectionReports(){
+ if(!canViewInspections())return;
+ const {data,error}=await sb.from("inspection_reports").select("*").order("inspection_date",{ascending:false}).order("created_at",{ascending:false});
+ if(error)throw error;
+ const rows=$("inspection-rows");rows.replaceChildren();
+ (data||[]).forEach(r=>{
+  const tr=document.createElement("tr");
+  safeCell(tr,r.report_number);safeCell(tr,dateFmt(r.inspection_date));safeCell(tr,r.inspected_entity);safeCell(tr,r.subject);
+  safeCell(tr,r.findings);safeCell(tr,r.recommendations||"—");safeCell(tr,r.status==="submitted"?"مرسل رسميًا":"مسودة");
+  const box=rowActions(tr);
+  button(box,"طباعة",()=>printInspectionReport(r));
+  rows.append(tr);
+ });
+ if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد تقارير تفتيش مسجلة في النظام حتى الآن.");td.colSpan=8;rows.append(tr)}
+}
+function printInspectionReport(r){
+ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const sec=(title,value)=>'<h3>'+esc(title)+'</h3><p>'+esc(value||"—")+'</p>';
+ const w=window.open("","_blank");if(!w){message("inspections-msg","اسمح بالنوافذ المنبثقة لطباعة التقرير.","error");return}
+ w.document.write('<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>تقرير تفتيش</title><style>body{font-family:Tahoma,Arial;max-width:850px;margin:30px auto;padding:20px;line-height:2;color:#17352e}h1{text-align:center}p{white-space:pre-wrap}.meta{border:1px solid #bbb;padding:12px}</style><h1>جمعية الأفق الولائية للرياضات الجوية والجبلية</h1><h2>تقرير تفتيش ومراقبة</h2><div class="meta">رقم التقرير: '+esc(r.report_number)+'<br>التاريخ: '+esc(dateFmt(r.inspection_date))+'<br>الجهة: '+esc(r.inspected_entity)+'<br>الموضوع: '+esc(r.subject)+'</div>'+sec("نطاق التفتيش",r.scope)+sec("الملاحظات والنتائج",r.findings)+sec("التوصيات",r.recommendations)+'<p>الحالة: '+esc(r.status==="submitted"?"مرسل رسميًا":"مسودة")+'</p><script>window.print()<\/script></html>');
+ w.document.close();
+}
+async function submitInspectionReport(form){
+ if(!canEditInspections()){message("inspections-msg","هذا الحساب لا يملك صلاحية إنشاء التقارير.","error");return}
+ const v=values(form),payload={report_number:v.report_number,inspection_date:v.inspection_date,inspected_entity:v.inspected_entity,subject:v.subject,scope:v.scope||"",findings:v.findings,recommendations:v.recommendations||"",status:"draft",created_by:user.id,submitted_at:null};
+ const b=form.querySelector('button[type="submit"]');if(b)b.disabled=true;
+ try{
+  const {data,error}=await sb.from("inspection_reports").insert(payload).select("id").single();if(error)throw error;
+  const {error:submitError}=await sb.from("inspection_reports").update({status:"submitted",submitted_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",data.id);
+  if(submitError)throw submitError;
+  form.reset();form.elements.inspection_date.value=localToday();form.elements.inspected_entity.value="جمعية الأفق الولائية للرياضات الجوية والجبلية";
+  await loadInspectionReports();message("inspections-msg","تم حفظ التقرير وإرساله. لا يمكن تعديل التقرير بعد إرساله.","success");
+ }catch(e){message("inspections-msg","تعذر إرسال التقرير: "+e.message,"error")}
+ finally{if(b)b.disabled=false}
 }
 function suggestDecisionFromMeeting(){
  const source=meetings.find(m=>m.id===$("decision-source-meeting").value);
@@ -388,7 +453,9 @@ async function refreshAll(){
  if(roleIs("president","secretary_general")){await run("طلبات الانخراط",loadJoinRequests)}
  if(roleIs("president","secretary_general","treasurer"))await run("ملفات استكمال الانخراط",loadJoinFiles);
  if(canViewActivities())await run("الأنشطة",loadActivities);
- if(canViewEquipment())await run("المعدات",loadEquipment);
+ if(canViewEquipment())await run("سجل العتاد",loadEquipment);
+ if(canViewTasks())await run("المهام والتكليفات",loadTasks);
+ if(canViewInspections())await run("تقارير التفتيش",loadInspectionReports);
  if(canViewMeetings()){
   await run("الاجتماعات",loadMeetings);
   await run("قائمة الجمعية العامة",loadFoundingRoster);
@@ -470,6 +537,19 @@ function bind(){
  $("finance-cancel").onclick=()=>{setForm($("finance-form"));$("finance-form").elements.transaction_date.value=localToday();message("finance-msg","تم إلغاء التعديل.")};
  $("activity-cancel").onclick=()=>setForm($("activity-form"));
  $("equipment-cancel").onclick=()=>setForm($("equipment-form"));
+ $("tasks-refresh").onclick=()=>loadTasks().catch(e=>message("tasks-msg",e.message,"error"));
+ $("task-cancel").onclick=()=>setForm($("task-form"));
+ $("task-form").addEventListener("submit",async e=>{
+  e.preventDefault();if(!canViewTasks()){message("tasks-msg","هذه الوحدة خاصة بالرئيس.","error");return}
+  const v=values(e.currentTarget),id=v.id;delete v.id;
+  const status=v.status||"pending";
+  const payload={title:v.title,description:v.description||"",assigned_to:v.assigned_to||"",priority:v.priority||"normal",status,due_date:v.due_date||null,completion_note:v.completion_note||"",created_by:user.id,updated_at:new Date().toISOString(),completed_at:status==="completed"?new Date().toISOString():null};
+  try{const q=id?sb.from("executive_tasks").update(payload).eq("id",id):sb.from("executive_tasks").insert(payload);const {error}=await q;if(error)throw error;setForm($("task-form"));await loadTasks();message("tasks-msg","تم حفظ التكليف.","success")}catch(err){message("tasks-msg","تعذر حفظ التكليف: "+err.message,"error")}
+ });
+ $("inspections-refresh").onclick=()=>loadInspectionReports().catch(e=>message("inspections-msg",e.message,"error"));
+ $("inspection-cancel").onclick=()=>{setForm($("inspection-form"));$("inspection-form").elements.inspection_date.value=localToday();$("inspection-form").elements.inspected_entity.value="جمعية الأفق الولائية للرياضات الجوية والجبلية"};
+ $("inspection-form").addEventListener("submit",e=>{e.preventDefault();submitInspectionReport(e.currentTarget)});
+ $("inspection-form").elements.inspection_date.value=localToday();
  $("meeting-cancel").onclick=()=>{setForm($("meeting-form"));message("meetings-msg","تم إلغاء التعديل.")};
  $("meeting-build-template").onclick=()=>{
   const f=$("meeting-form"),v=values(f),type=MEETTYPE[v.meeting_type]||v.meeting_type;
@@ -543,6 +623,8 @@ function bind(){
  $("finance-export").onclick=()=>exportCSV("elafak-finance-"+$("finance-year").value+".csv",transactions.filter(x=>!x.is_test));
  $("activities-export").onclick=()=>exportCSV("elafak-activities.csv",activities.filter(x=>!x.is_test));
  $("equipment-export").onclick=()=>exportCSV("elafak-equipment.csv",equipment.filter(x=>!x.is_test));
+ $("tasks-refresh").setAttribute("aria-label","تحديث سجل المهام");
+ $("inspections-refresh").setAttribute("aria-label","تحديث تقارير التفتيش");
  $("meetings-export").onclick=()=>exportCSV("elafak-meetings.csv",meetings.filter(x=>!x.is_test));
  $("backup-json").onclick=backup;$("print-page").onclick=()=>window.print();$("audit-refresh").onclick=()=>loadAudit();
  saveForm($("finance-form"),"finance_transactions",["transaction_date","transaction_type","category","amount","payment_method","reference","description"],canFinance,"finance-msg");
