@@ -136,6 +136,7 @@ function applyPermissions(){
  $("delib-notifications-heading")?.closest(".delib-notifications")?.classList.toggle("m-hide",roleIs("inspection_inspector"));
  document.querySelectorAll("[data-delib-new]").forEach(el=>el.classList.toggle("m-hide",roleIs("inspection_inspector")||!roleIs("secretary_general")));
  document.querySelectorAll("[data-delib-open=\"drafts\"],[data-delib-open=\"meetings\"]").forEach(el=>el.classList.toggle("m-hide",roleIs("inspection_inspector")||!canEditMeetings()));
+ document.querySelector('[data-delib-open="register"]')?.classList.toggle("m-hide",roleIs("inspection_inspector"));
  renderDashboardCards();
 }
 async function loadYears(){
@@ -545,6 +546,7 @@ function renderDeliberationTable(bodyId,rows,mode){
  if(!rows.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=mode==="register"?7:7;td.textContent=emptyText;tr.append(td);body.append(tr)}
 }
 async function loadDeliberationOutputs(){
+ if(roleIs("inspection_inspector")){deliberationOutputs=[];return;}
  let outputQuery=sb.from("deliberation_outputs").select("*");
  if(roleIs("inspection_inspector"))outputQuery=outputQuery.eq("status","approved").not("register_year","is",null).not("register_number","is",null);
  const {data,error}=await outputQuery.order("created_at",{ascending:false});
@@ -560,7 +562,7 @@ async function loadDeliberationOutputs(){
  renderDeliberationTable("delib-review-rows",[],"review");
 }
 async function loadDeliberationNotifications(){
- const list=$("delib-notifications-list");if(!list||!user)return;
+ const list=$("delib-notifications-list");if(!list||!user||roleIs("inspection_inspector"))return;
  const {data,error}=await sb.from("deliberation_notifications").select("id,output_id,event_type,title,body,created_at,read_at").order("created_at",{ascending:false}).limit(30);
  if(error){list.textContent="تعذر تحميل الإشعارات: "+error.message;return}
  list.replaceChildren();
