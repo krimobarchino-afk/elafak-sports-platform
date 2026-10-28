@@ -23,7 +23,7 @@ const FIELDS={
  tasks:[["title","عنوان المهمة","text",true],["assigned_to","المكلّف بالمهمة","text",true],["priority","الأولوية","select",true,["منخفضة","عادية","عالية","عاجلة"]],["due_date","الأجل","date",false],["description","تفاصيل التكليف","textarea",true],["status","حالة التنفيذ","select",true,["جديدة","قيد التنفيذ","منجزة","مؤجلة"]]],
  inspection:[["report_date","تاريخ التفتيش/المراقبة","date",true],["inspector_name","اسم المفتش","text",true],["scope","موضوع التفتيش","text",true],["observations","الملاحظات والمعاينات","textarea",true],["recommendations","التوصيات","textarea",false],["follow_up","المتابعة المطلوبة","textarea",false]]
 };
-let sb,profile,editDraft=null;
+let sb,profile,editDraft=null,activeRegisterKey=null;
 const msg=(s,kind="")=>{const e=$("registers-msg");if(e){e.textContent=s;e.className="m-msg "+kind}};
 function el(tag,txt,cls){const n=document.createElement(tag);if(txt!==undefined)n.textContent=txt;if(cls)n.className=cls;return n}
 function roleIs(...r){return !!profile&&r.includes(profile.role)}
@@ -68,6 +68,28 @@ function renderTable(key,entries,drafts){
  else {const table=el("table");table.className="m-table";const head=el("thead"),hr=el("tr");["الرقم الرسمي","التاريخ","المحتوى","القيد"].forEach(x=>hr.append(el("th",x)));head.append(hr);table.append(head);const body=el("tbody");for(const e of officialEntries){const row=el("tr");row.append(el("td",e.register_year+"/"+e.register_number),el("td",formatDate(e.approved_at)),el("td",renderPayload(e.payload)),el("td",e.approved_by?"معتمد من الرئيس":"قيد مباشر وفق الصلاحية"));body.append(row)}table.append(body);section.append(table)}
  host.append(section)
 }
+function showRegister(key){
+ if(!key||!ROLES[key]?.includes(profile?.role))return;
+ activeRegisterKey=key;
+ for(const k of Object.keys(TITLES)){const host=$("register-"+k);if(host)host.hidden=k!==key}
+ document.querySelectorAll("#register-choice-grid [data-register-key]").forEach(b=>{
+  const active=b.dataset.registerKey===key;b.classList.toggle("active",active);b.setAttribute("aria-pressed",active?"true":"false");
+ });
+ const form=$("register-draft-form");
+ if(form.dataset.key&&form.dataset.key!==key){form.hidden=true;form.reset();editDraft=null}
+ $("register-selection-hint").textContent="السجل المفتوح الآن: "+TITLES[key]+" — لا تظهر بقية السجلات داخل هذه الصفحة.";
+}
+function renderRegisterChoices(){
+ const grid=$("register-choice-grid");grid.replaceChildren();
+ for(const key of Object.keys(TITLES)){
+  if(!ROLES[key].includes(profile.role))continue;
+  const b=el("button",undefined,"m-dashboard-card");b.type="button";b.dataset.registerKey=key;
+  b.append(el("span","▤","m-dashboard-icon"),el("span",TITLES[key],"m-dashboard-title"));
+  const descriptions={deliberation:"المداولات والقرارات المعتمدة",accounting:"الإيرادات والمصروفات والقيود المالية",equipment:"جرد العتاد وحالته",outgoing_mail:"المراسلات الصادرة مرتبة بالتاريخ",incoming_mail:"المراسلات الواردة مرتبة بالتاريخ",activities:"الأنشطة والبرامج المنجزة والمبرمجة",tasks:"المهام والتكليفات الرئاسية",inspection:"تقارير التفتيش والمراقبة"};
+  b.append(el("span",descriptions[key],"m-dashboard-description"));
+  b.setAttribute("aria-pressed","false");b.onclick=()=>showRegister(key);grid.append(b);
+ }
+}
 function profileUserId(){return profile?.user_id}
 function notifyUI(items){const host=$("register-notifications");host.replaceChildren();if(!items.length){host.append(el("p","لا توجد إشعارات جديدة.","m-note"));return}for(const n of items){const card=el("div",undefined,"delib-notification");card.append(el("strong",n.title),el("p",n.body),el("small",formatDate(n.created_at)));const b=el("button","تمييز كمقروء","m-small");b.onclick=async()=>{await sb.from("association_register_notifications").update({read_at:new Date().toISOString()}).eq("id",n.id);await loadNotifications()};card.append(b);host.append(card)}}
 async function loadNotifications(){const {data,error}=await sb.from("association_register_notifications").select("*").is("read_at",null).order("created_at",{ascending:false}).limit(30);if(error){$("register-notifications").textContent="تعذر تحميل الإشعارات: "+error.message;return}notifyUI(data||[])}
@@ -81,7 +103,10 @@ async function loadAll(){
   let drafts=[];if(key in DRAFT_ROLE){const q=sb.from("association_register_drafts").select("*").eq("register_key",key).neq("status","approved").order("created_at",{ascending:false}).limit(100);const {data:d,error:de}=await q;if(!de)drafts=d||[]}
   renderTable(key,entries||[],drafts);
  }
- await loadNotifications();msg("تم تحديث السجلات التي يسمح بها حسابك.","success")
+ await loadNotifications();
+ if(!activeRegisterKey||!ROLES[activeRegisterKey]?.includes(profile.role))activeRegisterKey=keys.find(k=>ROLES[k].includes(profile.role))||null;
+ renderRegisterChoices();if(activeRegisterKey)showRegister(activeRegisterKey);
+ msg("تم تحديث السجلات التي يسمح بها حسابك.","success")
 }
 document.addEventListener("DOMContentLoaded",async()=>{
  const pane=$("pane-official-registers");if(!pane)return;
@@ -95,6 +120,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
   document.querySelectorAll(".m-tabs button[data-pane]").forEach(b=>{if(["finance","activities","equipment","meetings"].includes(b.dataset.pane))b.classList.add("m-hide")});
   document.querySelectorAll(".m-dashboard-card").forEach(card=>{if(["finance","activities","equipment","meetings"].includes(card.dataset.pane))card.classList.add("m-hide")});
   if(tab.classList.contains("m-hide")){pane.hidden=true;return}
+  renderRegisterChoices();
   tab.addEventListener("click",()=>loadAll().catch(e=>msg(e.message,"error")));
   $("register-refresh").addEventListener("click",()=>loadAll().catch(e=>msg(e.message,"error")));
   $("register-draft-form").addEventListener("submit",async e=>{
