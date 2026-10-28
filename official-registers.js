@@ -3,11 +3,11 @@ const C=window.ElAfakSupabaseConfig||{url:"https://lfubzohsbwdoiagfkpkt.supabase
 const $=id=>document.getElementById(id);
 const TITLES={deliberation:"سجل المداولة",accounting:"سجل المحاسبة",equipment:"سجل العتاد",outgoing_mail:"سجل المراسلات الصادرة",incoming_mail:"سجل المراسلات الواردة",activities:"سجل الأنشطة",tasks:"سجل المهام",inspection:"سجل التفتيش والمراقبة"};
 const ROLES={
- deliberation:["president","deputy_president","secretary_general","deputy_secretary_general"],
- accounting:["president","treasurer","deputy_treasurer","technical_director"],
- equipment:["president","treasurer","deputy_treasurer","technical_director"],
- outgoing_mail:["president","deputy_president","secretary_general","deputy_secretary_general"],
- incoming_mail:["president","deputy_president","secretary_general","deputy_secretary_general"],
+ deliberation:["president","deputy_president","secretary_general","deputy_secretary_general","inspection_inspector"],
+ accounting:["president","treasurer","deputy_treasurer","technical_director","inspection_inspector"],
+ equipment:["president","treasurer","deputy_treasurer","technical_director","inspection_inspector"],
+ outgoing_mail:["president","deputy_president","secretary_general","deputy_secretary_general","inspection_inspector"],
+ incoming_mail:["president","deputy_president","secretary_general","deputy_secretary_general","inspection_inspector"],
  activities:["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director","inspection_inspector"],
  tasks:["president","inspection_inspector"],
  inspection:["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director","inspection_inspector"]
