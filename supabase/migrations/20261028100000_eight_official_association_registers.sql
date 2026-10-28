@@ -189,3 +189,27 @@ create trigger notify_association_register_draft after insert or update on publi
 create policy "Inspector does not read drafts" on public.association_register_drafts as restrictive
  for all to authenticated using (private.current_staff_role() is distinct from 'inspection_inspector')
  with check (private.current_staff_role() is distinct from 'inspection_inspector');
+
+create or replace function private.number_direct_association_register_entry()
+returns trigger language plpgsql security definer
+set search_path = pg_catalog, public, private, auth
+as $$
+declare v_year integer; v_number bigint; v_role text;
+begin
+ v_role:=private.current_staff_role();
+ if new.created_by is distinct from (select auth.uid()) or new.is_test then
+  raise exception 'مصدر القيد المباشر غير صالح';
+ end if;
+ if not ((new.register_key='tasks' and v_role='president') or (new.register_key='inspection' and v_role='inspection_inspector')) then
+  raise exception 'القيد المباشر مسموح لسجل المهام للرئيس ولسجل التفتيش للمفتش فقط';
+ end if;
+ v_year:=extract(year from now())::integer;
+ perform pg_advisory_xact_lock(hashtext('association-register-'||new.register_key||'-'||v_year::text)::bigint);
+ select coalesce(max(register_number),0)+1 into v_number from public.association_register_entries where register_key=new.register_key and register_year=v_year;
+ new.register_year:=v_year; new.register_number:=v_number; new.approved_by:=null; new.approved_at:=now();
+ return new;
+end $$;
+revoke all on function private.number_direct_association_register_entry() from public, anon, authenticated;
+drop trigger if exists number_direct_association_register_entry on public.association_register_entries;
+create trigger number_direct_association_register_entry before insert on public.association_register_entries
+ for each row execute function private.number_direct_association_register_entry();
