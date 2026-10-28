@@ -8,8 +8,8 @@ const ROLES={
  equipment:["president","treasurer","deputy_treasurer","technical_director"],
  outgoing_mail:["president","deputy_president","secretary_general","deputy_secretary_general"],
  incoming_mail:["president","deputy_president","secretary_general","deputy_secretary_general"],
- activities:["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director"],
- tasks:["president"],
+ activities:["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director","inspection_inspector"],
+ tasks:["president","inspection_inspector"],
  inspection:["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director","inspection_inspector"]
 };
 const DRAFT_ROLE={deliberation:"secretary_general",accounting:"treasurer",equipment:"treasurer",outgoing_mail:"secretary_general",incoming_mail:"secretary_general",activities:"technical_director"};
