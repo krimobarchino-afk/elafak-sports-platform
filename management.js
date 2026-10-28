@@ -77,6 +77,9 @@ function renderDashboardCards(){
   card.append(icon,title,desc);card.addEventListener("click",()=>b.click());grid.append(card)}
  if(!tabs.length){const empty=document.createElement("p");empty.className="m-dashboard-empty";empty.textContent="لا توجد أقسام إضافية مفعّلة لهذا الحساب حاليًا.";grid.append(empty)}
 }
+function canViewOfficialRegisters(){
+ return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director","inspection_inspector");
+}
 function applyPermissions(){
  $("tab-equipment").classList.toggle("m-hide",!canViewEquipment());
  document.querySelector('.m-tabs button[data-pane="activities"]')?.classList.toggle("m-hide",!canViewActivities());
@@ -87,6 +90,7 @@ function applyPermissions(){
  $("stat-meetings").closest(".m-stat").classList.toggle("m-hide",!canViewMeetings());
  $("tab-tasks").classList.toggle("m-hide",!canViewTasks());
  $("tab-inspections").classList.toggle("m-hide",!canViewInspections());
+ $("tab-official-registers")?.classList.toggle("m-hide",!canViewOfficialRegisters());
  document.querySelectorAll('.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.toggle("m-hide",!roleIs("president")));
  $("equipment-form").classList.toggle("m-hide",!canEditEquipment());
  $("activity-form").classList.toggle("m-hide",!canEditActivities());
