@@ -69,8 +69,8 @@ function makeForm(key){
      if(scanBusy||video.readyState<2)return;scanBusy=true;
      try{const codes=await detector.detect(video);if(!codes.length)return;
       const raw=(codes[0].rawValue||"").trim();let qr={};try{qr=JSON.parse(raw)}catch{}
-      const memberId=String(qr.association_member_id||qr.member_id||qr.id||"").trim();
-      const memberNo=String(qr.member_no||qr.member_number||"").trim();
+      const memberId=String(qr.association_member_id||qr.member_id||qr.id||(/^([0-9a-f]{8}-[0-9a-f-]{27,})$/i.test(raw)?raw:"")).trim();
+      const memberNo=String(qr.member_no||qr.member_number||(/^AF-[A-Z0-9-]+$/i.test(raw)?raw:"")).trim();
       const founderNo=Number(qr.founder_number||qr.founder_no||0);
       let member=null;
       if(memberId){const q=await sb.from("association_members").select("id,founder_number,full_name,membership_status").eq("id",memberId).maybeSingle();if(!q.error)member=q.data}
