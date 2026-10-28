@@ -1,7 +1,9 @@
 (()=>{
 'use strict';
-const SUPABASE_URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
-const KEY="sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ";
+const CONFIG=window.ElAfakSupabaseConfig;
+if(!CONFIG) throw new Error("Supabase configuration is missing");
+const SUPABASE_URL=CONFIG.url;
+const KEY=CONFIG.key;
 const $=id=>document.getElementById(id);
 const ENTRY=new URLSearchParams(window.location.search).get("entry");
 const EXECUTIVE_ROLES=["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer"];
@@ -1054,7 +1056,7 @@ async function enter(){
 addEventListener("DOMContentLoaded",()=>{
  if(!ENTRY||ENTRY==="general_assembly"||ENTRY==="site_admin"){window.location.replace(ENTRY==="site_admin"?"/staff.html?entry=site_admin":"/management-portal.html");return}
  if(!window.supabase){message("m-login-msg","تعذر تحميل خدمة الدخول. تحقق من الاتصال بالإنترنت.");return}
- sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:"sb-lfubzohsbwdoiagfkpkt-auth-token"}});bind();
+ sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:CONFIG.storageKey}});bind();
  sb.auth.getSession().then(({data,error})=>{if(error){message("m-login-msg","تعذر استعادة جلسة الدخول: "+error.message,"error");return}if(data.session){enter().catch(err=>{console.error("Management session restore failed:",err);hide("m-app",true);hide("m-login",false);message("m-login-msg",err?.message||"تم العثور على جلسة لكن تعذر تحميل لوحة الإدارة.","error")})}else{hide("m-app",true);hide("m-login",false)}});
 });
 })();
