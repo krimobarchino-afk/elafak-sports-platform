@@ -2,7 +2,7 @@
 const C=window.ElAfakSupabaseConfig||{url:"https://lfubzohsbwdoiagfkpkt.supabase.co",key:"sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ",storageKey:"sb-lfubzohsbwdoiagfkpkt-auth-token"};
 const $=id=>document.getElementById(id);
 const ledgerStyle=document.createElement("style");
-ledgerStyle.textContent=".official-ledger-page{position:relative;max-width:920px;margin:1.4rem auto;padding:2rem clamp(1rem,4vw,3.2rem);background:#fffdf6;border:1px solid #c9c0a8;border-right:8px solid #6c806d;box-shadow:0 5px 18px #182e2510;color:#202a24;line-height:2;font-family:'Traditional Arabic','Amiri','Noto Naskh Arabic',serif;font-size:1.08rem;break-inside:avoid}.ledger-bookhead{text-align:center;border-bottom:3px double #8a927d;padding-bottom:1rem;margin-bottom:1rem;font-weight:700}.ledger-bookhead h3{font-size:1.45rem;margin:.6rem 0;color:#183c31}.ledger-meta{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.55rem 0;border-bottom:1px solid #c9c0a8;font-size:.98rem}.ledger-minutes{padding:.7rem 0;overflow-wrap:anywhere}.ledger-minutes p{margin:.15rem 0;min-height:.8em;white-space:pre-wrap}.ledger-field{padding:.55rem 0;border-bottom:1px dotted #c9c0a8}.ledger-field strong{display:block;color:#234c3d}.ledger-field p{white-space:pre-wrap;margin:.2rem 0}.ledger-signatures{display:flex;justify-content:space-between;gap:2rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #b9b29f;font-weight:700}@media(max-width:620px){.official-ledger-page{padding:1rem .8rem;border-right-width:5px;font-size:1rem}.ledger-meta{display:grid}.ledger-signatures{gap:.8rem;font-size:.9rem}}@media print{body *{visibility:hidden!important}#register-deliberation,#register-deliberation *{visibility:visible!important}#register-deliberation{position:absolute!important;left:0!important;top:0!important;width:100%!important;max-width:none!important}#register-deliberation .ledger-print-toolbar{display:none!important}.official-ledger-page{box-shadow:none;border:0;border-right:3px solid #777;margin:0;max-width:none;break-after:page;page-break-after:always}.ledger-signatures{break-inside:avoid}}";
+ledgerStyle.textContent=".official-ledger-page{position:relative;max-width:920px;margin:1.4rem auto;padding:2rem clamp(1rem,4vw,3.2rem);background:#fffdf6;border:1px solid #c9c0a8;border-right:8px solid #6c806d;box-shadow:0 5px 18px #182e2510;color:#202a24;line-height:2;font-family:'Traditional Arabic','Amiri','Noto Naskh Arabic',serif;font-size:1.08rem;break-inside:avoid}.ledger-bookhead{text-align:center;border-bottom:3px double #8a927d;padding-bottom:1rem;margin-bottom:1rem;font-weight:700}.ledger-bookhead h3{font-size:1.45rem;margin:.6rem 0;color:#183c31}.ledger-meta{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.55rem 0;border-bottom:1px solid #c9c0a8;font-size:.98rem}.ledger-minutes{padding:.7rem 0;overflow-wrap:anywhere}.ledger-minutes p{margin:.15rem 0;min-height:.8em;white-space:pre-wrap}.ledger-field{padding:.55rem 0;border-bottom:1px dotted #c9c0a8}.ledger-field strong{display:block;color:#234c3d}.ledger-field p{white-space:pre-wrap;margin:.2rem 0}.ledger-signatures{display:flex;justify-content:space-between;gap:2rem;margin-top:2rem;padding-top:1rem;border-top:1px solid #b9b29f;font-weight:700}@media(max-width:620px){.official-ledger-page{padding:1rem .8rem;border-right-width:5px;font-size:1rem}.ledger-meta{display:grid}.ledger-signatures{gap:.8rem;font-size:.9rem}}@media print{body *{visibility:hidden!important}.register-print-active,.register-print-active *{visibility:visible!important}.register-print-active{display:block!important;position:absolute!important;left:0!important;top:0!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;box-shadow:none!important;border:0!important;background:#fff!important}.register-print-active .m-no-print,.register-print-active .register-page-nav{display:none!important}.official-ledger-page{box-shadow:none;border:0;border-right:3px solid #777;margin:0;max-width:none;break-after:page;page-break-after:always}.ledger-signatures{break-inside:avoid}.register-pdf-page{break-after:page;page-break-after:always;padding:12mm;color:#111;background:#fff}.register-pdf-page h4{border-bottom:1px solid #777;padding-bottom:5px}.register-pdf-page p{white-space:pre-wrap;overflow-wrap:anywhere}}";
 document.head.append(ledgerStyle);
 const TITLES={deliberation:"سجل المداولة",accounting:"سجل المحاسبة",equipment:"سجل العتاد",outgoing_mail:"سجل المراسلات الصادرة",incoming_mail:"سجل المراسلات الواردة",activities:"سجل الأنشطة",tasks:"سجل المهام",inspection:"سجل التفتيش والمراقبة"};
 const ROLES={
@@ -17,7 +17,7 @@ const ROLES={
 };
 const DRAFT_ROLE={deliberation:"secretary_general",accounting:"treasurer",equipment:"treasurer",outgoing_mail:"secretary_general",incoming_mail:"secretary_general",activities:"technical_director"};
 const FIELDS={
- deliberation:[["title","عنوان المداولة","text",true],["record_date","تاريخ المداولة","date",true],["meeting_type","نوع الاجتماع","text",false],["attendees","الحاضرون وصفاتهم","textarea",true],["agenda","جدول الأعمال","textarea",true],["discussion","المناقشات","textarea",false],["decisions","القرارات","textarea",true],["attachments","المرفقات والمراجع","textarea",false]],
+ deliberation:[["title","عنوان المداولة","text",true],["record_date","تاريخ المداولة","date",true],["meeting_type","نوع الاجتماع","select",true,["المكتب التنفيذي","الجمعية العامة","اجتماع استثنائي","اجتماع تقني","اجتماع لجنة","اجتماع تنسيقي","أخرى"]],["meeting_start_time","ساعة البداية","time",true],["meeting_end_time","ساعة الرفع/الاختتام","time",true],["meeting_chair","رئيس الاجتماع وصفته","text",true],["attendees","الحاضرون وصفاتهم","textarea",true],["agenda","جدول الأعمال","textarea",true],["discussion","المناقشات","textarea",false],["decisions","القرارات","textarea",true],["attachments","المرفقات والمراجع","textarea",false]],
  accounting:[["transaction_date","تاريخ العملية","date",true],["transaction_type","نوع العملية (إيراد/مصروف)","select",true,["إيراد","مصروف"]],["category","التصنيف","text",true],["amount","المبلغ بالدينار الجزائري","number",true],["payment_method","طريقة الدفع","text",false],["reference","مرجع الوثيقة","text",false],["description","بيان العملية","textarea",true]],
  equipment:[["item_name","اسم العتاد","text",true],["category","الصنف","text",false],["quantity","الكمية","number",true],["condition","الحالة","text",true],["serial_number","الرقم التسلسلي","text",false],["acquisition_date","تاريخ الاقتناء","date",false],["storage_location","مكان التخزين","text",false],["notes","ملاحظات","textarea",false]],
  outgoing_mail:[["mail_date","تاريخ الإرسال","date",true],["recipient","الجهة المرسل إليها","text",true],["subject","موضوع المراسلة","text",true],["reference","رقم/مرجع المراسلة","text",false],["summary","ملخص المحتوى","textarea",true],["attachments","المرفقات","textarea",false]],
@@ -46,7 +46,48 @@ function makeForm(key){
   input.name=name;input.required=!!required;input.maxLength=type==="textarea"?6000:500;wrap.append(input);f.append(wrap);
  }
  if(key==="deliberation"){
-  const edit=el("button","تحرير المحضر","m-small");edit.type="button";edit.onclick=()=>buildDeliberationMinutes(f);f.append(edit);
+  const titleInput=f.elements.title;
+  const titleList=el("datalist");titleList.id="deliberation-title-suggestions";
+  ["محضر اجتماع المكتب التنفيذي","محضر اجتماع الجمعية العامة العادية","محضر اجتماع الجمعية العامة الاستثنائية","محضر اجتماع تقني","محضر اجتماع لجنة","محضر اجتماع تنسيقي","محضر اجتماع طارئ"].forEach(v=>{const o=el("option");o.value=v;titleList.append(o)});
+  titleInput.setAttribute("list",titleList.id);f.append(titleList);
+  const scanBox=el("section",undefined,"m-card m-no-print");scanBox.append(el("h4","إضافة الحاضرين بمسح QR بطاقة العضو"),el("p","وجّه الكاميرا إلى رمز QR على بطاقة العضو. سيُضاف الاسم إلى قائمة الحضور بعد التحقق من سجل العضوية."));
+  const camera=el("button","تشغيل ماسح QR","m-small");camera.type="button";
+  const stop=el("button","إيقاف الكاميرا","m-small");stop.type="button";stop.disabled=true;
+  const video=document.createElement("video");video.setAttribute("playsinline","");video.autoplay=true;video.hidden=true;video.style.maxWidth="100%";video.style.width="420px";video.style.display="block";
+  const scanStatus=el("p","لم يبدأ المسح بعد.","m-note");scanStatus.setAttribute("role","status");
+  scanBox.append(camera,stop,video,scanStatus);f.append(scanBox);
+  let stream=null,scanTimer=null,detector=null,scanBusy=false;
+  const stopScanner=()=>{if(scanTimer){clearInterval(scanTimer);scanTimer=null}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}video.srcObject=null;video.hidden=true;stop.disabled=true;camera.disabled=false};
+  stop.onclick=stopScanner;
+  camera.onclick=async()=>{
+   if(!("BarcodeDetector" in window)){scanStatus.textContent="هذا المتصفح لا يدعم قراءة QR مباشرة. جرّب Chrome أو أدخل الحضور يدويًا.";return}
+   try{
+    detector=new BarcodeDetector({formats:["qr_code"]});
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+    video.srcObject=stream;video.hidden=false;await video.play();camera.disabled=true;stop.disabled=false;scanStatus.textContent="وجّه رمز QR إلى الكاميرا.";
+    scanTimer=setInterval(async()=>{
+     if(scanBusy||video.readyState<2)return;scanBusy=true;
+     try{const codes=await detector.detect(video);if(!codes.length)return;
+      const raw=(codes[0].rawValue||"").trim();let qr={};try{qr=JSON.parse(raw)}catch{}
+      const memberId=String(qr.association_member_id||qr.member_id||qr.id||"").trim();
+      const memberNo=String(qr.member_no||qr.member_number||"").trim();
+      const founderNo=Number(qr.founder_number||qr.founder_no||0);
+      let member=null;
+      if(memberId){const q=await sb.from("association_members").select("id,founder_number,full_name,membership_status").eq("id",memberId).maybeSingle();if(!q.error)member=q.data}
+      if(!member&&memberNo){const q=await sb.from("members").select("id,member_no,join_request_id,membership_status").eq("member_no",memberNo).eq("is_test",false).maybeSingle();if(!q.error&&q.data){const d=await sb.from("join_requests").select("full_name").eq("id",q.data.join_request_id).maybeSingle();if(!d.error&&d.data)member={id:q.data.id,full_name:d.data.full_name,membership_status:q.data.membership_status}}}
+      if(!member&&founderNo){const q=await sb.from("association_members").select("id,founder_number,full_name,membership_status").eq("founder_number",founderNo).maybeSingle();if(!q.error)member=q.data}
+      if(!member&&qr.full_name)member={full_name:String(qr.full_name),membership_status:"unverified"};
+      if(!member){scanStatus.textContent="لم يُعثر على العضو في السجل. تأكد أن QR يحتوي معرّف العضو المسجل.";return}
+      if(member.membership_status&&member.membership_status!=="active"){scanStatus.textContent="العضوية ليست نشطة؛ لم يُضف الاسم. راجع حالة العضو.";return}
+      const area=f.elements.attendees;const name=String(member.full_name||"").trim();if(!name){scanStatus.textContent="لم يتوفر اسم العضو في السجل.";return}
+      const current=area.value.split("\n").map(x=>x.trim()).filter(Boolean);if(current.some(x=>x.includes(name))){scanStatus.textContent="العضو موجود مسبقًا في قائمة الحضور: "+name;return}
+      current.push(String(current.length+1).padStart(2,"0")+" — "+name+" — عضو");area.value=current.join("\n");area.dispatchEvent(new Event("input",{bubbles:true}));scanStatus.textContent="تمت إضافة الحاضر: "+name;stopScanner();
+     }catch(err){scanStatus.textContent="تعذر قراءة/التحقق من الرمز: "+(err.message||"خطأ غير معروف")}finally{scanBusy=false}
+    },700);
+   }catch(err){scanStatus.textContent="تعذر تشغيل الكاميرا. تحقق من إذن الكاميرا واستخدم الموقع عبر HTTPS."}
+  };
+  f.addEventListener("reset",stopScanner);
+  const edit=el("button","تكوين نص المحضر تلقائيًا","m-small");edit.type="button";edit.onclick=()=>buildDeliberationMinutes(f);f.append(edit);
  }
  const row=el("div",undefined,"m-actions");const save=el("button","حفظ المسودة");save.type="submit";save.className="btn btn-dark";row.append(save);
  const cancel=el("button","إلغاء");cancel.type="button";cancel.onclick=()=>{editDraft=null;f.hidden=true;f.reset()};row.append(cancel);f.append(row);f.hidden=false;
@@ -62,6 +103,9 @@ function buildDeliberationMinutes(f){
  "عنوان المداولة: "+(v.title||"................................"),
  "تاريخ الاجتماع/المداولة: "+(v.record_date||"...................."),
  "نوع الاجتماع: "+(v.meeting_type||"...................."),
+ "ساعة البداية: "+(v.meeting_start_time||"...................."),
+ "ساعة الرفع/الاختتام: "+(v.meeting_end_time||"...................."),
+ "رئيس الاجتماع وصفته: "+(v.meeting_chair||"...................."),
  "",
  "الحاضرون وصفاتهم:",
  v.attendees||"................................................................",
@@ -80,7 +124,7 @@ function buildDeliberationMinutes(f){
  "",
  "حرر هذا المحضر لإثبات ما جرى وما اتُّخذ من قرارات، ويعرض على رئيس الجمعية للمراجعة والاعتماد.",
  "",
- "الأمين العام: ................................      رئيس الجمعية: ................................"
+ "الأمين العام: ................................      رئيس الاجتماع: "+(v.meeting_chair||"................................")+"      رئيس الجمعية: ................................"
  ];
  let area=f.elements.minutes_text;
  if(!area){const wrap=el("label","نص المحضر المحرر (راجع النص قبل حفظ المسودة)");area=document.createElement("textarea");area.name="minutes_text";area.rows=16;area.maxLength=16000;area.required=true;wrap.append(area);const anchor=f.querySelector(".m-actions");f.insertBefore(wrap,anchor)}
@@ -95,13 +139,13 @@ function renderDeliberationPage(entry){
  top.append(el("div","الجمهورية الجزائرية الديمقراطية الشعبية"),el("div","جمعية الأفق الولائية للرياضات الجوية والجبلية — ولاية الشلف"),el("h3","سجل المداولة"));
  page.append(top);
  const meta=el("div",undefined,"ledger-meta");
- meta.append(el("span","رقم القيد: "+entry.register_year+"/"+String(entry.register_number).padStart(3,"0")),el("span","تاريخ الاعتماد: "+formatDate(entry.approved_at)));
+ meta.append(el("span","رقم القيد: "+entry.register_year+"/"+String(entry.register_number).padStart(3,"0")),el("span","تاريخ الاعتماد: "+formatDate(entry.approved_at)),el("span","رئيس الاجتماع: "+valText(entry.payload?.meeting_chair)));
  page.append(meta);
  const body=el("div",undefined,"ledger-minutes");
  const text=entry.payload?.minutes_text;
  if(text){text.split("\n").forEach(line=>body.append(el("p",line||" ")))}
  else{
-  const fields=[["عنوان المداولة",entry.payload?.title],["التاريخ",entry.payload?.record_date],["نوع الاجتماع",entry.payload?.meeting_type],["الحاضرون وصفاتهم",entry.payload?.attendees],["جدول الأعمال",entry.payload?.agenda],["المناقشات",entry.payload?.discussion],["القرارات",entry.payload?.decisions],["المرفقات والمراجع",entry.payload?.attachments]];
+  const fields=[["عنوان المداولة",entry.payload?.title],["التاريخ",entry.payload?.record_date],["نوع الاجتماع",entry.payload?.meeting_type],["ساعة البداية",entry.payload?.meeting_start_time],["ساعة الرفع/الاختتام",entry.payload?.meeting_end_time],["رئيس الاجتماع وصفته",entry.payload?.meeting_chair],["الحاضرون وصفاتهم",entry.payload?.attendees],["جدول الأعمال",entry.payload?.agenda],["المناقشات",entry.payload?.discussion],["القرارات",entry.payload?.decisions],["المرفقات والمراجع",entry.payload?.attachments]];
   for(const [label,value] of fields){const block=el("div",undefined,"ledger-field");block.append(el("strong",label));block.append(el("p",valText(value)));body.append(block)}
  }
  page.append(body);
