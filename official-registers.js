@@ -93,6 +93,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
   profile=p;
   const tab=$("tab-official-registers");tab.classList.toggle("m-hide",!Object.values(ROLES).some(r=>r.includes(profile.role)));
   document.querySelectorAll(".m-tabs button[data-pane]").forEach(b=>{if(["finance","activities","equipment","meetings"].includes(b.dataset.pane))b.classList.add("m-hide")});
+  document.querySelectorAll(".m-dashboard-card").forEach(card=>{if(["finance","activities","equipment","meetings"].includes(card.dataset.pane))card.classList.add("m-hide")});
   if(tab.classList.contains("m-hide")){pane.hidden=true;return}
   tab.addEventListener("click",()=>loadAll().catch(e=>msg(e.message,"error")));
   $("register-refresh").addEventListener("click",()=>loadAll().catch(e=>msg(e.message,"error")));
