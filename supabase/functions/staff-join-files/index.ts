@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const isAllowedOrigin = (origin: string | null) => origin === "https://horizon-barchino.vercel.app" || origin === "https://horizon-git-feature-deliberation-workflow-barchino.vercel.app";
 const cors = {
-  "Access-Control-Allow-Origin": "https://horizon-barchino.vercel.app",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Content-Type": "application/json",
@@ -9,7 +10,7 @@ const out = (body: unknown, status = 200) => new Response(JSON.stringify(body), 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return out({ error: "الطريقة غير مسموحة." }, 405);
-  if (req.headers.get("origin") !== "https://horizon-barchino.vercel.app") return out({ error: "مصدر الطلب غير مسموح." }, 403);
+  if (!isAllowedOrigin(req.headers.get("origin"))) return out({ error: "مصدر الطلب غير مسموح." }, 403);
   const url = Deno.env.get("SUPABASE_URL"), key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !key) return out({ error: "خدمة الملفات غير مهيأة." }, 503);
   const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
