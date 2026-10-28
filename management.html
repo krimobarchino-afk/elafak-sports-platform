@@ -7,7 +7,8 @@
 <title>فضاء تسيير جمعية الأفق</title>
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script><script src="/supabase-config.js" defer></script>
-<script src="/management.js?v=20261027-deliberation-shared-2" defer></script>
+<script src="/management.js?v=20261028-official-registers-1" defer></script>
+<script src="/official-registers.js?v=20261028-1" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -90,6 +91,7 @@
 <div class="m-card"><div class="m-toolbar"><div><span class="m-badge" id="m-role">مسيّر</span><h2 id="m-welcome">لوحة التسيير</h2><p class="m-note" id="m-permissions"></p></div><button id="m-refresh" class="btn btn-dark m-no-print">تحديث البيانات</button></div><p id="m-message" role="status"></p></div>
 <nav class="m-tabs m-no-print" aria-label="وحدات التسيير">
 <button data-pane="overview" id="tab-overview" class="active">الرئيسية</button>
+<button data-pane="official-registers" id="tab-official-registers">السجلات الرسمية الثمانية</button>
 <button data-pane="join-requests" id="tab-join-requests">طلبات الانخراط</button>
 <button data-pane="finance" id="tab-finance">المالية</button>
 <button data-pane="activities">الأنشطة</button>
@@ -100,6 +102,22 @@
 <button data-pane="office-roster" id="tab-office-roster">التشكيلة الرسمية</button>
 <button data-pane="archive">الأرشيف والنسخ</button>
 </nav>
+<section class="m-pane" id="pane-official-registers" hidden>
+<div class="m-card"><div class="m-toolbar"><h2>السجلات الرسمية لجمعية الأفق</h2><button id="register-refresh" type="button" class="m-small">تحديث السجلات</button></div>
+<p class="m-note">تعرض هذه الصفحة السجلات الرسمية الثمانية بحسب صلاحيات الحساب. المسودات منفصلة عن القيود النهائية، ولا تُدرج المسودة في السجل إلا بعد اعتماد الرئيس، باستثناء سجل المهام الذي يدوّنه الرئيس مباشرة وسجل التفتيش الذي يدوّنه المفتش مباشرة.</p>
+<p id="registers-msg" role="status"></p>
+<h3>الإشعارات</h3><div id="register-notifications" class="delib-notifications-list"></div>
+<form id="register-draft-form" class="m-grid m-card m-no-print" hidden></form>
+</div>
+<div id="register-deliberation"></div>
+<div id="register-accounting"></div>
+<div id="register-equipment"></div>
+<div id="register-outgoing_mail"></div>
+<div id="register-incoming_mail"></div>
+<div id="register-activities"></div>
+<div id="register-tasks"></div>
+<div id="register-inspection"></div>
+</section>
 <section class="m-pane" id="pane-join-requests" hidden>
 <div class="m-card" id="join-request-review-card"><div class="m-toolbar"><h2>طلبات الانخراط</h2><button type="button" class="m-small" id="join-refresh">تحديث الطلبات</button></div>
 <p class="m-note">راجع الطلبات واتخذ القرار المبدئي. القبول المبدئي لا ينشئ حسابًا ولا يثبت الانخراط النهائي، ولا تُطبّق رسوم أو باقات غير مصادق عليها.</p>
