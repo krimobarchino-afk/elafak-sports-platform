@@ -10,6 +10,7 @@
 
 ## الترحيلات
 - `supabase/migrations/202610150001_initial_join_requests.sql`
+- `supabase/migrations/202610160001_membership_primitives.sql`
 - `supabase/migrations/202610170001_staff_profiles.sql`
 - `supabase/migrations/202610170002_staff_join_request_review_policies.sql`
 - `supabase/migrations/202610180001_add_deputy_president_role.sql`
@@ -20,6 +21,7 @@
 - `supabase/migrations/202610180006_full_management_modules.sql`
 - `supabase/migrations/202610180007_seed_official_meetings.sql`
 - `supabase/migrations/202610180008_tighten_management_role_visibility.sql`
+- `supabase/migrations/202610180009_membership_document_access_policies.sql`
 - `supabase/migrations/202610250001_restrict_finance_read_to_finance_roles.sql`
 - `supabase/migrations/202610250002_consolidate_members_select_policy.sql`
 - `supabase/migrations/202610250003_block_unapproved_membership_fee_income.sql`
@@ -34,6 +36,7 @@
 - `supabase/migrations/202610260005_restrict_finance_to_president_treasurer.sql`
 - `supabase/migrations/202610270001_inspection_reports_role.sql`
 - `supabase/migrations/20261027084716_role_specific_equipment_and_president_tasks.sql`
+- `supabase/migrations/20261027090000_executive_office_roster_schema.sql`
 - `supabase/migrations/20261027093609_restrict_inspector_to_inspection_records.sql`
 - `supabase/migrations/20261027101303_restore_inspector_read_only_oversight_access.sql`
 - `supabase/migrations/20261027121500_deliberation_outputs_workflow.sql`
@@ -44,9 +47,6 @@
 - `supabase/migrations/20261027143000_limit_inspector_to_inspection_register.sql`
 - `supabase/migrations/20261027150000_official_record_draft_workflow.sql`
 - `supabase/migrations/20261027153000_inspector_official_draft_isolation.sql`
-- `supabase/migrations/202610160001_membership_primitives.sql`
-- `supabase/migrations/202610180009_membership_document_access_policies.sql`
-- `supabase/migrations/20261027090000_executive_office_roster_schema.sql`
 - `supabase/migrations/20261027160000_private_join_request_storage.sql`
 - `supabase/migrations/20261027161000_seed_office_roster_positions.sql`
 
