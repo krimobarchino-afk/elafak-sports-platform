@@ -9,12 +9,12 @@ const $=id=>document.getElementById(id);
 const EXEC=["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer"];
 const ROUTES={
  site_admin:{title:"مدير الموقع",description:"الإدارة التقنية للحسابات والإعدادات المصرح بها.",href:"/staff.html?entry=site_admin"},
- president:{title:"المكتب التنفيذي",description:"فضاء المكتب التنفيذي وفق الصلاحيات المرتبطة بمنصبك.",href:"/management.html?entry=executive"},
- deputy_president:{title:"المكتب التنفيذي",description:"فضاء المكتب التنفيذي وفق الصلاحيات المرتبطة بمنصبك.",href:"/management.html?entry=executive"},
- secretary_general:{title:"المكتب التنفيذي",description:"فضاء المكتب التنفيذي وفق الصلاحيات المرتبطة بمنصبك.",href:"/management.html?entry=executive"},
- deputy_secretary_general:{title:"المكتب التنفيذي",description:"فضاء المكتب التنفيذي وفق الصلاحيات المرتبطة بمنصبك.",href:"/management.html?entry=executive"},
- treasurer:{title:"المكتب التنفيذي",description:"فضاء المكتب التنفيذي وفق الصلاحيات المرتبطة بمنصبك.",href:"/management.html?entry=executive"},
- deputy_treasurer:{title:"المكتب التنفيذي",description:"فضاء المكتب التنفيذي وفق الصلاحيات المرتبطة بمنصبك.",href:"/management.html?entry=executive"},
+ president:{title:"فضاء الرئيس",description:"الإشراف العام، المهام والتكليفات، ومراجعة واعتماد السجلات وفق الإجراءات والصلاحيات المعتمدة.",href:"/management.html?entry=president"},
+ deputy_president:{title:"فضاء نائب الرئيس",description:"متابعة الأعمال والمهام المفوضة إليك، دون صلاحيات تلقائية على السجلات المالية أو سجل العتاد.",href:"/management.html?entry=deputy_president"},
+ secretary_general:{title:"فضاء الأمين العام",description:"المراسلات والأرشيف والاجتماعات والمحاضر ومتابعة طلبات الانخراط ضمن الصلاحيات المعتمدة.",href:"/management.html?entry=secretary_general"},
+ deputy_secretary_general:{title:"فضاء نائب الأمين العام",description:"متابعة الأعمال المسندة إليك في الشؤون الإدارية دون اعتماد السجلات أو تعديلها خارج التفويض.",href:"/management.html?entry=deputy_secretary_general"},
+ treasurer:{title:"فضاء أمين المال",description:"السجل المالي ومسودات العمليات المالية وسجل العتاد والجرد والتحقق من التسديد ضمن الاختصاص.",href:"/management.html?entry=treasurer"},
+ deputy_treasurer:{title:"فضاء نائب أمين المال",description:"متابعة الأعمال المالية المسندة إليك ضمن الصلاحيات المحددة، دون امتلاك صلاحيات أمين المال كاملة تلقائيًا.",href:"/management.html?entry=deputy_treasurer"},
  technical_director:{title:"المدير التقني الولائي",description:"فضاء المهام التقنية والرياضية المخصص لحسابك.",href:"/management.html?entry=technical_director"},
  inspection_inspector:{title:"التفتيش والمراقبة",description:"الاطلاع على تقارير التفتيش والمراقبة السابقة والجديدة، وإنشاء التقارير ومتابعتها فقط، دون الوصول إلى بقية سجلات الجمعية.",href:"/management.html?entry=inspection_inspector"}
 };
