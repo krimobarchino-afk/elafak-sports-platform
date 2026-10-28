@@ -26,7 +26,10 @@ const FIELDS={
  tasks:[["title","عنوان المهمة","text",true],["assigned_to","المكلّف بالمهمة","text",true],["priority","الأولوية","select",true,["منخفضة","عادية","عالية","عاجلة"]],["due_date","الأجل","date",false],["description","تفاصيل التكليف","textarea",true],["status","حالة التنفيذ","select",true,["جديدة","قيد التنفيذ","منجزة","مؤجلة"]]],
  inspection:[["report_date","تاريخ التفتيش/المراقبة","date",true],["inspector_name","اسم المفتش","text",true],["scope","موضوع التفتيش","text",true],["observations","الملاحظات والمعاينات","textarea",true],["recommendations","التوصيات","textarea",false],["follow_up","المتابعة المطلوبة","textarea",false]]
 };
-let sb,profile,editDraft=null,activeRegisterKey=null;
+let sb,profile,editDraft=null,activeRegisterKey=null,registerView="home";
+const cachedEntries={},cachedDrafts={};
+function canCreate(key){return DRAFT_ROLE[key]===profile?.role||(key==="tasks"&&roleIs("president"))||(key==="inspection"&&roleIs("inspection_inspector"))}
+function canReview(key){return roleIs("president")&&key in DRAFT_ROLE}
 const msg=(s,kind="")=>{const e=$("registers-msg");if(e){e.textContent=s;e.className="m-msg "+kind}};
 function el(tag,txt,cls){const n=document.createElement(tag);if(txt!==undefined)n.textContent=txt;if(cls)n.className=cls;return n}
 function roleIs(...r){return !!profile&&r.includes(profile.role)}
@@ -107,16 +110,31 @@ function renderDeliberationPage(entry){
 }
 function renderTable(key,entries,drafts){
  const host=$("register-"+key);if(!host)return;host.replaceChildren();
- const section=el("section",undefined,"m-card");section.append(el("h3",TITLES[key]));
- if(DRAFT_ROLE[key]===profile.role){const b=el("button","إنشاء مسودة جديدة","m-small");b.type="button";b.onclick=()=>{editDraft=null;makeForm(key);$("register-draft-form").scrollIntoView({behavior:"smooth",block:"start"})};section.append(b)}
- if(key==="tasks"&&roleIs("president")){const b=el("button","إضافة مهمة","m-small");b.type="button";b.onclick=()=>{editDraft=null;makeForm(key);$("register-draft-form").scrollIntoView({behavior:"smooth",block:"start"})};section.append(b)}
- if(key==="inspection"&&roleIs("inspection_inspector")){const b=el("button","إنشاء تقرير تفتيش","m-small");b.type="button";b.onclick=()=>{editDraft=null;makeForm(key);$("register-draft-form").scrollIntoView({behavior:"smooth",block:"start"})};section.append(b)}
- if(drafts.length){section.append(el("h4","المسودات قيد الإجراء"));const table=el("table");table.className="m-table";const thead=el("thead");const tr=el("tr");["تاريخ الإنشاء","المحتوى","الحالة","ملاحظة الرئيس","الإجراءات"].forEach(x=>tr.append(el("th",x)));thead.append(tr);table.append(thead);const tb=el("tbody");
+ const nav=el("div",undefined,"m-toolbar register-page-nav m-no-print");
+ const back=el("button","العودة إلى قائمة السجلات","m-small");back.type="button";back.onclick=()=>{activeRegisterKey=null;registerView="home";host.hidden=true;$("register-choice-grid").hidden=false;$("register-selection-hint").textContent="اختر السجل المناسب لحسابك.";renderRegisterChoices()};nav.append(back,el("span",TITLES[key],"m-dashboard-title"));host.append(nav);
+ if(registerView==="home"){
+  const intro=el("section",undefined,"m-card register-action-page");intro.append(el("h3",TITLES[key]),el("p",canReview(key)?"توجد هنا مسودات تحتاج إلى مراجعة الرئيس واعتمادها أو إعادتها للتعديل.":canCreate(key)?"اختر العملية التي تريد تنفيذها في هذا السجل.":"يمكنك تصفح القيود الرسمية المعتمدة في هذا السجل."));
+  const actions=el("div",undefined,"m-dashboard-grid");
+  if(canCreate(key)){const browse=el("button",undefined,"m-dashboard-card");browse.type="button";browse.append(el("span","▤","m-dashboard-icon"),el("span","تصفح السجل","m-dashboard-title"),el("span","عرض القيود الرسمية المعتمدة","m-dashboard-description"));browse.onclick=()=>{registerView="browse";renderTable(key,entries,[])};actions.append(browse);
+   const create=el("button",undefined,"m-dashboard-card");create.type="button";create.append(el("span","＋","m-dashboard-icon"),el("span",key==="inspection"?"إنشاء تقرير تفتيش":key==="tasks"?"إضافة مهمة":"إنشاء مسودة","m-dashboard-title"),el("span",key==="inspection"?"إعداد تقرير جديد للتفتيش والمراقبة":key==="tasks"?"تسجيل مهمة أو تكليف رئاسي جديد":"تحرير البيانات ثم حفظها كمسودة للمراجعة","m-dashboard-description"));create.onclick=()=>{registerView="create";host.replaceChildren(nav);const title=el("h3","إنشاء — "+TITLES[key]);host.append(title);makeForm(key);host.append($("register-draft-form"));};actions.append(create);
+  }else if(canReview(key)){const reviewBtn=el("button",undefined,"m-dashboard-card");reviewBtn.type="button";reviewBtn.append(el("span","✓","m-dashboard-icon"),el("span","مراجعة المسودات","m-dashboard-title"),el("span","مراجعة المسودات الواردة واتخاذ قرار الاعتماد أو طلب التعديل","m-dashboard-description"));reviewBtn.onclick=()=>{registerView="review";renderTable(key,entries,drafts)};actions.append(reviewBtn);
+   const browse=el("button",undefined,"m-dashboard-card");browse.type="button";browse.append(el("span","▤","m-dashboard-icon"),el("span","تصفح السجل","m-dashboard-title"),el("span","الاطلاع على القيود المعتمدة","m-dashboard-description"));browse.onclick=()=>{registerView="browse";renderTable(key,entries,[])};actions.append(browse);
+  }
+  intro.append(actions);host.append(intro);return;
+ }
+ if(registerView==="create"){
+  const title=el("h3","إنشاء — "+TITLES[key]);host.append(title);makeForm(key);host.append($("register-draft-form"));return;
+ }
+ const section=el("section",undefined,"m-card");section.append(el("h3",registerView==="review"?"مراجعة المسودات — "+TITLES[key]:TITLES[key]));
+ if(registerView!=="browse"&&registerView!=="review"&&DRAFT_ROLE[key]===profile.role){const b=el("button","إنشاء مسودة جديدة","m-small");b.type="button";b.onclick=()=>{editDraft=null;makeForm(key);$("register-draft-form").scrollIntoView({behavior:"smooth",block:"start"})};section.append(b)}
+ if(registerView!=="browse"&&key==="tasks"&&roleIs("president")){const b=el("button","إضافة مهمة","m-small");b.type="button";b.onclick=()=>{editDraft=null;makeForm(key);$("register-draft-form").scrollIntoView({behavior:"smooth",block:"start"})};section.append(b)}
+ if(registerView!=="browse"&&key==="inspection"&&roleIs("inspection_inspector")){const b=el("button","إنشاء تقرير تفتيش","m-small");b.type="button";b.onclick=()=>{editDraft=null;makeForm(key);$("register-draft-form").scrollIntoView({behavior:"smooth",block:"start"})};section.append(b)}
+ if(registerView!=="browse"&&drafts.length){section.append(el("h4","المسودات قيد الإجراء"));const table=el("table");table.className="m-table";const thead=el("thead");const tr=el("tr");["تاريخ الإنشاء","المحتوى","الحالة","ملاحظة الرئيس","الإجراءات"].forEach(x=>tr.append(el("th",x)));thead.append(tr);table.append(thead);const tb=el("tbody");
   for(const d of drafts){const row=el("tr");row.append(el("td",formatDate(d.created_at)),el("td",renderPayload(d.payload)),el("td",d.status==="changes_requested"?"مطلوب تعديل":"مسودة"),el("td",d.review_note||"—"));const td=el("td");if(roleIs("president")){const note=document.createElement("textarea");note.placeholder="ملاحظة التعديل (إن لزم)";note.rows=2;td.append(note);const ask=el("button","طلب تعديل","m-small");ask.onclick=async()=>{if(note.value.trim().length<3){msg("اكتب ملاحظة واضحة بطلب التعديل.","error");return}await review(d,"changes_requested",note.value.trim())};const approve=el("button","اعتماد وإدراج","m-small");approve.onclick=async()=>{if(!confirm("اعتماد هذه المسودة وإدراجها نهائيًا في "+TITLES[key]+"؟"))return;await review(d,"approved","")};td.append(ask,approve)}else if(d.created_by===profileUserId()){const edit=el("button","تعديل المسودة","m-small");edit.onclick=()=>{editDraft=d;makeForm(key);const f=$("register-draft-form");if(key==="deliberation"&&d.payload?.minutes_text&&!f.elements.minutes_text){const wrap=el("label","نص المحضر المحرر (قابل للمراجعة)");const area=document.createElement("textarea");area.name="minutes_text";area.rows=16;area.maxLength=16000;area.required=true;wrap.append(area);f.insertBefore(wrap,f.querySelector(".m-actions"))}for(const [k,v] of Object.entries(d.payload||{})){if(f.elements[k])f.elements[k].value=v??""}f.scrollIntoView({behavior:"smooth",block:"start"})};td.append(edit)}row.append(td);tb.append(row)}
   table.append(tb);section.append(table)
  }
- section.append(el("h4","السجل الرسمي"));
- let officialEntries=[...entries];
+ if(registerView!=="review")section.append(el("h4","السجل الرسمي"));
+ let officialEntries=registerView==="review"?[]:[...entries];
  if(key==="deliberation"){
   const printBar=el("div",undefined,"m-toolbar ledger-print-toolbar m-no-print");
   printBar.append(el("p","يمكن طباعة كل المحاضر المعتمدة الظاهرة أو اختيار «حفظ بتنسيق PDF» من نافذة الطباعة.","m-note"));
@@ -141,13 +159,16 @@ function renderTable(key,entries,drafts){
 function showRegister(key){
  if(!key||!ROLES[key]?.includes(profile?.role))return;
  activeRegisterKey=key;
+ registerView=canReview(key)?"home":canCreate(key)?"home":"browse";
+ $("register-choice-grid").hidden=true;
+ $("register-selection-hint").textContent="أنت الآن داخل "+TITLES[key]+".";
  for(const k of Object.keys(TITLES)){const host=$("register-"+k);if(host)host.hidden=k!==key}
- document.querySelectorAll("#register-choice-grid [data-register-key]").forEach(b=>{
-  const active=b.dataset.registerKey===key;b.classList.toggle("active",active);b.setAttribute("aria-pressed",active?"true":"false");
- });
  const form=$("register-draft-form");
  if(form.dataset.key&&form.dataset.key!==key){form.hidden=true;form.reset();editDraft=null}
- $("register-selection-hint").textContent="السجل المفتوح الآن: "+TITLES[key]+" — لا تظهر بقية السجلات داخل هذه الصفحة.";
+ const host=$("register-"+key);if(host){host.hidden=false;
+  if(registerView==="browse")renderTable(key,[],[]);
+  else renderTable(key,[],[]);
+ }
 }
 function renderRegisterChoices(){
  const grid=$("register-choice-grid");grid.replaceChildren();
@@ -157,7 +178,7 @@ function renderRegisterChoices(){
   b.append(el("span","▤","m-dashboard-icon"),el("span",TITLES[key],"m-dashboard-title"));
   const descriptions={deliberation:"المداولات والقرارات المعتمدة",accounting:"الإيرادات والمصروفات والقيود المالية",equipment:"جرد العتاد وحالته",outgoing_mail:"المراسلات الصادرة مرتبة بالتاريخ",incoming_mail:"المراسلات الواردة مرتبة بالتاريخ",activities:"الأنشطة والبرامج المنجزة والمبرمجة",tasks:"المهام والتكليفات الرئاسية",inspection:"تقارير التفتيش والمراقبة"};
   b.append(el("span",descriptions[key],"m-dashboard-description"));
-  b.setAttribute("aria-pressed","false");b.onclick=()=>showRegister(key);grid.append(b);
+  b.setAttribute("aria-pressed","false");b.onclick=()=>{showRegister(key);renderTable(key,cachedEntries[key]||[],cachedDrafts[key]||[])};grid.append(b);
  }
 }
 function profileUserId(){return profile?.user_id}
@@ -171,11 +192,13 @@ async function loadAll(){
   const {data:entries,error}=await sb.from("association_register_entries").select("*").eq("register_key",key).eq("is_test",false).order("register_year",{ascending:false}).order("register_number",{ascending:false}).limit(200);
   if(error){host.textContent="تعذر تحميل السجل: "+error.message;continue}
   let drafts=[];if(key in DRAFT_ROLE){const q=sb.from("association_register_drafts").select("*").eq("register_key",key).neq("status","approved").order("created_at",{ascending:false}).limit(100);const {data:d,error:de}=await q;if(!de)drafts=d||[]}
-  renderTable(key,entries||[],drafts);
+  cachedEntries[key]=entries||[];cachedDrafts[key]=drafts;renderTable(key,cachedEntries[key],cachedDrafts[key]);
  }
  await loadNotifications();
  if(!activeRegisterKey||!ROLES[activeRegisterKey]?.includes(profile.role))activeRegisterKey=keys.find(k=>ROLES[k].includes(profile.role))||null;
- renderRegisterChoices();if(activeRegisterKey)showRegister(activeRegisterKey);
+ renderRegisterChoices();
+ if(activeRegisterKey&&ROLES[activeRegisterKey]?.includes(profile.role)){const savedKey=activeRegisterKey;showRegister(savedKey);renderTable(savedKey,cachedEntries[savedKey]||[],cachedDrafts[savedKey]||[])}
+ else {activeRegisterKey=null;$("register-choice-grid").hidden=false;for(const key of keys){const host=$("register-"+key);if(host)host.hidden=true}}
  msg("تم تحديث السجلات التي يسمح بها حسابك.","success")
 }
 document.addEventListener("DOMContentLoaded",async()=>{
