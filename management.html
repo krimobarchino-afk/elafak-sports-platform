@@ -195,7 +195,7 @@
 <section class="m-pane" id="pane-inspections" hidden>
 <div class="m-card">
 <div class="m-toolbar"><h2>تقارير التفتيش والمراقبة</h2><button id="inspections-refresh" class="m-small m-no-print" type="button">تحديث التقارير</button></div>
-<p class="m-note">سجل التفتيش وتقاريره ظاهر لأعضاء المكتب التنفيذي للاطلاع والمتابعة، وللمفتش الاطلاع على السجلات الواقعة ضمن نطاق صلاحياته وإجراء تفتيش جديد وتحرير تقريره. لا يتدخل المفتش في مسودات الجمعية الإدارية، ولا يخضع تقرير التفتيش لاعتماد الرئيس كمسودة إدارية. تحفظ التقارير السابقة والجديدة مع سجل المتابعات.</p>
+<p class="m-note">سجل التفتيش وتقاريره ظاهر لأعضاء المكتب التنفيذي للاطلاع والمتابعة، وللمفتش الاطلاع على تقارير التفتيش والمراقبة السابقة والجديدة وإنشاء تقاريره ومتابعتها فقط. لا يتدخل المفتش في مسودات الجمعية الإدارية، ولا يخضع تقرير التفتيش لاعتماد الرئيس كمسودة إدارية. تحفظ التقارير السابقة والجديدة مع سجل المتابعات.</p>
 <form id="inspection-form" class="m-grid m-no-print">
 <label>رقم التقرير<input name="report_number" required minlength="3" maxlength="80"></label>
 <label>تاريخ التفتيش<input name="inspection_date" type="date" required></label>
@@ -246,7 +246,7 @@
 </div>
 <section id="delib-register-view" class="delib-view" hidden>
  <div class="delib-toolbar"><h3>سجل المداولة الرسمي</h3><button type="button" class="m-small" data-delib-home>العودة إلى خيارات المداولة</button></div>
- <p class="m-note">يعرض هذا السجل الاجتماعات المعتمدة، ثم التقارير والمحاضر والقرارات التي اعتمدها الرئيس وقُيّدت برقم رسمي. حساب المفتش مخصص للقراءة والطباعة لهذه السجلات فقط ولا يعرض المسودات أو أدوات الإدخال.</p>
+ <p class="m-note">يعرض هذا السجل حساب المفتش لا يتيح عرض سجلات الاجتماعات أو المداولات؛ يقتصر على تقارير التفتيش والمراقبة ومتابعاتها.</p>
  <h4>سجل الاجتماعات المعتمدة</h4>
  <div class="m-tablewrap"><table class="m-table"><thead><tr><th>الاجتماع</th><th>النوع</th><th>التاريخ</th><th>المكان</th><th>عدد الحاضرين</th><th>القرارات / المحضر</th><th>الإجراء</th></tr></thead><tbody id="official-meeting-register-rows"></tbody></table></div>
  <h4>سجل المحاضر والتقارير والقرارات المقيدة</h4>
