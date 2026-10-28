@@ -30,3 +30,14 @@ on public.executive_office_roster
 for all to authenticated
 using ((select private.current_staff_role()) = any (array['president','secretary_general']))
 with check ((select private.current_staff_role()) = any (array['president','secretary_general']));
+
+-- These are fixed office-position placeholders, not historical office-holder records.
+-- Names remain NULL until the association enters them from verified minutes.
+insert into public.executive_office_roster (position_key, position_label) values
+  ('president', 'الرئيس'),
+  ('deputy_president', 'نائب الرئيس'),
+  ('secretary_general', 'الأمين العام'),
+  ('deputy_secretary_general', 'نائب الأمين العام'),
+  ('treasurer', 'أمين المال'),
+  ('deputy_treasurer', 'نائب أمين المال')
+on conflict (position_key) do nothing;
