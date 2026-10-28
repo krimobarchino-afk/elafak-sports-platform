@@ -39,11 +39,69 @@ function makeForm(key){
   else {input=document.createElement("input");input.type=type==="number"?"number":type; if(type==="number")input.step="any"}
   input.name=name;input.required=!!required;input.maxLength=type==="textarea"?6000:500;wrap.append(input);f.append(wrap);
  }
+ if(key==="deliberation"){
+  const edit=el("button","تحرير المحضر","m-small");edit.type="button";edit.onclick=()=>buildDeliberationMinutes(f);f.append(edit);
+ }
  const row=el("div",undefined,"m-actions");const save=el("button","حفظ المسودة");save.type="submit";save.className="btn btn-dark";row.append(save);
  const cancel=el("button","إلغاء");cancel.type="button";cancel.onclick=()=>{editDraft=null;f.hidden=true;f.reset()};row.append(cancel);f.append(row);f.hidden=false;
 }
 function payloadFromForm(f){const p={};for(const [k,v] of new FormData(f)){p[k]=String(v).trim()}return p}
-function renderPayload(payload){return Object.entries(payload||{}).map(([k,v])=>k+": "+valText(v)).join(" • ")}
+function buildDeliberationMinutes(f){
+ const v=Object.fromEntries(new FormData(f).entries());
+ const lines=[
+ "الجمهورية الجزائرية الديمقراطية الشعبية",
+ "جمعية الأفق الولائية للرياضات الجوية والجبلية — ولاية الشلف",
+ "سجل المداولة",
+ "",
+ "عنوان المداولة: "+(v.title||"................................"),
+ "تاريخ الاجتماع/المداولة: "+(v.record_date||"...................."),
+ "نوع الاجتماع: "+(v.meeting_type||"...................."),
+ "",
+ "الحاضرون وصفاتهم:",
+ v.attendees||"................................................................",
+ "",
+ "جدول الأعمال:",
+ v.agenda||"................................................................",
+ "",
+ "مجريات الاجتماع والمناقشات:",
+ v.discussion||"................................................................",
+ "",
+ "القرارات المتخذة:",
+ v.decisions||"................................................................",
+ "",
+ "المرفقات والمراجع:",
+ v.attachments||"لا يوجد",
+ "",
+ "حرر هذا المحضر لإثبات ما جرى وما اتُّخذ من قرارات، ويعرض على رئيس الجمعية للمراجعة والاعتماد.",
+ "",
+ "الأمين العام: ................................      رئيس الجمعية: ................................"
+ ];
+ let area=f.elements.minutes_text;
+ if(!area){const wrap=el("label","نص المحضر المحرر (راجع النص قبل حفظ المسودة)");area=document.createElement("textarea");area.name="minutes_text";area.rows=16;area.maxLength=16000;area.required=true;wrap.append(area);const anchor=f.querySelector(".m-actions");f.insertBefore(wrap,anchor)}
+ area.value=lines.join("\n");
+ area.scrollIntoView({behavior:"smooth",block:"center"});
+ msg("تم تكوين نص المحضر من الخانات. راجعه وعدّله ثم احفظ المسودة.","success");
+}
+function renderPayload(payload){return Object.entries(payload||{}).filter(([k])=>k!=="minutes_text").map(([k,v])=>k+": "+valText(v)).join(" • ")}
+function renderDeliberationPage(entry){
+ const page=el("article",undefined,"official-ledger-page");
+ const top=el("div",undefined,"ledger-bookhead");
+ top.append(el("div","الجمهورية الجزائرية الديمقراطية الشعبية"),el("div","جمعية الأفق الولائية للرياضات الجوية والجبلية — ولاية الشلف"),el("h3","سجل المداولة"));
+ page.append(top);
+ const meta=el("div",undefined,"ledger-meta");
+ meta.append(el("span","رقم القيد: "+entry.register_year+"/"+String(entry.register_number).padStart(3,"0")),el("span","تاريخ الاعتماد: "+formatDate(entry.approved_at)));
+ page.append(meta);
+ const body=el("div",undefined,"ledger-minutes");
+ const text=entry.payload?.minutes_text;
+ if(text){text.split("\n").forEach(line=>body.append(el("p",line||" ")))}
+ else{
+  const fields=[["عنوان المداولة",entry.payload?.title],["التاريخ",entry.payload?.record_date],["نوع الاجتماع",entry.payload?.meeting_type],["الحاضرون وصفاتهم",entry.payload?.attendees],["جدول الأعمال",entry.payload?.agenda],["المناقشات",entry.payload?.discussion],["القرارات",entry.payload?.decisions],["المرفقات والمراجع",entry.payload?.attachments]];
+  for(const [label,value] of fields){const block=el("div",undefined,"ledger-field");block.append(el("strong",label));block.append(el("p",valText(value)));body.append(block)}
+ }
+ page.append(body);
+ const sign=el("div",undefined,"ledger-signatures");sign.append(el("span","الأمين العام"),el("span","رئيس الجمعية"));page.append(sign);
+ return page;
+}
 function renderTable(key,entries,drafts){
  const host=$("register-"+key);if(!host)return;host.replaceChildren();
  const section=el("section",undefined,"m-card");section.append(el("h3",TITLES[key]));
@@ -56,6 +114,12 @@ function renderTable(key,entries,drafts){
  }
  section.append(el("h4","السجل الرسمي"));
  let officialEntries=[...entries];
+ if(key==="deliberation"){
+  if(!officialEntries.length)section.append(el("p","لا توجد مداولات معتمدة مسجلة في هذا السجل حتى الآن.","m-note"));
+  for(const entry of officialEntries)section.append(renderDeliberationPage(entry));
+  host.append(section);
+  return;
+ }
  if(key==="outgoing_mail"||key==="incoming_mail"){
   officialEntries.sort((a,b)=>String(b.payload?.mail_date||"").localeCompare(String(a.payload?.mail_date||"")));
   const filters=el("div",undefined,"m-actions");const from=el("input"),to=el("input"),apply=el("button","تصفية بالتاريخ"),clear=el("button","مسح التصفية");
