@@ -1,8 +1,10 @@
 (()=>{
 "use strict";
-const URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
-const KEY="sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ";
-const STORAGE_KEY="sb-lfubzohsbwdoiagfkpkt-auth-token";
+const CONFIG=window.ElAfakSupabaseConfig;
+if(!CONFIG) throw new Error("Supabase configuration is missing");
+const URL=CONFIG.url;
+const KEY=CONFIG.key;
+const STORAGE_KEY=CONFIG.storageKey;
 const $=id=>document.getElementById(id);
 const EXEC=["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer"];
 const ROUTES={
