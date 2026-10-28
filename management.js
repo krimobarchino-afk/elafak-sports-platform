@@ -70,12 +70,15 @@ function renderDashboardCards(){
  const icons={"join-requests":"↗",finance:"دج",activities:"✦",equipment:"◇",tasks:"✓",inspections:"⌕",meetings:"▤","office-roster":"♙",archive:"▣"};
  const grid=$("m-dashboard-cards");if(!grid)return;grid.replaceChildren();
  const tabs=[...document.querySelectorAll(".m-tabs button[data-pane]")].filter(b=>b.dataset.pane!=="overview"&&!b.classList.contains("m-hide"));
- for(const b of tabs){const card=document.createElement("button");card.type="button";card.className="m-dashboard-card";
+ for(const b of tabs){const card=document.createElement("button");card.type="button";card.className="m-dashboard-card";card.dataset.pane=b.dataset.pane;
   const icon=document.createElement("span");icon.className="m-dashboard-icon";icon.setAttribute("aria-hidden","true");icon.textContent=icons[b.dataset.pane]||"•";
   const title=document.createElement("span");title.className="m-dashboard-title";title.textContent=b.textContent.trim();
   const desc=document.createElement("span");desc.className="m-dashboard-description";desc.textContent=descriptions[b.dataset.pane]||"فتح القسم المسموح به لحسابك.";
   card.append(icon,title,desc);card.addEventListener("click",()=>b.click());grid.append(card)}
  if(!tabs.length){const empty=document.createElement("p");empty.className="m-dashboard-empty";empty.textContent="لا توجد أقسام إضافية مفعّلة لهذا الحساب حاليًا.";grid.append(empty)}
+}
+function canViewOfficialRegisters(){
+ return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director","inspection_inspector");
 }
 function applyPermissions(){
  $("tab-equipment").classList.toggle("m-hide",!canViewEquipment());
@@ -87,6 +90,7 @@ function applyPermissions(){
  $("stat-meetings").closest(".m-stat").classList.toggle("m-hide",!canViewMeetings());
  $("tab-tasks").classList.toggle("m-hide",!canViewTasks());
  $("tab-inspections").classList.toggle("m-hide",!canViewInspections());
+ $("tab-official-registers")?.classList.toggle("m-hide",!canViewOfficialRegisters());
  document.querySelectorAll('.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.toggle("m-hide",!roleIs("president")));
  $("equipment-form").classList.toggle("m-hide",!canEditEquipment());
  $("activity-form").classList.toggle("m-hide",!canEditActivities());
