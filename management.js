@@ -150,6 +150,13 @@ function applyPermissions(){
  document.querySelectorAll("[data-delib-new]").forEach(el=>el.classList.toggle("m-hide",roleIs("inspection_inspector")||!roleIs("secretary_general")));
  document.querySelectorAll("[data-delib-open=\"drafts\"],[data-delib-open=\"meetings\"]").forEach(el=>el.classList.toggle("m-hide",roleIs("inspection_inspector")||!canEditMeetings()));
  document.querySelector('[data-delib-open="register"]')?.classList.toggle("m-hide",roleIs("inspection_inspector"));
+ // The eight official registers are the primary register interface. Hide older overlapping modules
+ // to prevent duplicate/conflicting ways of recording official information.
+ ["tab-finance","tab-equipment","tab-tasks","tab-inspections","tab-office-roster"].forEach(id=>$(id)?.classList.add("m-hide"));
+ document.querySelectorAll('.m-tabs button[data-pane="activities"],.m-tabs button[data-pane="meetings"],.m-tabs button[data-pane="join-requests"],.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.add("m-hide"));
+ ["pane-finance","pane-equipment","pane-activities","pane-tasks","pane-inspections","pane-meetings","pane-office-roster","pane-join-requests","pane-archive"].forEach(id=>$(id)?.classList.add("m-hide"));
+ ["stat-balance","stat-activities","stat-equipment","stat-meetings"].forEach(id=>$(id)?.closest(".m-stat")?.classList.add("m-hide"));
+ $("tab-official-registers")?.classList.toggle("m-hide",profile.role==="site_admin");
  renderDashboardCards();
 }
 async function loadYears(){
