@@ -125,7 +125,7 @@ function applyPermissions(){
  const rolePage=ROLE_PAGE[profile.role];
  $("management-title").textContent=rolePage?.[0]||"فضاء التسيير";
  $("management-intro").textContent=rolePage?.[1]||"فضاء مخصص وفق الدور والصلاحيات المعتمدة للحساب.";
- $("m-permissions").textContent=roleIs("inspection_inspector")?"صلاحية الاطلاع على تقارير التفتيش والمراقبة السابقة والجديدة، وإنشاء التقارير ومتابعتها ضمن سجل التفتيش فقط. لا يتيح الحساب الوصول إلى بقية سجلات الجمعية أو تحريرها أو اعتمادها.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
+ $("m-permissions").textContent=roleIs("inspection_inspector")?"يمكن للمفتش إنشاء تقارير التفتيش والمراقبة والاطلاع عليها، والاطلاع على السجلات المخصصة له وفق الصلاحيات المعتمدة. لا يملك صلاحية إنشاء مسودات السجلات الأخرى أو اعتمادها.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
  $("tab-finance").classList.toggle("m-hide",!canViewFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
  $("payment-workflow-card").classList.toggle("m-hide",!canFinance());
