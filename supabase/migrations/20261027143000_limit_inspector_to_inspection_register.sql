@@ -1,8 +1,8 @@
 -- Final inspector policy model:
--- The inspector's UI and database access are limited to inspection reports plus
--- the official accounting, equipment-inventory, and deliberation registers.
--- Draft workflows, membership information, activity records, staff roster,
--- office tasks, notifications, and audit logs remain out of scope.
+-- The inspector's data access is limited to inspection reports and their follow-ups.
+-- All other association registers (finance, equipment, meetings, deliberations,
+-- membership, activities, tasks, staff administration, notifications and audit logs)
+-- remain out of scope. The staff profile is retained only for role/session checks.
 --
 -- Drop the older blanket restrictive policy first (if a prior draft of this
 -- migration was applied), so these exact exceptions can be re-established.
@@ -27,12 +27,7 @@ begin
       and tablename not in (
         'inspection_reports',
         'inspection_followups',
-        'staff_profiles',
-        'finance_transactions',
-        'financial_years',
-        'equipment',
-        'meetings',
-        'deliberation_outputs'
+        'staff_profiles'
       )
   loop
     execute format('alter table public.%I enable row level security', v_table);
