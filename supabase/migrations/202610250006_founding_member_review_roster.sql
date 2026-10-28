@@ -23,12 +23,8 @@ on public.founding_member_roster for all to authenticated
 using ((select private.current_staff_role()) = any (array['site_admin','president','secretary_general']))
 with check ((select private.current_staff_role()) = any (array['site_admin','president','secretary_general']));
 grant select, insert, update, delete on public.founding_member_roster to authenticated;
-insert into public.founding_member_roster (founder_number, full_name) values
- (1,'رحماني قوادري محمد'),(2,'صابر عبدالعزيز'),(3,'قانيت محمد أمين'),(4,'عبدالكريم محمد'),
- (5,'رزيق أحمد'),(6,'لعرابة زيان بلقاسم'),(7,'حاج هني مراد'),(8,'مهدي نصرالدين'),
- (9,'قانيت عبدالمجيد'),(10,'دحماني جمال الدين'),(11,'لعرابة زيان عبدالله'),(12,'مجاهد عبدالرحمن'),
- (13,'بوحديبة بوناقة'),(14,'زياد العربي'),(15,'شوال عبدالقادر'),(16,'رقاد عبدالقادر')
-on conflict (founder_number) do nothing;
+-- Founding-member roster intentionally starts empty; enter names only from verified records.
+
 create or replace function public.touch_founding_member_roster_updated_at()
 returns trigger language plpgsql set search_path = '' as $$
 begin

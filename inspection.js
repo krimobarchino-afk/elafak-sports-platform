@@ -1,7 +1,9 @@
 (()=>{"use strict";
-const SUPABASE_URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
-const KEY="sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ";
-const STORAGE_KEY="sb-lfubzohsbwdoiagfkpkt-auth-token";
+const CONFIG=window.ElAfakSupabaseConfig;
+if(!CONFIG) throw new Error("Supabase configuration is missing");
+const SUPABASE_URL=CONFIG.url;
+const KEY=CONFIG.key;
+const STORAGE_KEY=CONFIG.storageKey;
 const ENTRY=new URLSearchParams(window.location.search).get("entry");
 const $=id=>document.getElementById(id);
 let sb,user=null,profile=null,reports=[],followups=[];

@@ -1,6 +1,8 @@
 (()=> {
-const URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
-const KEY="sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ";
+const CONFIG=window.ElAfakSupabaseConfig;
+if(!CONFIG) throw new Error("Supabase configuration is missing");
+const URL=CONFIG.url;
+const KEY=CONFIG.key;
 const $=id=>document.getElementById(id);
 let sb;
 const initialAuthType=new URLSearchParams(location.hash.replace(/^#/,"")).get("type");

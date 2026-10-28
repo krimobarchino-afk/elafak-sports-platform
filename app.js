@@ -1,4 +1,6 @@
 (() => {
+  const SUPABASE_CONFIG = window.ElAfakSupabaseConfig;
+  if (!SUPABASE_CONFIG) throw new Error('Supabase configuration is missing');
   const toggle = document.querySelector('.menu-toggle');
   const nav = document.querySelector('#nav');
   const modal = document.querySelector('#join-modal');
@@ -80,11 +82,11 @@
     formMessage.textContent = '';
     formMessage.className = 'form-message';
     try {
-      const response = await fetch('https://lfubzohsbwdoiagfkpkt.supabase.co/functions/v1/submit-join-request', {
+      const response = await fetch(SUPABASE_CONFIG.url + '/functions/v1/submit-join-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': 'sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ'
+          'apikey': SUPABASE_CONFIG.key
         },
         body: JSON.stringify(payload)
       });
@@ -167,9 +169,9 @@
     messageEl.textContent = 'جارٍ التحقق من حالة الطلب…';
     messageEl.className = 'form-message';
     try {
-      const response = await fetch('https://lfubzohsbwdoiagfkpkt.supabase.co/functions/v1/lookup-join-request', {
+      const response = await fetch(SUPABASE_CONFIG.url + '/functions/v1/lookup-join-request', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': 'sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ' },
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_CONFIG.key },
         body: JSON.stringify({ request_ref, phone })
       });
       const result = await response.json().catch(() => ({}));
@@ -268,9 +270,9 @@
               uploadMessage.textContent = 'جارٍ رفع الملف بصورة آمنة…';
               uploadMessage.className = 'form-message';
               try {
-                const response = await fetch('https://lfubzohsbwdoiagfkpkt.supabase.co/functions/v1/submit-join-file', {
+                const response = await fetch(SUPABASE_CONFIG.url + '/functions/v1/submit-join-file', {
                   method: 'POST',
-                  headers: { 'apikey': 'sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ' },
+                  headers: { 'apikey': SUPABASE_CONFIG.key },
                   body: data
                 });
                 const uploaded = await response.json().catch(() => ({}));

@@ -50,3 +50,24 @@ The first decision-linked rule is implemented for the annual membership fee. Oth
 - Review the Supabase Auth leaked-password protection warning; enable it if supported by the subscription.
 
 Never commit project secrets, service-role keys, or user passwords to this repository.
+
+
+## Fresh free development environment (2026-10-27)
+
+A separate free-tier development Supabase project was created for the feature branch:
+- Name: `elafak-sports-dev`
+- Project ref: `yflokiwvbbxtjjpdhned`
+- Region: `eu-west-1`
+- API URL: `https://yflokiwvbbxtjjpdhned.supabase.co`
+
+The development database was built without copying production rows. Its 28 public application tables had RLS enabled; all operational tables were empty at the schema check. Six rows in `executive_office_roster` are static position placeholders only (president/deputies/secretary/treasurer); their holder names remain NULL. The founding-member roster is empty and the UI now offers manual insertion from verified documents.
+
+The original tracked migrations were found to omit the historical schema source for `members`, `join_request_document_requirements`, `join_request_file_submissions`, `join_request_lookup_rate_limits`, and `executive_office_roster`. The feature branch adds fresh-environment migrations reconstructed against reviewed production schema metadata. They are not claimed to be exact recovery of the original historical SQL and must not be run against production as a replacement for missing migration history.
+
+Historical-data seeds have been removed from the fresh-environment path: no 2025 accounting entries or opening balances, no historical meeting rows, no founder names, and no automatic founder active/eligibility decisions. A private `join-request-files` Storage bucket was added to development with PDF-only type and 15 MiB maximum.
+
+Seven Edge Functions were deployed to the development project using the feature-branch sources. The static client configuration now selects production only for the exact hostname `horizon-barchino.vercel.app`; preview and local hosts default to the development project. The known preview alias was added to the function CORS allowlist. The main production project, its schema, its Auth accounts, its Storage files and its operational rows were not modified by this development setup.
+
+Validation performed: browser JavaScript syntax parsing succeeded for all six page scripts and the configuration file; static checks confirmed one config script tag is loaded before the page script on all six pages. The Supabase Security Advisor returned no security lints for the development schema. Performance Advisor reports informational foreign-key index and multiple-permissive-policy warnings; review these as load develops, and do not delete unused indexes without workload evidence.
+
+Still required before calling the workflow fully tested or merging PR #24: configure Authentication URL/redirect allowlist for the stable preview host in the development project, create a separate development site-admin user, confirm Vercel's latest preview build and target, and test authentication, public request submission/lookup/file upload, role permissions, official-register visibility and inspector read-only boundaries with test data only.

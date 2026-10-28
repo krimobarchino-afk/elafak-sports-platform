@@ -1,8 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const ORIGIN = "https://horizon-barchino.vercel.app";
+const isAllowedOrigin = (origin: string | null) => origin === ORIGIN || origin === "https://horizon-git-feature-deliberation-workflow-barchino.vercel.app";
 const headers = {
-  "Access-Control-Allow-Origin": ORIGIN,
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Content-Type": "application/json",
@@ -13,7 +14,7 @@ const out = (body: unknown, status = 200) =>
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers });
   if (req.method !== "POST") return out({ error: "الطريقة غير مسموحة." }, 405);
-  if (req.headers.get("origin") !== ORIGIN) return out({ error: "مصدر الطلب غير مسموح." }, 403);
+  if (!isAllowedOrigin(req.headers.get("origin"))) return out({ error: "مصدر الطلب غير مسموح." }, 403);
 
   const url = Deno.env.get("SUPABASE_URL");
   const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -110,7 +111,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: ORIGIN + "/member.html",
+    redirectTo: ((req.headers.get("origin") && isAllowedOrigin(req.headers.get("origin")) ? req.headers.get("origin") : ORIGIN) + "/member.html"),
     data: { member_no: member.member_no },
   });
   if (inviteError || !invited.user) {

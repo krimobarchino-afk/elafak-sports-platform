@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const jsonHeaders = {
-  "Access-Control-Allow-Origin": "https://horizon-barchino.vercel.app",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Content-Type": "application/json",

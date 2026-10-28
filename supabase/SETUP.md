@@ -10,6 +10,7 @@
 
 ## الترحيلات
 - `supabase/migrations/202610150001_initial_join_requests.sql`
+- `supabase/migrations/202610160001_membership_primitives.sql`
 - `supabase/migrations/202610170001_staff_profiles.sql`
 - `supabase/migrations/202610170002_staff_join_request_review_policies.sql`
 - `supabase/migrations/202610180001_add_deputy_president_role.sql`
@@ -20,11 +21,34 @@
 - `supabase/migrations/202610180006_full_management_modules.sql`
 - `supabase/migrations/202610180007_seed_official_meetings.sql`
 - `supabase/migrations/202610180008_tighten_management_role_visibility.sql`
+- `supabase/migrations/202610180009_membership_document_access_policies.sql`
 - `supabase/migrations/202610250001_restrict_finance_read_to_finance_roles.sql`
 - `supabase/migrations/202610250002_consolidate_members_select_policy.sql`
 - `supabase/migrations/202610250003_block_unapproved_membership_fee_income.sql`
 - `supabase/migrations/202610250004_decision_driven_membership_fee_settings.sql`
 - `supabase/migrations/202610250005_tighten_decision_source_validation.sql`
+- `supabase/migrations/202610250006_founding_member_review_roster.sql`
+- `supabase/migrations/202610250007_add_dynamic_meeting_minutes_fields.sql`
+- `supabase/migrations/202610260001_add_test_record_flags.sql`
+- `supabase/migrations/202610260002_enforce_test_record_flags.sql`
+- `supabase/migrations/202610260003_confirm_founders_active_general_assembly.sql`
+- `supabase/migrations/202610260004_membership_dues_lifecycle_foundation.sql`
+- `supabase/migrations/202610260005_restrict_finance_to_president_treasurer.sql`
+- `supabase/migrations/202610270001_inspection_reports_role.sql`
+- `supabase/migrations/20261027084716_role_specific_equipment_and_president_tasks.sql`
+- `supabase/migrations/20261027090000_executive_office_roster_schema.sql`
+- `supabase/migrations/20261027093609_restrict_inspector_to_inspection_records.sql`
+- `supabase/migrations/20261027101303_restore_inspector_read_only_oversight_access.sql`
+- `supabase/migrations/20261027121500_deliberation_outputs_workflow.sql`
+- `supabase/migrations/20261027122500_deliberation_workflow_rls_transitions.sql`
+- `supabase/migrations/20261027123000_consolidate_deliberation_update_policy.sql`
+- `supabase/migrations/20261027131500_shared_deliberation_workspace.sql`
+- `supabase/migrations/20261027140000_inspection_register_shared_with_bureau.sql`
+- `supabase/migrations/20261027143000_limit_inspector_to_inspection_register.sql`
+- `supabase/migrations/20261027150000_official_record_draft_workflow.sql`
+- `supabase/migrations/20261027153000_inspector_official_draft_isolation.sql`
+- `supabase/migrations/20261027160000_private_join_request_storage.sql`
+- `supabase/migrations/20261027161000_seed_office_roster_positions.sql`
 
 ## حالة حسابات المكتب الحالية
 تم التحقق من قاعدة الإنتاج بتاريخ 2026-10-25: يوجد 8 حسابات موظفين نشطة بالفعل، تشمل `siteadmin` و`president` و`deputy.president` و`secretary` و`deputy.secretary` و`treasurer` و`deputy.treasurer` و`technical`.
@@ -33,18 +57,31 @@
 ## تهيئة بيئة جديدة فقط
 عند إنشاء بيئة Supabase جديدة خالية، أنشئ مستخدم `siteadmin@staff.elafak.invalid` من Authentication → Users، ثم أضف صف `site_admin` المرتبط بمعرّف المستخدم الفعلي في `staff_profiles`. لا تنفذ هذا الإجراء على قاعدة الإنتاج القائمة.
 
-## فضاء تسيير الجمعية
-- افتح `/management.html` بعد تسجيل الدخول بحساب موظف نشط.
-- السجل المالي يبدأ بعمليتي 2025 الموثقتين (1000 دج إيداع و595 دج رسوم بنكية)، ويعرض رصيدًا ختاميًا قدره 405 دج. تاريخا العمليتين غير معروفين ولذلك تركا فارغين. سنة 2025 مغلقة، وسنة 2026 تبدأ برصيد افتتاحي 405 دج.
-- توجد في سجل 2026 عملية إيراد بقيمة 1000 دج موصوفة بأنها اشتراك سنوي بتاريخ 18/10/2026. لم تُحذف أو تُعدّل؛ يجب التحقق منها يدويًا قبل اعتبارها رسم انخراط معتمدًا.
-- في «الاجتماعات والمحاضر والقرارات» أضيفت آلية ربط القرار بالإعدادات: يختار الرئيس محضر جمعية عامة معتمدًا، ويمكن للواجهة اقتراح المبلغ من نص القرار، ثم يراجع الرئيس المبلغ والنص الحرفي ويؤكدهما. لا يتفعّل الاشتراك بمجرد ذكره، ولا يقبل النظام مرجعًا إلى محضر غير معتمد أو إلى نص غير موجود فيه.
-- بعد اعتماد قرار الاشتراك السنوي، تقبل قاعدة البيانات إيرادات الاشتراك الجديدة بالمبلغ المعتمد فقط؛ أما قبل ذلك فتبقى محظورة. العملية التاريخية ذات 1000 دج لا تتغير تلقائيًا.
-- سجل المعدات فارغ عمدًا حتى إدخال الجرد بعد التحقق الميداني.
-- أضيفت سجلات الاجتماعات الثلاثة بالقدر الموثق فقط؛ تفاصيل المحاضر غير المتوفرة يجب استكمالها من الوثائق الرسمية.
-- أدوار المالية: الرئيس ومدير الموقع وأمين المال؛ نائب أمين المال يطّلع فقط دون صلاحيات إدخال أو تعديل، ولا يطّلع نائب الرئيس على السجلات المالية. إدارة الأنشطة والمعدات للرئيس ومدير الموقع والمدير التقني. المحاضر يحررها الرئيس ومدير الموقع والأمين العام، والاعتماد النهائي للرئيس/مدير الموقع.
-- النسخ من الواجهة تنزيل JSON/CSV لما تسمح به صلاحيات الحساب، وليست بديلًا عن النسخ الاحتياطي الكامل من لوحة Supabase.
+## بيئة التطوير المجانية ومبدأ البداية الفارغة
 
-راجع [تقرير تدقيق قاعدة بيانات الإنتاج](../docs/production-database-audit.md) لمعرفة الفجوة بين سجل ترحيلات Supabase وملفات المصدر المحفوظة في GitHub.
+- مشروع التطوير المنفصل: `elafak-sports-dev`، المرجع `yflokiwvbbxtjjpdhned`، المنطقة `eu-west-1`. رابط API هو `https://yflokiwvbbxtjjpdhned.supabase.co`.
+- أُنشئت البنية في هذا المشروع من دون نقل بيانات الإنتاج. تحقق الفحص من وجود 28 جدولًا عامًا، وكل جدول مفعّل عليه RLS. كانت جميع جداول السجلات التشغيلية فارغة وقت الفحص؛ الاستثناء الوحيد هو ست خانات مرجعية ثابتة لمناصب المكتب التنفيذي، وأسماء شاغليها فارغة ولم تُحمّل أي أسماء تاريخية.
+- عُدّلت ترحيلات التهيئة حتى لا تُدخل تلقائيًا أرصدة أو حركات مالية قديمة أو اجتماعات سابقة أو أسماء المؤسسين أو حالاتهم. أدخل المعلومات السابقة لاحقًا يدويًا/باستيراد مقصود بعد مراجعة المستندات الرسمية.
+- الملفات `202610160001_membership_primitives.sql` و`202610180009_membership_document_access_policies.sql` و`20261027090000_executive_office_roster_schema.sql` تعيد بناء جداول كانت موجودة في قاعدة الإنتاج ولم يكن ملف إنشائها التاريخي محفوظًا كاملًا في المستودع. اعتمدت على بنية قاعدة الإنتاج التي تمت مراجعتها، لكنها ليست استرجاعًا حرفيًا للترحيلات التاريخية الأصلية. هذه الترحيلات مخصصة لبيئة التطوير الجديدة، ولا تُطبّق رجعيًا على الإنتاج.
+- نُشرت وظائف Edge السبعة في مشروع التطوير: `submit-join-request` و`lookup-join-request` و`submit-join-file` و`staff-admin` و`staff-join-files` و`staff-finalize-member` و`member-activate-account`. هذا يؤكد النشر فقط، وليس اكتمال اختبار مسار الانخراط من البداية إلى النهاية.
+- أُنشئت الحاوية الخاصة `join-request-files` للملفات بصيغة PDF فقط وبحد أقصى 15 MiB. تبقى خاصة؛ تتم عمليات الرفع والاطلاع عبر وظائف الخادم وصلاحياتها.
+- توجد ست خانات فارغة ثابتة لمناصب المكتب التنفيذي لأن أسماء المناصب جزء من بنية النظام وليست معلومات تاريخية؛ تُدخل أسماء شاغلي المناصب من محضر موثوق لاحقًا. أما سجل المؤسسين فيبدأ بلا أسماء، ويوفر نموذجًا لإدخال كل اسم ورقمه مع إبقاء الحالة وأهلية الجمعية العامة «قيد المراجعة».
+
+## فصل الإنتاج عن المعاينة
+
+- ملف `/supabase-config.js` يختار مشروع الإنتاج فقط عندما يكون المضيف بالضبط `horizon-barchino.vercel.app`. معاينات Vercel وسير العمل المحلي تستخدم مشروع التطوير المنفصل افتراضيًا.
+- يستخدم كل مشروع مفتاحًا منشورًا (publishable) مختلفًا ومفتاح تخزين جلسة مستقلًا. لا توضع مفاتيح الخدمة أو كلمات المرور في واجهة الموقع أو المستودع.
+- قاعدة الإنتاج الحالية `lfubzohsbwdoiagfkpkt` تحتوي معلومات وسجلات قائمة؛ لا تحذفها أو تفرغها لجعل الواجهة تبدو فارغة. لم تُطبق ترحيلات هذا العمل على الإنتاج.
+- قبل اعتبار المعاينة جاهزة للاختبار الفعلي، تحقق من نجاح بناء Vercel، ثم اختبر تسجيل الدخول والصلاحيات وكل مسار Edge Function باستخدام حسابات وسجلات اختبار فقط. لا تدمج PR قبل هذه الفحوصات.
+
+## السجلات الرسمية
+
+- السجل المحاسبي وسجل العتاد ومحاضر الاجتماعات ومخرجات المداولة تبدأ فارغة في مشروع التطوير. لا يُنشأ عام مالي أو رصيد افتتاحي أو عملية إيراد/مصروف تلقائيًا.
+- لا توجد رسوم أو باقات انخراط مفعلة أو مفترضة. لا تضف رسومًا إلى الواجهة أو سجل المالية حتى صدور قرار صحيح من الجمعية العامة ومراجعته ضمن مسار الاعتماد.
+- بيانات العتاد لا تُسجّل إلا بعد الجرد والتحقق الفعلي. وتُدخل المحاضر القديمة بعد مطابقتها مع النسخ الرسمية، مع عدم اختلاق التفاصيل غير المتوفرة.
+- المفتش يطّلع على تقارير التفتيش والمراقبة السابقة والجديدة ومتابعاتها فقط؛ لا يُمنح وصولًا إلى السجلات المالية أو العتاد أو الاجتماعات أو بقية سجلات الجمعية.
+- سجل المهام والتكليفات للرئيس فقط. مدير الموقع حساب إداري تقني وليس منصبًا في المكتب التنفيذي، والمدير التقني الولائي دور وظيفي لا ينشئ عضوية في المكتب التنفيذي أو حق تصويت.
+- صادرات CSV/JSON من الواجهة لا تُعد بديلًا عن النسخ الاحتياطي الكامل من لوحة Supabase.
 
 ## أمان وتشغيل
 - لا تضع مفتاح service-role/secret أو كلمة مرور في الواجهة أو GitHub.
@@ -66,3 +103,10 @@
 - الترحيل `202610250007_add_dynamic_meeting_minutes_fields.sql` يضيف حقولًا اختيارية لساعة البداية والرفع، رئيس الاجتماع، الحضور، جدول الأعمال، المناقشات والمرفقات إلى `meetings`.
 - تبقى الحقول القديمة كما هي، ولا يتطلب الترحيل إدخال بيانات سابقة. يحفظ النموذج الجديد الحقول المنظمة لتظهر عند إعادة فتح المحضر والطباعة.
 - إنشاء نص المحضر لا يعني اعتماده؛ يبقى المحضر مسودة إلى أن يعتمده صاحب الصلاحية وفق إجراءات الجمعية.
+
+
+## السجلات الرسمية الثمانية
+- أضيف الترحيل `20261028100000_eight_official_association_registers.sql` لإنشاء سجلات المداولة والمحاسبة والعتاد والمراسلات الصادرة والواردة والأنشطة والمهام والتفتيش والمراقبة.
+- تنشأ المسودات من حساب الأمين العام أو أمين المال أو المدير التقني بحسب نوع السجل؛ يراجع الرئيس المسودات ويطلب تعديلها أو يعتمدها. الاعتماد ينشئ قيدًا رسميًا مرقمًا، وتصل إشعارات إلى صاحب المسودة.
+- الرئيس يدوّن المهام مباشرة، والمفتش يدوّن سجل التفتيش مباشرة. سياسات RLS تمنع الحسابات من الوصول إلى السجلات خارج نطاق الاطلاع المحدد.
+- الترحيل مطبق على مشروع التطوير `yflokiwvbbxtjjpdhned` فقط. لم يُطبق على الإنتاج `lfubzohsbwdoiagfkpkt`.

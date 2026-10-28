@@ -1,8 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SITE_ORIGIN = "https://horizon-barchino.vercel.app";
+const isAllowedOrigin = (origin: string | null) => origin === SITE_ORIGIN || origin === "https://horizon-git-feature-deliberation-workflow-barchino.vercel.app";
 const headers = {
-  "Access-Control-Allow-Origin": SITE_ORIGIN,
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Content-Type": "application/json",
@@ -20,7 +21,7 @@ async function digest(value: string): Promise<string> {
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers });
   if (req.method !== "POST") return reply({ error: "الطريقة غير مسموحة." }, 405);
-  if (req.headers.get("origin") !== SITE_ORIGIN) return reply({ error: "مصدر الطلب غير مسموح." }, 403);
+  if (!isAllowedOrigin(req.headers.get("origin")) ) return reply({ error: "مصدر الطلب غير مسموح." }, 403);
 
   const url = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");

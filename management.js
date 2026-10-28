@@ -1,19 +1,31 @@
 (()=>{
 'use strict';
-const SUPABASE_URL="https://lfubzohsbwdoiagfkpkt.supabase.co";
-const KEY="sb_publishable_tCZjOnFHLIeQHF0mR9tVFA_9bu4lLrJ";
+const CONFIG=window.ElAfakSupabaseConfig;
+if(!CONFIG) throw new Error("Supabase configuration is missing");
+const SUPABASE_URL=CONFIG.url;
+const KEY=CONFIG.key;
 const $=id=>document.getElementById(id);
 const ENTRY=new URLSearchParams(window.location.search).get("entry");
 const EXECUTIVE_ROLES=["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer"];
-function entryAllows(role){return ENTRY==="executive"?EXECUTIVE_ROLES.includes(role):ENTRY==="technical_director"?role==="technical_director":ENTRY==="inspection_inspector"?role==="inspection_inspector":false;}
+function entryAllows(role){return ENTRY===role||(ENTRY==="executive"&&EXECUTIVE_ROLES.includes(role));}
 const ROLE={site_admin:"مدير الموقع — مسؤول تقني",president:"الرئيس — عضو المكتب التنفيذي",deputy_president:"نائب الرئيس — عضو المكتب التنفيذي",secretary_general:"الأمين العام — عضو المكتب التنفيذي",treasurer:"أمين المال — عضو المكتب التنفيذي",deputy_secretary_general:"نائب الأمين العام — عضو المكتب التنفيذي",deputy_treasurer:"نائب أمين المال — عضو المكتب التنفيذي",technical_director:"المدير التقني الولائي",inspection_inspector:"مفتش الشباب والرياضة — حساب اطلاع وتفتيش"};
+const ROLE_PAGE={
+ president:["فضاء الرئيس","الإشراف العام والمهام والتكليفات ومراجعة السجلات واعتمادها وفق الإجراءات المعتمدة."],
+ deputy_president:["فضاء نائب الرئيس","متابعة الأعمال والمهام المفوضة إليك؛ لا تمنحك النيابة تلقائيًا صلاحية تعديل السجلات المالية أو سجل العتاد."],
+ secretary_general:["فضاء الأمين العام","المراسلات والأرشيف والاجتماعات والمحاضر ومتابعة طلبات الانخراط ضمن الصلاحيات المعتمدة."],
+ deputy_secretary_general:["فضاء نائب الأمين العام","متابعة الأعمال الإدارية المسندة إليك ضمن حدود التفويض."],
+ treasurer:["فضاء أمين المال","السجل المالي ومسودات العمليات المالية وسجل العتاد والجرد والتحقق المالي ضمن الاختصاص."],
+ deputy_treasurer:["فضاء نائب أمين المال","متابعة الأعمال المالية المسندة إليك؛ لا تمتد صلاحياتك تلقائيًا إلى كامل صلاحيات أمين المال."],
+ technical_director:["فضاء المدير التقني الولائي","البرامج والأنشطة والتقارير التقنية والمهام الرياضية المسندة إليك."],
+ inspection_inspector:["فضاء التفتيش والمراقبة","تقارير التفتيش والمراقبة السابقة والجديدة ومتابعاتها فقط، دون الوصول إلى بقية سجلات الجمعية."]
+};
 const TYPE={income:"إيراد",expense:"مصروف"};
 const PAY={bank:"البنك",cash:"نقدًا",transfer:"تحويل",other:"أخرى"};
 const ACTTYPE={paragliding:"الطيران الشراعي",hiking:"المشي الجبلي",training:"التكوين",volunteering:"التطوع",other:"أخرى"};
 const ACTSTATUS={planned:"مبرمج",completed:"منجز",cancelled:"ملغى"};
 const CONDITION={new:"جديدة",good:"صالحة",needs_repair:"تحتاج إصلاحًا",out_of_service:"خارج الخدمة",retired:"مستبعدة"};
 const MEETTYPE={executive:"المكتب التنفيذي",general_assembly:"الجمعية العامة",committee:"لجنة",technical:"تقني",other:"أخرى"};
-let sb,profile,user,years=[],transactions=[],activities=[],equipment=[],meetings=[],executiveRoster=[];
+let sb,profile,user,years=[],transactions=[],activities=[],equipment=[],meetings=[],executiveRoster=[],deliberationOutputs=[],inspectionReports=[],inspectionFollowups=[];
 const fmt=n=>new Intl.NumberFormat('ar-DZ',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n||0))+" دج";
 const dateFmt=v=>v?new Date(v+"T12:00:00").toLocaleDateString("ar-DZ"):"غير محدد";
 function message(id,text,kind=""){const el=$(id);if(!el)return;el.textContent=text;el.className=kind?"m-msg "+kind:"m-msg";}
@@ -22,16 +34,18 @@ function button(parent,label,fn,kind=""){const b=document.createElement("button"
 function rowActions(tr){const td=document.createElement("td"),box=document.createElement("div");box.className="m-actions";td.append(box);tr.append(td);return box;}
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
-function canViewFinance(){return roleIs("president","treasurer","inspection_inspector");}
-function canWriteFinance(){return roleIs("president","treasurer");}
-function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director","inspection_inspector");}
-function canViewEquipment(){return roleIs("president","treasurer","inspection_inspector");}
+function canViewFinance(){return roleIs("president","treasurer");}
+function canWriteFinance(){return roleIs("treasurer");}
+function canCreateOfficialDraft(table){return table==="finance_transactions"||table==="equipment"?roleIs("treasurer"):table==="activities"?roleIs("technical_director"):false;}
+function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
+function canViewEquipment(){return roleIs("president","treasurer");}
 function canViewTasks(){return roleIs("president");}
-function canViewInspections(){return roleIs("inspection_inspector","president","secretary_general");}
+function canViewInspections(){return roleIs("inspection_inspector",...EXECUTIVE_ROLES);}
 function canEditInspections(){return roleIs("inspection_inspector");}
-function canViewMeetings(){return canViewActivities();}
-function canEditActivities(){return roleIs("president","technical_director");}
-function canEditEquipment(){return roleIs("president","treasurer");}
+function canEditInspectionFollowups(){return roleIs("president","secretary_general");}
+function canViewMeetings(){return roleIs("president","secretary_general","deputy_president","deputy_secretary_general","technical_director");}
+function canEditActivities(){return roleIs("technical_director");}
+function canEditEquipment(){return roleIs("treasurer");}
 function canEditMeetings(){return roleIs("president","secretary_general");}
 function canApprove(){return roleIs("president");}
 function localToday(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-");}
@@ -66,7 +80,7 @@ function setupTabs(){
  });
 }
 function renderDashboardCards(){
- const descriptions={"join-requests":"مراجعة الطلبات ومتابعة ملفات استكمال الانخراط وفق الصلاحيات.","finance":"عرض السجل المالي والعمليات والتقارير المالية المتاحة لحسابك.","activities":"متابعة برامج الجمعية وأنشطتها وخططها.","equipment":"جرد المعدات ومتابعة حالتها وسجلها.","tasks":"متابعة المهام والتكليفات التي تدخل ضمن صلاحية الرئيس.","inspections":"إعداد تقارير التفتيش ومراجعة التقارير والمتابعات المسموح بها.","meetings":"الاجتماعات والمحاضر والقرارات والسجلات المرتبطة بها.","office-roster":"الاطلاع على التشكيلة الرسمية للمكتب التنفيذي عند السماح بذلك.","archive":"الأرشيف وسجل العمليات والنسخ المسموح بها."};
+ const descriptions={"join-requests":"مراجعة الطلبات ومتابعة ملفات استكمال الانخراط وفق الصلاحيات.","finance":"عرض السجل المالي والعمليات والتقارير المالية المتاحة لحسابك.","activities":"متابعة برامج الجمعية وأنشطتها وخططها.","equipment":"جرد المعدات ومتابعة حالتها وسجلها.","tasks":"متابعة المهام والتكليفات التي تدخل ضمن صلاحية الرئيس.","inspections":"إعداد تقارير التفتيش ومراجعة التقارير والمتابعات المسموح بها.","meetings":"سجل المداولة ومحرر التقارير والمحاضر والقرارات ومسار مراجعة الرئيس.","office-roster":"الاطلاع على التشكيلة الرسمية للمكتب التنفيذي عند السماح بذلك.","archive":"الأرشيف وسجل العمليات والنسخ المسموح بها."};
  const icons={"join-requests":"↗",finance:"دج",activities:"✦",equipment:"◇",tasks:"✓",inspections:"⌕",meetings:"▤","office-roster":"♙",archive:"▣"};
  const grid=$("m-dashboard-cards");if(!grid)return;grid.replaceChildren();
  const tabs=[...document.querySelectorAll(".m-tabs button[data-pane]")].filter(b=>b.dataset.pane!=="overview"&&!b.classList.contains("m-hide"));
@@ -93,20 +107,33 @@ function applyPermissions(){
  $("meeting-form").classList.toggle("m-hide",!canEditMeetings());
  $("task-form").classList.toggle("m-hide",!canViewTasks());
  $("inspection-form").classList.toggle("m-hide",!canEditInspections());
+ $("inspection-followup-form").classList.toggle("m-hide",!canEditInspectionFollowups());
  $("ga-invitations-card").classList.toggle("m-hide",!canEditMeetings());
+ $("delib-review-shortcut")?.classList.add("m-hide");
+ document.querySelectorAll("[data-delib-secretary]").forEach(el=>el.classList.toggle("m-hide",!roleIs("secretary_general")));
+ document.querySelectorAll("[data-delib-new]").forEach(el=>el.classList.toggle("m-hide",!roleIs("secretary_general")));
+ document.querySelector('[data-delib-open="drafts"]')?.classList.toggle("m-hide",!canEditMeetings());
+ document.querySelector('[data-delib-open="meetings"]')?.classList.toggle("m-hide",!canEditMeetings());
  $("tab-join-requests").classList.toggle("m-hide",!roleIs("president","secretary_general"));
  $("join-request-review-card").classList.toggle("m-hide",!roleIs("president","secretary_general"));
  $("requirements-admin")?.classList.add("m-hide");
  $("filepanel").classList.toggle("m-hide",!roleIs("president","secretary_general","treasurer"));
- $("founding-roster-card").classList.toggle("m-hide",!canViewMeetings());
- $("tab-office-roster").classList.toggle("m-hide",!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
+ $("founding-roster-card").classList.toggle("m-hide",roleIs("inspection_inspector")||!canViewMeetings());
+ $("tab-office-roster").classList.toggle("m-hide",roleIs("inspection_inspector")||!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
- $("m-permissions").textContent=roleIs("inspection_inspector")?"صلاحيات رقابية للقراءة على السجلات الإدارية والمالية والتقنية ذات الصلة، مع منع تعديل السجلات الأصلية أو إدارة الحسابات. تُفرض الصلاحيات من قاعدة البيانات أيضًا.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
+ const rolePage=ROLE_PAGE[profile.role];
+ $("management-title").textContent=rolePage?.[0]||"فضاء التسيير";
+ $("management-intro").textContent=rolePage?.[1]||"فضاء مخصص وفق الدور والصلاحيات المعتمدة للحساب.";
+ $("m-permissions").textContent=roleIs("inspection_inspector")?"يمكن للمفتش إنشاء تقارير التفتيش والمراقبة والاطلاع عليها، والاطلاع على السجلات المخصصة له وفق الصلاحيات المعتمدة. لا يملك صلاحية إنشاء مسودات السجلات الأخرى أو اعتمادها.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
  $("tab-finance").classList.toggle("m-hide",!canViewFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
+ $("payment-workflow-card").classList.toggle("m-hide",!canFinance());
  $("decision-settings-form").classList.toggle("m-hide",!roleIs("president"));
- $("finance-form").classList.toggle("m-hide",!canFinance());
+ $("finance-form").classList.toggle("m-hide",!roleIs("treasurer"));
+ $("finance-drafts-card").classList.toggle("m-hide",!roleIs("president","treasurer"));
+ $("activity-drafts-card").classList.toggle("m-hide",!roleIs("president","technical_director"));
+ $("equipment-drafts-card").classList.toggle("m-hide",!roleIs("president","treasurer"));
  $("dues-payment-form")?.classList.toggle("m-hide",!canFinance());
  $("close-year").classList.toggle("m-hide",!canApprove());
  $("backup-json").classList.toggle("m-hide",!roleIs("president"));
@@ -118,6 +145,18 @@ function applyPermissions(){
  $("finance-expense").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-closing").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-year-status").closest("label").classList.toggle("m-hide",!canViewFinance());
+ $("delib-counts")?.classList.toggle("m-hide",roleIs("inspection_inspector"));
+ $("delib-notifications-heading")?.closest(".delib-notifications")?.classList.toggle("m-hide",roleIs("inspection_inspector"));
+ document.querySelectorAll("[data-delib-new]").forEach(el=>el.classList.toggle("m-hide",roleIs("inspection_inspector")||!roleIs("secretary_general")));
+ document.querySelectorAll("[data-delib-open=\"drafts\"],[data-delib-open=\"meetings\"]").forEach(el=>el.classList.toggle("m-hide",roleIs("inspection_inspector")||!canEditMeetings()));
+ document.querySelector('[data-delib-open="register"]')?.classList.toggle("m-hide",roleIs("inspection_inspector"));
+ // The eight official registers are the primary register interface. Hide older overlapping modules
+ // to prevent duplicate/conflicting ways of recording official information.
+ ["tab-finance","tab-equipment","tab-tasks","tab-inspections","tab-office-roster"].forEach(id=>$(id)?.classList.add("m-hide"));
+ document.querySelectorAll('.m-tabs button[data-pane="activities"],.m-tabs button[data-pane="meetings"],.m-tabs button[data-pane="join-requests"],.m-tabs button[data-pane="archive"]').forEach(el=>el.classList.add("m-hide"));
+ ["pane-finance","pane-equipment","pane-activities","pane-tasks","pane-inspections","pane-meetings","pane-office-roster","pane-join-requests","pane-archive"].forEach(id=>$(id)?.classList.add("m-hide"));
+ ["stat-balance","stat-activities","stat-equipment","stat-meetings"].forEach(id=>$(id)?.closest(".m-stat")?.classList.add("m-hide"));
+ $("tab-official-registers")?.classList.toggle("m-hide",profile.role==="site_admin");
  renderDashboardCards();
 }
 async function loadYears(){
@@ -131,7 +170,9 @@ async function loadYears(){
 async function loadFinance(){
  if(!canViewFinance())return;
  const year=Number($("finance-year").value||new Date().getFullYear()),fy=years.find(y=>Number(y.fiscal_year)===year);
- const {data,error}=await sb.from("finance_transactions").select("*").eq("fiscal_year",year).order("transaction_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
+ let financeQuery=sb.from("finance_transactions").select("*").eq("fiscal_year",year);
+ if(roleIs("inspection_inspector"))financeQuery=financeQuery.eq("is_test",false);
+ const {data,error}=await financeQuery.order("transaction_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
  if(error)throw error;transactions=data||[];
  const officialTransactions=transactions.filter(x=>!x.is_test);
  const inc=officialTransactions.filter(x=>x.transaction_type==="income").reduce((a,x)=>a+Number(x.amount),0);
@@ -140,6 +181,7 @@ async function loadFinance(){
  $("finance-opening").value=fmt(opening);$("finance-income").value=fmt(inc);$("finance-expense").value=fmt(exp);$("finance-closing").value=fmt(closing);$("finance-year-status").value=fy?(fy.is_closed?"مغلقة — للقراءة فقط":"مفتوحة"):"غير مهيأة";
  $("stat-balance").textContent=fmt(closing);
  $("close-year").disabled=!fy||fy.is_closed;
+ const financeSave=$("finance-save");if(financeSave)financeSave.disabled=!fy||fy.is_closed;
  const body=$("finance-rows");body.replaceChildren();
  transactions.forEach(x=>{
   const tr=document.createElement("tr");safeCell(tr,dateFmt(x.transaction_date));safeCell(tr,TYPE[x.transaction_type]);safeCell(tr,x.category+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,x.description);safeCell(tr,fmt(x.amount));safeCell(tr,PAY[x.payment_method]||x.payment_method);
@@ -147,7 +189,7 @@ async function loadFinance(){
   if(!fy?.is_closed&&canWriteFinance()){
    button(box,"تعديل",()=>{setForm($("finance-form"),x);$("finance-form").elements.transaction_date.value=x.transaction_date||localToday();message("finance-msg","تعديل العملية المحددة. احفظ لإتمام التعديل.");$("finance-form").scrollIntoView({behavior:"smooth",block:"center"});});
    if(roleIs("president"))button(box,"حذف",async()=>{if(!confirm("حذف هذه العملية المالية؟ سيُسجّل الحذف في سجل العمليات."))return;try{const {error}=await sb.from("finance_transactions").delete().eq("id",x.id);if(error)throw error;message("finance-msg","تم حذف العملية.","success");await loadFinance();await loadAudit(false)}catch(e){message("finance-msg","تعذر الحذف: "+e.message,"error")}},"danger");
-  }else safeCellDummy(box,"سنة مغلقة");
+  }else safeCellDummy(box,fy?.is_closed?"سنة مغلقة":"عرض فقط");
   body.append(tr);
  });
  if(!transactions.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد عمليات مسجلة لهذه السنة.");td.colSpan=7;body.append(tr);}
@@ -164,7 +206,9 @@ async function loadActivities(){
 }
 async function loadEquipment(){
  if(!canViewEquipment())return;
- const {data,error}=await sb.from("equipment").select("*").order("item_name");
+ let equipmentQuery=sb.from("equipment").select("*");
+ if(roleIs("inspection_inspector"))equipmentQuery=equipmentQuery.eq("is_test",false);
+ const {data,error}=await equipmentQuery.order("item_name");
  if(error)throw error;equipment=data||[];$("stat-equipment").textContent=equipment.filter(x=>!x.is_test).reduce((n,x)=>n+Number(x.quantity||0),0);
  const body=$("equipment-rows");body.replaceChildren();
  equipment.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.item_name+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,x.category);safeCell(tr,x.quantity);safeCell(tr,CONDITION[x.condition]||x.condition);safeCell(tr,x.serial_number);safeCell(tr,x.storage_location);const box=rowActions(tr);
@@ -189,20 +233,70 @@ async function loadTasks(){
  });
  if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد مهام أو تكليفات مسجلة.");td.colSpan=7;rows.append(tr)}
 }
+function populateInspectionFollowupReportOptions(selected=""){
+ const select=$("inspection-followup-report");if(!select)return;
+ const keep=selected||select.value;select.replaceChildren();
+ const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="اختر تقريرًا مرسلًا";select.append(placeholder);
+ for(const report of inspectionReports.filter(x=>x.status==="submitted")){
+  const option=document.createElement("option");option.value=report.id;
+  option.textContent=report.report_number+" — "+dateFmt(report.inspection_date)+" — "+report.subject;
+  select.append(option);
+ }
+ select.value=keep;
+}
 async function loadInspectionReports(){
  if(!canViewInspections())return;
  const {data,error}=await sb.from("inspection_reports").select("*").order("inspection_date",{ascending:false}).order("created_at",{ascending:false});
  if(error)throw error;
+ inspectionReports=data||[];
+ populateInspectionFollowupReportOptions($("inspection-followup-report")?.value||"");
  const rows=$("inspection-rows");rows.replaceChildren();
- (data||[]).forEach(r=>{
+ inspectionReports.forEach(r=>{
   const tr=document.createElement("tr");
   safeCell(tr,r.report_number);safeCell(tr,dateFmt(r.inspection_date));safeCell(tr,r.inspected_entity);safeCell(tr,r.subject);
   safeCell(tr,r.findings);safeCell(tr,r.recommendations||"—");safeCell(tr,r.status==="submitted"?"مرسل رسميًا":"مسودة");
-  const box=rowActions(tr);
-  button(box,"طباعة",()=>printInspectionReport(r));
-  rows.append(tr);
+  const box=rowActions(tr);button(box,"طباعة",()=>printInspectionReport(r));rows.append(tr);
  });
- if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد تقارير تفتيش مسجلة في النظام حتى الآن.");td.colSpan=8;rows.append(tr)}
+ if(!inspectionReports.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد تقارير تفتيش مسجلة في النظام حتى الآن.");td.colSpan=8;rows.append(tr)}
+ await loadInspectionFollowups();
+}
+async function loadInspectionFollowups(){
+ if(!canViewInspections())return;
+ const {data,error}=await sb.from("inspection_followups").select("*").order("created_at",{ascending:false});
+ if(error)throw error;
+ inspectionFollowups=data||[];
+ const reportMap=new Map(inspectionReports.map(r=>[r.id,r]));
+ const body=$("inspection-followup-rows");body.replaceChildren();
+ for(const f of inspectionFollowups){
+  const tr=document.createElement("tr"),report=reportMap.get(f.report_id);
+  safeCell(tr,report?.report_number||"تقرير "+f.report_id.slice(0,8));
+  safeCell(tr,f.response_text);safeCell(tr,f.corrective_action||"—");safeCell(tr,f.responsible_person||"—");safeCell(tr,dateFmt(f.due_date));
+  safeCell(tr,({open:"مفتوحة",in_progress:"قيد التنفيذ",completed:"مكتملة"})[f.status]||f.status);
+  const box=rowActions(tr);
+  if(canEditInspectionFollowups())button(box,"تعديل",()=>{
+   setForm($("inspection-followup-form"),f);
+   populateInspectionFollowupReportOptions(f.report_id);
+   $("inspection-followup-form").scrollIntoView({behavior:"smooth",block:"center"});
+  });
+  else safeCellDummy(box,"اطلاع");
+  body.append(tr);
+ }
+ if(!inspectionFollowups.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد متابعات مسجلة لتقارير التفتيش.");td.colSpan=7;body.append(tr)}
+}
+async function saveInspectionFollowup(form){
+ if(!canEditInspectionFollowups()){message("inspection-followups-msg","تحرير المتابعات من صلاحية الرئيس والأمين العام فقط.","error");return}
+ const v=values(form),id=v.id;delete v.id;
+ const payload={report_id:v.report_id,response_text:v.response_text,corrective_action:v.corrective_action||"",responsible_person:v.responsible_person||"",due_date:v.due_date||null,status:v.status||"open",updated_at:new Date().toISOString()};
+ if(!payload.report_id||!payload.response_text||payload.response_text.length<3){message("inspection-followups-msg","اختر تقريرًا مرسلًا وأدخل ردًا واضحًا.","error");return}
+ const submit=form.querySelector('button[type="submit"]');if(submit)submit.disabled=true;
+ try{
+  if(id){const {error}=await sb.from("inspection_followups").update(payload).eq("id",id);if(error)throw error}
+  else{payload.created_by=user.id;const {error}=await sb.from("inspection_followups").insert(payload);if(error)throw error}
+  setForm(form);populateInspectionFollowupReportOptions("");
+  await loadInspectionFollowups();
+  message("inspection-followups-msg",id?"تم تحديث المتابعة مع الاحتفاظ بتقرير التفتيش الأصلي.":"تم حفظ المتابعة وربطها بتقرير التفتيش.","success");
+ }catch(e){message("inspection-followups-msg","تعذر حفظ المتابعة: "+(e.message||"خطأ غير معروف"),"error")}
+ finally{if(submit)submit.disabled=false}
 }
 function printInspectionReport(r){
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -247,6 +341,7 @@ function suggestDecisionFromMeeting(){
 const FOUNDER_STATUS={pending_review:"قيد المراجعة",active:"نشط",inactive:"غير نشط",resigned:"منسحب",deceased:"متوفى",unknown:"غير محدد"};
 const GA_ELIGIBILITY={pending_review:"قيد المراجعة",eligible:"مؤهل للمشاركة",ineligible:"غير مؤهل للمشاركة"};
 async function loadFoundingRoster(){
+ const addForm=$("founding-roster-add-form");if(addForm)addForm.classList.toggle("m-hide",!canEditMeetings());
  const {data,error}=await sb.from("founding_member_roster").select("*").order("founder_number",{ascending:true});
  if(error)throw error;
  const rows=$( "founding-roster-rows" );rows.replaceChildren();
@@ -266,7 +361,7 @@ async function loadFoundingRoster(){
   });}else safeCellDummy(actionCell,"عرض فقط");
   rows.append(tr);
  });
- if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد سجلات للمراجعة.");td.colSpan=6;rows.append(tr)}
+ if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,canEditMeetings()?"السجل فارغ. أضف الأسماء من الوثائق الرسمية باستخدام النموذج أعلاه.":"لا توجد أسماء مدخلة في سجل المؤسسين.");td.colSpan=6;rows.append(tr)}
 }
 function refreshGAInvitationSources(){
  const select=$("ga-invite-source");if(!select)return;
@@ -337,8 +432,33 @@ async function loadDecisionSettings(){
   status.textContent="قاعدة الاشتراك النشطة: "+fmt(data.annual_amount)+" دج سنويًا ابتداءً من "+dateFmt(data.applies_from)+" — المرجع: "+(meetings.find(m=>m.id===data.source_meeting_id)?.title||"محضر جمعية عامة")+". أي تغيير يتطلب قرارًا معتمدًا جديدًا.";
  }else status.textContent="لا توجد قاعدة اشتراك نشطة في سجل الاشتراكات. لن تُنشأ استحقاقات أو تُحصّل رسوم حتى توثيق قرار جمعية عامة معتمد.";
 }
+function renderOfficialMeetingRegister(){
+ const body=$("official-meeting-register-rows");
+ if(!body)return;
+ body.replaceChildren();
+ const officialMeetings=meetings.filter(x=>x.status==="approved"&&!x.is_test)
+  .sort((a,b)=>String(b.meeting_date||"").localeCompare(String(a.meeting_date||"")));
+ for(const x of officialMeetings){
+  const tr=document.createElement("tr");
+  safeCell(tr,x.title);
+  safeCell(tr,MEETTYPE[x.meeting_type]||x.meeting_type);
+  safeCell(tr,dateFmt(x.meeting_date));
+  safeCell(tr,x.location||"—");
+  safeCell(tr,x.attendees_count??"غير محدد");
+  safeCell(tr,[x.decisions,x.minutes_text].filter(Boolean).join(" — ")||"—");
+  const box=rowActions(tr);
+  button(box,"عرض / طباعة",()=>printMeeting(x));
+  body.append(tr);
+ }
+ if(!officialMeetings.length){
+  const tr=document.createElement("tr"),td=safeCell(tr,"لا توجد اجتماعات معتمدة ومقيدة في السجل بعد.");
+  td.colSpan=7;body.append(tr);
+ }
+}
 async function loadMeetings(){
- const {data,error}=await sb.from("meetings").select("*").order("meeting_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
+ let meetingQuery=sb.from("meetings").select("*");
+ if(roleIs("inspection_inspector"))meetingQuery=meetingQuery.eq("status","approved").eq("is_test",false);
+ const {data,error}=await meetingQuery.order("meeting_date",{ascending:false,nullsFirst:false}).order("created_at",{ascending:false});
  if(error)throw error;meetings=data||[];$("stat-meetings").textContent=meetings.filter(x=>!x.is_test).length;
  const body=$("meeting-rows");body.replaceChildren();
  meetings.forEach(x=>{const tr=document.createElement("tr");safeCell(tr,x.title+(x.is_test?" — [تجريبي غير رسمي]":""));safeCell(tr,MEETTYPE[x.meeting_type]||x.meeting_type);safeCell(tr,dateFmt(x.meeting_date));safeCell(tr,x.location);safeCell(tr,x.attendees_count??"غير محدد");safeCell(tr,x.status==="approved"?"معتمد":"مسودة");safeCell(tr,[x.decisions,x.minutes_text].filter(Boolean).join(" — ")||"—");const box=rowActions(tr);
@@ -348,8 +468,176 @@ async function loadMeetings(){
  if(canApprove())button(box,"حذف",async()=>{if(!confirm("حذف سجل الاجتماع؟"))return;try{const {error}=await sb.from("meetings").delete().eq("id",x.id);if(error)throw error;await loadMeetings();message("meetings-msg","تم حذف الاجتماع.","success")}catch(e){message("meetings-msg","تعذر الحذف: "+e.message,"error")} },"danger");
  if(!canEditMeetings()&&!canApprove())safeCellDummy(box,"عرض فقط");body.append(tr)});
  if(!meetings.length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد محاضر مسجلة بعد.");td.colSpan=8;body.append(tr)}
- refreshGAInvitationSources();
- await loadDecisionSettings();
+ renderOfficialMeetingRegister();
+ if(!roleIs("inspection_inspector")){
+  refreshGAInvitationSources();
+  await loadDecisionSettings();
+  await loadDeliberationNotifications();
+ }
+ await loadDeliberationOutputs();
+}
+const DELIB_TYPE_LABEL={report:"تقرير",minutes:"محضر",decision:"قرار"};
+const DELIB_STATUS_LABEL={draft:"مسودة مشتركة",changes_requested:"ملاحظة من الرئيس / تعديل مطلوب",approved:"معتمد ومقيد"};
+function delibRegisterNo(x){return x.register_year&&x.register_number?"م/"+x.register_year+"/"+String(x.register_number).padStart(4,"0"):"—";}
+function showDeliberationView(view){
+ const ids={home:"delib-home",register:"delib-register-view",drafts:"delib-drafts-view",review:"delib-review-view",form:"delib-form-view"};
+ for(const [key,id] of Object.entries(ids))if($(id))$(id).hidden=key!==view;
+ $("legacy-meeting-tools").classList.toggle("m-hide",view!=="meetings");
+ if(view==="meetings")$("legacy-meeting-tools").scrollIntoView({behavior:"smooth",block:"start"});
+ else $("pane-meetings").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function populateDeliberationMeetingOptions(selected=""){
+ const select=$("delib-meeting-id");if(!select)return;
+ const keep=selected||select.value;select.replaceChildren();
+ const first=document.createElement("option");first.value="";first.textContent="اختر الاجتماع المصدر";select.append(first);
+ for(const m of meetings.filter(x=>!x.is_test)){
+  const o=document.createElement("option");o.value=m.id;o.textContent=(m.title||"اجتماع دون عنوان")+" — "+dateFmt(m.meeting_date)+" — "+(MEETTYPE[m.meeting_type]||m.meeting_type);select.append(o);
+ }
+ select.value=keep;
+}
+function startDeliberationDraft(type){
+ if(!roleIs("secretary_general")){message("delib-home-message","إنشاء المسودات وتحريرها من صلاحية الأمين العام فقط. يستطيع الرئيس تدوين الملاحظات أو الاعتماد.","error");return}
+ const form=$("deliberation-form");setForm(form,{output_type:type,status:"draft"});
+ $("delib-form-heading").textContent="تحرير "+(DELIB_TYPE_LABEL[type]||"مخرج المداولة");
+ populateDeliberationMeetingOptions("");
+ $("delib-form-message").textContent="";
+ showDeliberationView("form");
+}
+function importMeetingIntoDelibDraft(){
+ const form=$("deliberation-form"),v=values(form),meeting=meetings.find(m=>m.id===v.meeting_id&&!m.is_test);
+ if(!meeting){message("delib-form-message","اختر اجتماعًا رسميًا أولًا.","error");return}
+ if(v.content&&!confirm("سيتم استبدال النص الحالي بمسودة مستخرجة من بيانات الاجتماع. هل تريد المتابعة؟"))return;
+ const section=(label,value)=>label+"\n"+(String(value||"").trim()||"لم يُدرج في سجل الاجتماع.");
+ let content="";
+ if(v.output_type==="minutes"){
+  content=String(meeting.minutes_text||"").trim();
+  if(!content)content=["جمعية الأفق الولائية للرياضات الجوية والجبلية","محضر اجتماع","عنوان الاجتماع: "+(meeting.title||"غير محدد"),"نوع الاجتماع: "+(MEETTYPE[meeting.meeting_type]||meeting.meeting_type||"غير محدد"),"التاريخ: "+(meeting.meeting_date||"غير محدد"),"ساعة البداية: "+(meeting.meeting_start_time||"غير محددة"),"المكان: "+(meeting.location||"غير محدد"),"رئيس الاجتماع: "+(meeting.meeting_chair||"غير محدد"),section("الحاضرون وصفاتهم:",meeting.meeting_attendees),section("جدول الأعمال:",meeting.meeting_agenda),section("مجريات الاجتماع والمناقشات:",meeting.meeting_discussion),section("القرارات:",meeting.decisions),section("النصاب وملاحظاته:",meeting.quorum_note),section("المرفقات:",meeting.meeting_attachments)].join("\n\n");
+ }else if(v.output_type==="decision"){
+  content=String(meeting.decisions||"").trim();
+  if(!content)message("delib-form-message","لا توجد قرارات مدونة في سجل الاجتماع بعد؛ اكتب نص القرار المثبت فقط.","error");
+ }else{
+  content=["تقرير مخرجات الاجتماع: "+(meeting.title||"غير محدد"),"مرجع الاجتماع: "+dateFmt(meeting.meeting_date)+" — "+(meeting.location||"المكان غير محدد"),section("جدول الأعمال:",meeting.meeting_agenda),section("ملخص المناقشات المسجلة:",meeting.meeting_discussion),section("القرارات المسجلة:",meeting.decisions),section("المرفقات:",meeting.meeting_attachments),"ملاحظة تحريرية: يُستكمل التقرير بالوقائع والنتائج التي تم التحقق منها فقط."].join("\n\n");
+ }
+ form.elements.content.value=content;
+ if(!form.elements.title.value.trim())form.elements.title.value=(DELIB_TYPE_LABEL[v.output_type]||"مخرج المداولة")+" — "+meeting.title;
+ if(v.output_type!=="decision"||content)message("delib-form-message","أُدرجت مسودة أولية من بيانات الاجتماع. راجعها قبل الحفظ.","success");
+}
+function printDeliberationOutput(x){
+ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const meeting=meetings.find(m=>m.id===x.meeting_id);
+ const meta=[["رقم القيد",delibRegisterNo(x)],["نوع المخرج",DELIB_TYPE_LABEL[x.output_type]||x.output_type],["الاجتماع المصدر",meeting?.title||"غير محدد"],["تاريخ الاجتماع",dateFmt(meeting?.meeting_date)],["حالة المخرج",DELIB_STATUS_LABEL[x.status]||x.status],["تاريخ الاعتماد",x.reviewed_at?new Date(x.reviewed_at).toLocaleDateString("ar-DZ"):"—"],["ملاحظة الرئيس",x.review_note||"لا توجد"]].map(([k,v])=>"<div><b>"+esc(k)+":</b> "+esc(v)+"</div>").join("");
+ const w=window.open("","_blank");if(!w){message("delib-home-message","اسمح بالنوافذ المنبثقة لطباعة المخرج.","error");return}
+ w.document.write('<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>'+esc(x.title)+'</title><style>body{font-family:Tahoma,Arial;max-width:850px;margin:30px auto;padding:20px;color:#17352e;line-height:2}h1,h2{text-align:center}h1{font-size:21px}h2{font-size:18px;border-bottom:1px solid #aaa;padding-bottom:10px}.meta{border:1px solid #aaa;padding:12px;margin:20px 0}.content{white-space:pre-wrap;min-height:30px}.sign{display:flex;justify-content:space-between;gap:30px;margin-top:70px}.sign span{min-width:40%}@media print{body{margin:0 auto;padding:10mm}}</style><h1>جمعية الأفق الولائية للرياضات الجوية والجبلية</h1><h2>'+esc(DELIB_TYPE_LABEL[x.output_type]||"مخرج المداولة")+'</h2><h2>'+esc(x.title)+'</h2><div class="meta">'+meta+'</div><div class="content">'+esc(x.content)+'</div><div class="sign"><span>إمضاء الرئيس: ____________________</span><span>إمضاء الأمين العام/المحرر: ____________________</span></div><script>window.onload=()=>window.print()<\\/script></html>');
+ w.document.close();
+}
+function addDelibAction(box,label,fn,kind=""){const b=document.createElement("button");b.type="button";b.className="m-small"+(kind==="danger"?" danger":"");b.textContent=label;b.onclick=fn;box.append(b);return b;}
+function renderDeliberationTable(bodyId,rows,mode){
+ const body=$(bodyId);if(!body)return;body.replaceChildren();
+ const emptyText=mode==="register"?"لا توجد مخرجات معتمدة في سجل المداولة بعد.":"لا توجد مسودات مشتركة حتى الآن.";
+ for(const x of rows){
+  const tr=document.createElement("tr"),meeting=meetings.find(m=>m.id===x.meeting_id),actions=document.createElement("td"),box=document.createElement("div");box.className="m-actions";actions.append(box);
+  const cell=v=>safeCell(tr,v);
+  if(mode==="register"){
+   cell(delibRegisterNo(x));cell(DELIB_TYPE_LABEL[x.output_type]||x.output_type);cell(x.title);cell(meeting?.title||"—");cell(dateFmt(meeting?.meeting_date));cell(x.reviewed_at?new Date(x.reviewed_at).toLocaleDateString("ar-DZ"):"—");
+   addDelibAction(box,"عرض / طباعة",()=>printDeliberationOutput(x));
+  }else{
+   cell(x.title);cell(DELIB_TYPE_LABEL[x.output_type]||x.output_type);cell(meeting?.title||"—");
+   const status=cell("");const badge=document.createElement("span");badge.className="delib-status "+x.status;badge.textContent=DELIB_STATUS_LABEL[x.status]||x.status;status.append(badge);
+   cell(x.review_note||"—");
+   cell(x.updated_at?new Date(x.updated_at).toLocaleString("ar-DZ"):"—");
+   if(roleIs("secretary_general")&&x.created_by===user?.id&&["draft","changes_requested"].includes(x.status)){
+    addDelibAction(box,"تحرير المسودة",()=>{setForm($("deliberation-form"),x);populateDeliberationMeetingOptions(x.meeting_id);$("delib-form-heading").textContent="تحرير "+(DELIB_TYPE_LABEL[x.output_type]||"المخرج");$("delib-form-message").textContent=x.review_note?"ملاحظة الرئيس: "+x.review_note:"";showDeliberationView("form")});
+   }
+   if(canApprove()&&["draft","changes_requested"].includes(x.status)){
+    addDelibAction(box,"تدوين ملاحظة",async()=>{
+     const note=prompt("اكتب ملاحظة الرئيس التي ستظهر للأمين العام:",x.review_note||"");if(note===null)return;
+     if(note.trim().length<3){message("delib-home-message","اكتب ملاحظة واضحة لا تقل عن ثلاثة أحرف.","error");return}
+     try{const {data,error}=await sb.from("deliberation_outputs").update({review_note:note.trim(),updated_by:user.id,updated_at:new Date().toISOString()}).eq("id",x.id).in("status",["draft","changes_requested"]).select("id").maybeSingle();if(error)throw error;if(!data)throw Error("تعذر حفظ الملاحظة؛ تحقق من حالة المسودة.");await loadDeliberationOutputs();await loadDeliberationNotifications();message("delib-home-message","حُفظت ملاحظة الرئيس وأصبحت ظاهرة للأمين العام.","success")}catch(e){message("delib-home-message","تعذر حفظ الملاحظة: "+(e.message||"خطأ غير معروف"),"error")}
+    });
+    addDelibAction(box,"تأكيد وقيد",async()=>{
+     if(!confirm("هل تؤكد اعتماد هذا المخرج نهائيًا وقيده في سجل المداولة؟ لن يعود قابلًا للتحرير بعد الاعتماد."))return;
+     try{const {data,error}=await sb.from("deliberation_outputs").update({status:"approved",updated_by:user.id,updated_at:new Date().toISOString()}).eq("id",x.id).in("status",["draft","changes_requested"]).select("id").maybeSingle();if(error)throw error;if(!data)throw Error("تعذر الاعتماد؛ ربما سبق تحديث المخرج.");await loadDeliberationOutputs();await loadDeliberationNotifications();const approved=deliberationOutputs.find(y=>y.id===x.id);message("delib-home-message","تم اعتماد المخرج وقيده رسميًا بالرقم "+delibRegisterNo(approved||x)+".","success")}catch(e){message("delib-home-message","تعذر الاعتماد: "+(e.message||"خطأ غير معروف"),"error")}
+    });
+   }
+   if(x.status==="approved")addDelibAction(box,"عرض / طباعة",()=>printDeliberationOutput(x));
+  }
+  tr.append(actions);body.append(tr);
+ }
+ if(!rows.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=mode==="register"?7:7;td.textContent=emptyText;tr.append(td);body.append(tr)}
+}
+async function loadDeliberationOutputs(){
+ if(roleIs("inspection_inspector")){deliberationOutputs=[];return;}
+ let outputQuery=sb.from("deliberation_outputs").select("*");
+ if(roleIs("inspection_inspector"))outputQuery=outputQuery.eq("status","approved").not("register_year","is",null).not("register_number","is",null);
+ const {data,error}=await outputQuery.order("created_at",{ascending:false});
+ if(error)throw error;deliberationOutputs=data||[];
+ populateDeliberationMeetingOptions($("delib-meeting-id")?.value||"");
+ const shared=deliberationOutputs.filter(x=>x.status!=="approved");
+ const approved=deliberationOutputs.filter(x=>x.status==="approved").sort((a,b)=>(b.register_year||0)-(a.register_year||0)||(b.register_number||0)-(a.register_number||0));
+ $("delib-count-drafts").textContent=String(shared.length);
+ $("delib-count-review").textContent=String(shared.filter(x=>x.status==="changes_requested").length);
+ $("delib-count-approved").textContent=String(approved.length);
+ renderDeliberationTable("delib-register-rows",approved,"register");
+ renderDeliberationTable("delib-drafts-rows",shared,"drafts");
+ renderDeliberationTable("delib-review-rows",[],"review");
+}
+async function loadDeliberationNotifications(){
+ const list=$("delib-notifications-list");if(!list||!user||roleIs("inspection_inspector"))return;
+ const {data,error}=await sb.from("deliberation_notifications").select("id,output_id,event_type,title,body,created_at,read_at").order("created_at",{ascending:false}).limit(30);
+ if(error){list.textContent="تعذر تحميل الإشعارات: "+error.message;return}
+ list.replaceChildren();
+ if(!data?.length){const p=document.createElement("p");p.className="m-note";p.textContent="لا توجد إشعارات جديدة. ستظهر هنا حركة الطرف الآخر.";list.append(p);return}
+ for(const n of data){
+  const item=document.createElement("article");item.className="delib-notification"+(n.read_at?" read":"");
+  const title=document.createElement("strong");title.textContent=n.title;
+  const body=document.createElement("p");body.textContent=n.body;
+  const date=document.createElement("small");date.textContent=new Date(n.created_at).toLocaleString("ar-DZ");
+  item.append(title,body,date);
+  if(!n.read_at){const b=document.createElement("button");b.type="button";b.className="m-small";b.textContent="تحديد كمقروء";b.onclick=async()=>{const {error}=await sb.from("deliberation_notifications").update({read_at:new Date().toISOString()}).eq("id",n.id);if(error){message("delib-home-message","تعذر تحديث الإشعار: "+error.message,"error");return}await loadDeliberationNotifications()};item.append(b)}
+  list.append(item);
+ }
+}
+function subscribeDeliberationUpdates(){
+ if(!sb||!user||window.__delibRealtime)return;
+ window.__delibRealtime=sb.channel("deliberation-shared-workspace")
+  .on("postgres_changes",{event:"*",schema:"public",table:"deliberation_outputs"},async()=>{await loadDeliberationOutputs();await loadDeliberationNotifications()})
+  .on("postgres_changes",{event:"INSERT",schema:"public",table:"deliberation_notifications",filter:"recipient_user_id=eq."+user.id},()=>loadDeliberationNotifications())
+  .on("postgres_changes",{event:"*",schema:"public",table:"official_record_drafts"},async event=>{
+   const row=event.new&&Object.keys(event.new).length?event.new:event.old;
+   const type=row?.record_type;if(!type)return;
+   try{
+    await loadOfficialRecordDrafts(type);
+    if(type==="finance_transaction"&&canViewFinance())await loadFinance();
+    if(type==="equipment"&&canViewEquipment())await loadEquipment();
+    if(type==="activity"&&canViewActivities())await loadActivities();
+    if((row.updated_by||row.created_by)!==user.id){
+     const label=type==="finance_transaction"?"مسودة مالية":type==="equipment"?"مسودة عتاد":"مسودة نشاط";
+     message("m-message","إشعار: حدث تحديث في "+label+" ضمن مساحة العمل المشتركة.","success");
+    }
+   }catch(e){console.error("[Elafak official drafts realtime]",e)}
+  })
+  .subscribe();
+}
+async function saveDeliberationDraft(){
+ const form=$("deliberation-form");if(!form.reportValidity())return;
+ if(!roleIs("secretary_general")){message("delib-form-message","إنشاء المسودات وتحريرها من صلاحية الأمين العام فقط.","error");return}
+ const v=values(form),id=v.id||null;
+ if(!meetings.some(m=>m.id===v.meeting_id&&!m.is_test)){message("delib-form-message","اختر اجتماعًا رسميًا محفوظًا كمصدر للمخرج.","error");return}
+ const payload={meeting_id:v.meeting_id,output_type:v.output_type,title:v.title,content:v.content,updated_by:user.id,updated_at:new Date().toISOString()};
+ $("delib-save-draft").disabled=true;
+ try{
+  if(id){
+   const {data,error}=await sb.from("deliberation_outputs").update(payload).eq("id",id).eq("created_by",user.id).in("status",["draft","changes_requested"]).select("id").maybeSingle();
+   if(error)throw error;if(!data)throw Error("لم يتم تحديث المسودة؛ تحقق من صلاحياتك أو من اعتمادها النهائي.");
+  }else{
+   payload.created_by=user.id;payload.status="draft";
+   const {data,error}=await sb.from("deliberation_outputs").insert(payload).select("id").single();
+   if(error)throw error;form.elements.id.value=data.id;
+  }
+  message("delib-form-message","حُفظت المسودة المشتركة، وأصبح بإمكان الرئيس الاطلاع عليها مباشرة.","success");
+  await loadDeliberationOutputs();await loadDeliberationNotifications();
+ }catch(e){message("delib-form-message","تعذر حفظ المسودة: "+(e.message||"خطأ غير معروف"),"error")}
+ finally{$("delib-save-draft").disabled=false}
 }
 function printMeeting(x){
  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -482,56 +770,78 @@ async function refreshAll(){
  const run=async(label,task)=>{try{await task()}catch(e){failures.push(label+": "+(e?.message||"خطأ غير معروف"));console.error("[Elafak management] "+label,e)}};
  if(canViewFinance()){
   await run("السنة المالية",loadYears);
-  await run("السجل المالي",loadFinance);
-  await run("دفعات الاشتراك",loadPaymentWorkflow);
+  await run("السجل المحاسبي",loadFinance);
  }
- if(roleIs("president","secretary_general")){await run("طلبات الانخراط",loadJoinRequests)}
+ if(roleIs("president","treasurer")){
+  await run("دفعات الاشتراك",loadPaymentWorkflow);
+  await run("مسودات العمليات المالية",()=>loadOfficialRecordDrafts("finance_transaction"));
+ }
+ if(roleIs("president","secretary_general"))await run("طلبات الانخراط",loadJoinRequests);
  if(roleIs("president","secretary_general","treasurer"))await run("ملفات استكمال الانخراط",loadJoinFiles);
  if(canViewActivities())await run("الأنشطة",loadActivities);
- if(canViewEquipment())await run("سجل العتاد",loadEquipment);
+ if(roleIs("president","technical_director"))await run("مسودات الأنشطة",()=>loadOfficialRecordDrafts("activity"));
+ if(canViewEquipment())await run("سجل الجرد",loadEquipment);
+ if(roleIs("president","treasurer"))await run("مسودات سجل الجرد",()=>loadOfficialRecordDrafts("equipment"));
  if(canViewTasks())await run("المهام والتكليفات",loadTasks);
  if(canViewInspections())await run("تقارير التفتيش",loadInspectionReports);
- if(canViewMeetings()){
-  await run("الاجتماعات",loadMeetings);
-  await run("قائمة الجمعية العامة",loadFoundingRoster);
- }
- if(canViewMeetings()||roleIs("treasurer","deputy_treasurer")){
-  await run("التشكيلة الرسمية للمكتب التنفيذي",loadExecutiveRoster);
- }
- if(failures.length){
-  message("m-message","تم تحميل الوحدات التي تعمل، لكن تعذر تحميل: "+failures.join("؛ "),"error");
- }else{
-  message("m-message","تم تحديث الوحدات المتاحة لهذا الحساب.","success");
- }
+ if(canViewMeetings())await run("الاجتماعات وسجل المداولة",loadMeetings);
+ if(canViewMeetings()&&!roleIs("inspection_inspector"))await run("قائمة الجمعية العامة",loadFoundingRoster);
+ if((canViewMeetings()&&!roleIs("inspection_inspector"))||roleIs("treasurer","deputy_treasurer"))await run("التشكيلة الرسمية للمكتب التنفيذي",loadExecutiveRoster);
+ if(failures.length)message("m-message","تم تحميل الوحدات التي تعمل، لكن تعذر تحميل: "+failures.join("؛ "),"error");
+ else message("m-message","تم تحديث الوحدات المتاحة لهذا الحساب.","success");
 }
 async function saveForm(form,table,fields,roleCheck,msgId){
  form.addEventListener("submit",async e=>{
-  e.preventDefault();if(!roleCheck()){message(msgId,"هذا الحساب لا يملك صلاحية التعديل.","error");return}
-  const raw=values(form),id=raw.id;delete raw.id;
+  e.preventDefault();
+  const draftTable=["finance_transactions","activities","equipment"].includes(table);
+  if(draftTable?!canCreateOfficialDraft(table):!roleCheck()){message(msgId,"هذا الحساب لا يملك صلاحية إنشاء هذه المسودة أو تعديلها.","error");return}
+  const raw=values(form),id=raw.id,draftId=raw.draft_id;delete raw.id;delete raw.draft_id;
   const payload={};fields.forEach(k=>{if(raw[k]!==undefined)payload[k]=raw[k]===""?null:raw[k]});
-  if("entered_by" in payload)delete payload.entered_by;
-  if(!id&&["finance_transactions","activities","equipment","meetings"].includes(table))payload.is_test=true;
   if(table==="finance_transactions"){
-   payload.fiscal_year=Number($("finance-year").value);payload.amount=Number(payload.amount);payload.entered_by=user.id;
+   payload.fiscal_year=Number($("finance-year").value);
+   const selectedYear=years.find(y=>Number(y.fiscal_year)===payload.fiscal_year);
+   if(!selectedYear||selectedYear.is_closed){message(msgId,"لا يمكن إعداد مسودة لعملية مالية دون سنة مالية مفتوحة.","error");return}
+   payload.amount=Number(payload.amount);
    const feeLikeIncome=payload.transaction_type==="income"&&/اشتراك|انخراط|رسوم\s*(?:العضوية|الانخراط)|membership\s*(?:fee|dues)|annual\s*(?:subscription|dues)/i.test(String(payload.category||"")+" "+String(payload.description||""));
    if(!id&&feeLikeIncome){
     const {data:feeSetting,error:feeError}=await sb.from("association_settings").select("setting_value,source_meeting_id").eq("setting_key","annual_membership_fee_dzd").maybeSingle();
     const approvedAmount=Number(feeSetting?.setting_value?.amount||0);
-    if(feeError||!approvedAmount){message(msgId,"لا يوجد مبلغ اشتراك سنوي معتمد ومربوط بمحضر جمعية عامة. سجّل القرار أولًا من قسم الاجتماعات والقرارات.","error");return;}
-    if(Math.abs(Number(payload.amount)-approvedAmount)>0.001){message(msgId,"مبلغ العملية لا يطابق الاشتراك السنوي المعتمد ("+fmt(approvedAmount)+").","error");return;}
+    if(feeError||!approvedAmount){message(msgId,"لا يوجد مبلغ اشتراك سنوي معتمد ومربوط بمحضر جمعية عامة. سجّل القرار أولًا من قسم الاجتماعات والقرارات.","error");return}
+    if(Math.abs(Number(payload.amount)-approvedAmount)>0.001){message(msgId,"مبلغ العملية لا يطابق الاشتراك السنوي المعتمد ("+fmt(approvedAmount)+").","error");return}
    }
   }
-  if(table==="activities"){payload.planned_budget=Number(payload.planned_budget||0);payload.actual_budget=Number(payload.actual_budget||0);payload.entered_by=user.id;}
-  if(table==="equipment"){payload.quantity=Number(payload.quantity||0);payload.acquisition_cost=payload.acquisition_cost===null?null:Number(payload.acquisition_cost);payload.entered_by=user.id;}
-  if(table==="meetings"){payload.attendees_count=payload.attendees_count===null?null:Number(payload.attendees_count);payload.entered_by=user.id;payload.status="draft";payload.approved_by=null;payload.approved_at=null;}
+  if(table==="activities"){payload.planned_budget=Number(payload.planned_budget||0);payload.actual_budget=Number(payload.actual_budget||0)}
+  if(table==="equipment"){payload.quantity=Number(payload.quantity||0);payload.acquisition_cost=payload.acquisition_cost===null?null:Number(payload.acquisition_cost)}
+  if(table==="meetings"){payload.attendees_count=payload.attendees_count===null?null:Number(payload.attendees_count);payload.entered_by=user.id;payload.status="draft";payload.approved_by=null;payload.approved_at=null}
   if(payload.transaction_date==="")payload.transaction_date=null;
   const submit=form.querySelector('button[type="submit"],button:not([type])');if(submit)submit.disabled=true;
   try{
-   if(id){payload.updated_at=new Date().toISOString();if(table==="finance_transactions")delete payload.entered_by;
-    const {error}=await sb.from(table).update(payload).eq("id",id);if(error)throw error;
-   }else{const {error}=await sb.from(table).insert(payload);if(error)throw error;}
+   if(draftTable){
+    const recordType=table==="finance_transactions"?"finance_transaction":table==="equipment"?"equipment":"activity";
+    const draftPayload={...payload};
+    const draftRow={payload:draftPayload,updated_by:user.id,updated_at:new Date().toISOString()};
+    if(draftId){
+     const {error}=await sb.from("official_record_drafts").update(draftRow).eq("id",draftId).in("status",["draft","changes_requested"]).select("id").single();
+     if(error)throw error;
+    }else{
+     const {error}=await sb.from("official_record_drafts").insert({
+      record_type:recordType,operation:id?"update":"create",target_record_id:id||null,
+      payload:draftPayload,status:"draft",created_by:user.id,updated_by:user.id
+     });
+     if(error)throw error;
+    }
+    form.reset();if(form.elements.namedItem("id"))form.elements.namedItem("id").value="";
+    if(form.elements.namedItem("draft_id"))form.elements.namedItem("draft_id").value="";
+    if(table==="finance_transactions")form.elements.transaction_date.value=localToday();
+    await loadOfficialRecordDrafts(recordType);
+    message(msgId,draftId?"تم تحديث المسودة في مساحة العمل المشتركة.":"حُفظت المسودة بانتظار مراجعة الرئيس؛ لم تُدرج في السجل الرسمي بعد.","success");
+    return;
+   }
+   if(!id&&table==="meetings")payload.is_test=true;
+   if(id){payload.updated_at=new Date().toISOString();const {error}=await sb.from(table).update(payload).eq("id",id);if(error)throw error}
+   else{const {error}=await sb.from(table).insert(payload);if(error)throw error}
    form.reset();if(form.elements.namedItem("id"))form.elements.namedItem("id").value="";
-   if(table==="finance_transactions"){$("finance-form").elements.transaction_date.value=localToday();await loadFinance();}
+   if(table==="finance_transactions"){$("finance-form").elements.transaction_date.value=localToday();await loadFinance()}
    if(table==="activities")await loadActivities();
    if(table==="equipment")await loadEquipment();
    if(table==="meetings")await loadMeetings();
@@ -539,6 +849,76 @@ async function saveForm(form,table,fields,roleCheck,msgId){
   }catch(err){message(msgId,"تعذر حفظ السجل: "+(err.message||"خطأ غير معروف"),"error")}
   finally{if(submit)submit.disabled=false}
  });
+}
+async function loadOfficialRecordDrafts(recordType){
+ const tableId=recordType==="finance_transaction"?"finance-draft-rows":recordType==="equipment"?"equipment-draft-rows":"activity-draft-rows";
+ const body=$(tableId);if(!body)return;
+ const canRead=roleIs("president")||
+  (recordType==="finance_transaction"&&roleIs("treasurer"))||
+  (recordType==="equipment"&&roleIs("treasurer"))||
+  (recordType==="activity"&&roleIs("technical_director"));
+ if(!canRead)return;
+ const {data,error}=await sb.from("official_record_drafts").select("*").eq("record_type",recordType).in("status",["draft","changes_requested"]).order("created_at",{ascending:false});
+ if(error)throw error;
+ body.replaceChildren();
+ const formId=recordType==="finance_transaction"?"finance-form":recordType==="equipment"?"equipment-form":"activity-form";
+ const msgId=recordType==="finance_transaction"?"finance-msg":recordType==="equipment"?"equipment-msg":"activities-msg";
+ const summary=d=>{
+  const p=d.payload||{};
+  if(recordType==="finance_transaction")return (TYPE[p.transaction_type]||p.transaction_type||"عملية")+" — "+(p.category||"دون تصنيف")+" — "+fmt(p.amount);
+  if(recordType==="equipment")return (p.item_name||"معدة دون اسم")+" × "+(p.quantity??1);
+  return (p.title||"نشاط دون عنوان")+" — "+dateFmt(p.activity_date);
+ };
+ const statusLabel=s=>s==="changes_requested"?"ملاحظة من الرئيس — تعديل مطلوب":"مسودة مشتركة";
+ for(const d of data||[]){
+  const tr=document.createElement("tr");
+  safeCell(tr,d.operation==="update"?"تعديل سجل":"إضافة سجل");
+  safeCell(tr,summary(d));
+  safeCell(tr,statusLabel(d.status));
+  safeCell(tr,d.review_note||"—");
+  safeCell(tr,new Date(d.created_at).toLocaleString("ar-DZ"));
+  const box=rowActions(tr);
+  if(roleIs("president")){
+   button(box,"ملاحظة",async()=>{
+    const note=prompt("اكتب ملاحظة التعديل التي ستظهر للمسؤول المختص:",d.review_note||"");
+    if(note===null)return;
+    if(note.trim().length<3){message(msgId,"اكتب ملاحظة واضحة لا تقل عن ثلاثة أحرف.","error");return}
+    try{
+     const {error}=await sb.from("official_record_drafts").update({status:"changes_requested",review_note:note.trim()}).eq("id",d.id).select("id").single();
+     if(error)throw error;
+     await loadOfficialRecordDrafts(recordType);
+     message(msgId,"حُفظت ملاحظة الرئيس في المساحة المشتركة.","success");
+    }catch(e){message(msgId,"تعذر حفظ الملاحظة: "+e.message,"error")}
+   });
+   button(box,"اعتماد",async()=>{
+    if(!confirm("اعتماد هذه المسودة وإدراجها في السجل الرسمي؟ لا يمكن تعديل سجل الاعتماد بعد ذلك."))return;
+    try{
+     const {data:approved,error}=await sb.from("official_record_drafts").update({status:"approved",review_note:null}).eq("id",d.id).select("id,register_year,register_number,target_record_id").single();
+     if(error)throw error;
+     await loadOfficialRecordDrafts(recordType);
+     if(recordType==="finance_transaction"){await loadYears();await loadFinance()}
+     if(recordType==="equipment")await loadEquipment();
+     if(recordType==="activity")await loadActivities();
+     const register=approved?.register_year&&approved?.register_number?" رقم الاعتماد "+approved.register_year+"/"+String(approved.register_number).padStart(4,"0")+".":"";
+     message(msgId,"تم اعتماد المسودة وإدراجها في السجل الرسمي."+register+" احتُفظ بسجل الاعتماد.","success");
+    }catch(e){message(msgId,"تعذر اعتماد المسودة: "+e.message,"error")}
+   });
+  }else if(d.created_by===user.id){
+   button(box,"تحرير المسودة",async()=>{
+    const form=$(formId),values={...(d.payload||{}),id:d.target_record_id||"",draft_id:d.id};
+    setForm(form,values);
+    if(recordType==="finance_transaction"){
+     if(d.payload?.transaction_date)form.elements.transaction_date.value=d.payload.transaction_date;
+     if(d.payload?.fiscal_year&&years.some(y=>Number(y.fiscal_year)===Number(d.payload.fiscal_year)))$("finance-year").value=String(d.payload.fiscal_year);
+     await loadFinance();
+    }
+    form.scrollIntoView({behavior:"smooth",block:"center"});
+    message(msgId,"تحرير المسودة المشتركة؛ سيظل السجل الرسمي دون تغيير حتى يعتمدها الرئيس.");
+   });
+  }
+  body.append(tr);
+ }
+ if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد مسودات بانتظار المراجعة.");td.colSpan=6;body.append(tr)}
 }
 function exportCSV(filename,rows){
  if(!rows||!rows.length){message("m-message","لا توجد بيانات لتصديرها.");return}
@@ -567,6 +947,24 @@ function bind(){
  $("m-refresh").onclick=refreshAll;
  $("join-refresh").onclick=()=>loadJoinRequests().catch(e=>message("workmsg",e.message,"error"));
  $("refresh-files").onclick=()=>loadJoinFiles().catch(e=>message("filesmsg",e.message,"error"));
+ const founderForm=$("founding-roster-add-form");
+ if(founderForm)founderForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!canEditMeetings()){message("founding-roster-msg","إضافة الأسماء متاحة للرئيس والأمين العام فقط.","error");return}
+  const founderNumber=Number($("founder-number").value),fullName=$("founder-full-name").value.trim(),button=$("founder-add-button");
+  if(!Number.isInteger(founderNumber)||founderNumber<1||founderNumber>16){message("founding-roster-msg","رقم المؤسس يجب أن يكون عددًا صحيحًا من 1 إلى 16.","error");return}
+  if(fullName.length<3||fullName.length>180){message("founding-roster-msg","أدخل الاسم الكامل كما ورد في الوثيقة الرسمية.","error");return}
+  button.disabled=true;
+  try{
+   const {error}=await sb.from("founding_member_roster").insert({founder_number:founderNumber,full_name:fullName});
+   if(error){if(error.code==="23505")throw Error("رقم المؤسس مسجل مسبقًا. اختر رقمًا غير مستخدم.");throw error}
+   founderForm.reset();
+   await loadFoundingRoster();
+   message("founding-roster-msg","أُضيف الاسم إلى السجل بحالة «قيد المراجعة». لم تُعتمد حالة النشاط أو أهلية الجمعية العامة تلقائيًا.","success");
+  }catch(err){message("founding-roster-msg","تعذر إضافة المؤسس: "+(err.message||"خطأ غير معروف"),"error")}
+  finally{button.disabled=false}
+ });
+
  $("finance-year").addEventListener("change",()=>loadFinance().catch(e=>message("finance-msg",e.message,"error")));
  $("close-year").onclick=async()=>{const y=years.find(x=>String(x.fiscal_year)===$("finance-year").value);if(!y||y.is_closed)return;if(!confirm("إقفال السنة "+y.fiscal_year+"؟ سيصبح سجل عملياتها للقراءة فقط."))return;try{const closing=Number($("finance-closing").value.replace(/[^0-9,.-]/g,"").replace(",", "."));const officialTransactions=transactions.filter(x=>!x.is_test),income=officialTransactions.filter(x=>x.transaction_type==="income").reduce((a,x)=>a+Number(x.amount),0),expense=officialTransactions.filter(x=>x.transaction_type==="expense").reduce((a,x)=>a+Number(x.amount),0);const balance=Number(y.opening_balance)+income-expense;const {error}=await sb.from("financial_years").update({is_closed:true,closing_balance:balance,closed_at:new Date().toISOString(),closed_by:user.id}).eq("fiscal_year",y.fiscal_year);if(error)throw error;await loadYears();await loadFinance();message("finance-msg","أُقفلت السنة المالية وحُفظ رصيدها الختامي.","success")}catch(e){message("finance-msg","تعذر إقفال السنة: "+e.message,"error")}};
  $("finance-cancel").onclick=()=>{setForm($("finance-form"));$("finance-form").elements.transaction_date.value=localToday();message("finance-msg","تم إلغاء التعديل.")};
@@ -582,9 +980,23 @@ function bind(){
   try{const q=id?sb.from("executive_tasks").update(payload).eq("id",id):sb.from("executive_tasks").insert(payload);const {error}=await q;if(error)throw error;setForm($("task-form"));await loadTasks();message("tasks-msg","تم حفظ التكليف.","success")}catch(err){message("tasks-msg","تعذر حفظ التكليف: "+err.message,"error")}
  });
  $("inspections-refresh").onclick=()=>loadInspectionReports().catch(e=>message("inspections-msg",e.message,"error"));
+ $("inspection-followups-refresh").onclick=()=>loadInspectionFollowups().catch(e=>message("inspection-followups-msg",e.message,"error"));
+ $("inspection-followup-form").addEventListener("submit",e=>{e.preventDefault();saveInspectionFollowup(e.currentTarget)});
+ $("inspection-followup-cancel").onclick=()=>{setForm($("inspection-followup-form"));populateInspectionFollowupReportOptions("");message("inspection-followups-msg","تم إلغاء التحرير.")};
+
  $("inspection-cancel").onclick=()=>{setForm($("inspection-form"));$("inspection-form").elements.inspection_date.value=localToday();$("inspection-form").elements.inspected_entity.value="جمعية الأفق الولائية للرياضات الجوية والجبلية"};
  $("inspection-form").addEventListener("submit",e=>{e.preventDefault();submitInspectionReport(e.currentTarget)});
  $("inspection-form").elements.inspection_date.value=localToday();
+
+ document.querySelectorAll("[data-delib-open]").forEach(el=>el.addEventListener("click",()=>showDeliberationView(el.dataset.delibOpen)));
+ document.querySelectorAll("[data-delib-home]").forEach(el=>el.addEventListener("click",()=>showDeliberationView("home")));
+ document.querySelectorAll("[data-delib-new]").forEach(el=>el.addEventListener("click",()=>startDeliberationDraft(el.dataset.delibNew)));
+ $("delib-prefill-from-meeting").addEventListener("click",importMeetingIntoDelibDraft);
+ $("delib-save-draft").addEventListener("click",saveDeliberationDraft);
+ $("delib-notifications-refresh").addEventListener("click",loadDeliberationNotifications);
+
+ $("delib-cancel-form").addEventListener("click",()=>{setForm($("deliberation-form"),{output_type:"report",status:"draft"});showDeliberationView("home")});
+
  $("meeting-cancel").onclick=()=>{setForm($("meeting-form"));message("meetings-msg","تم إلغاء التعديل.")};
  $("meeting-build-template").onclick=()=>{
   const f=$("meeting-form"),v=values(f),type=MEETTYPE[v.meeting_type]||v.meeting_type;
@@ -662,7 +1074,10 @@ function bind(){
  $("inspections-refresh").setAttribute("aria-label","تحديث تقارير التفتيش");
  $("meetings-export").onclick=()=>exportCSV("elafak-meetings.csv",meetings.filter(x=>!x.is_test));
  $("backup-json").onclick=backup;$("print-page").onclick=()=>window.print();$("audit-refresh").onclick=()=>loadAudit();
- saveForm($("finance-form"),"finance_transactions",["transaction_date","transaction_type","category","amount","payment_method","reference","description"],canFinance,"finance-msg");
+ $("finance-drafts-refresh").onclick=()=>loadOfficialRecordDrafts("finance_transaction").catch(e=>message("finance-msg",e.message,"error"));
+ $("activity-drafts-refresh").onclick=()=>loadOfficialRecordDrafts("activity").catch(e=>message("activities-msg",e.message,"error"));
+ $("equipment-drafts-refresh").onclick=()=>loadOfficialRecordDrafts("equipment").catch(e=>message("equipment-msg",e.message,"error"));
+ saveForm($("finance-form"),"finance_transactions",["transaction_date","transaction_type","category","amount","payment_method","reference","description"],()=>roleIs("treasurer"),"finance-msg");
  saveForm($("activity-form"),"activities",["title","activity_date","location","activity_type","status","leader","planned_budget","actual_budget","notes"],canEditActivities,"activities-msg");
  saveForm($("equipment-form"),"equipment",["item_name","category","quantity","condition","serial_number","acquisition_date","acquisition_cost","storage_location","notes"],canEditEquipment,"equipment-msg");
  saveForm($("meeting-form"),"meetings",["title","meeting_type","meeting_date","meeting_start_time","meeting_end_time","location","meeting_chair","attendees_count","quorum_note","meeting_attendees","meeting_agenda","meeting_discussion","decisions","meeting_attachments","minutes_text"],canEditMeetings,"meetings-msg");
@@ -677,11 +1092,12 @@ async function enter(){
   message("m-login-msg","هذا الحساب غير مخوّل بالدخول من هذا المسار. تم إنهاء الجلسة؛ افتح بوابة التسيير لاختيار المسار الموافق لحسابك.","error");return;
  }
  hide("m-login",true);hide("m-app",false);applyPermissions();await refreshAll();
+ subscribeDeliberationUpdates();
 }
 addEventListener("DOMContentLoaded",()=>{
  if(!ENTRY||ENTRY==="general_assembly"||ENTRY==="site_admin"){window.location.replace(ENTRY==="site_admin"?"/staff.html?entry=site_admin":"/management-portal.html");return}
  if(!window.supabase){message("m-login-msg","تعذر تحميل خدمة الدخول. تحقق من الاتصال بالإنترنت.");return}
- sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:"sb-lfubzohsbwdoiagfkpkt-auth-token"}});bind();
+ sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:CONFIG.storageKey}});bind();
  sb.auth.getSession().then(({data,error})=>{if(error){message("m-login-msg","تعذر استعادة جلسة الدخول: "+error.message,"error");return}if(data.session){enter().catch(err=>{console.error("Management session restore failed:",err);hide("m-app",true);hide("m-login",false);message("m-login-msg",err?.message||"تم العثور على جلسة لكن تعذر تحميل لوحة الإدارة.","error")})}else{hide("m-app",true);hide("m-login",false)}});
 });
 })();
