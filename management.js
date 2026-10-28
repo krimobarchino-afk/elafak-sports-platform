@@ -320,6 +320,7 @@ function suggestDecisionFromMeeting(){
 const FOUNDER_STATUS={pending_review:"قيد المراجعة",active:"نشط",inactive:"غير نشط",resigned:"منسحب",deceased:"متوفى",unknown:"غير محدد"};
 const GA_ELIGIBILITY={pending_review:"قيد المراجعة",eligible:"مؤهل للمشاركة",ineligible:"غير مؤهل للمشاركة"};
 async function loadFoundingRoster(){
+ const addForm=$("founding-roster-add-form");if(addForm)addForm.classList.toggle("m-hide",!canEditMeetings());
  const {data,error}=await sb.from("founding_member_roster").select("*").order("founder_number",{ascending:true});
  if(error)throw error;
  const rows=$( "founding-roster-rows" );rows.replaceChildren();
@@ -339,7 +340,7 @@ async function loadFoundingRoster(){
   });}else safeCellDummy(actionCell,"عرض فقط");
   rows.append(tr);
  });
- if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,"لا توجد سجلات للمراجعة.");td.colSpan=6;rows.append(tr)}
+ if(!(data||[]).length){const tr=document.createElement("tr");const td=safeCell(tr,canEditMeetings()?"السجل فارغ. أضف الأسماء من الوثائق الرسمية باستخدام النموذج أعلاه.":"لا توجد أسماء مدخلة في سجل المؤسسين.");td.colSpan=6;rows.append(tr)}
 }
 function refreshGAInvitationSources(){
  const select=$("ga-invite-source");if(!select)return;
@@ -924,6 +925,24 @@ function bind(){
  $("m-refresh").onclick=refreshAll;
  $("join-refresh").onclick=()=>loadJoinRequests().catch(e=>message("workmsg",e.message,"error"));
  $("refresh-files").onclick=()=>loadJoinFiles().catch(e=>message("filesmsg",e.message,"error"));
+ const founderForm=$("founding-roster-add-form");
+ if(founderForm)founderForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!canEditMeetings()){message("founding-roster-msg","إضافة الأسماء متاحة للرئيس والأمين العام فقط.","error");return}
+  const founderNumber=Number($("founder-number").value),fullName=$("founder-full-name").value.trim(),button=$("founder-add-button");
+  if(!Number.isInteger(founderNumber)||founderNumber<1||founderNumber>16){message("founding-roster-msg","رقم المؤسس يجب أن يكون عددًا صحيحًا من 1 إلى 16.","error");return}
+  if(fullName.length<3||fullName.length>180){message("founding-roster-msg","أدخل الاسم الكامل كما ورد في الوثيقة الرسمية.","error");return}
+  button.disabled=true;
+  try{
+   const {error}=await sb.from("founding_member_roster").insert({founder_number:founderNumber,full_name:fullName});
+   if(error){if(error.code==="23505")throw Error("رقم المؤسس مسجل مسبقًا. اختر رقمًا غير مستخدم.");throw error}
+   founderForm.reset();
+   await loadFoundingRoster();
+   message("founding-roster-msg","أُضيف الاسم إلى السجل بحالة «قيد المراجعة». لم تُعتمد حالة النشاط أو أهلية الجمعية العامة تلقائيًا.","success");
+  }catch(err){message("founding-roster-msg","تعذر إضافة المؤسس: "+(err.message||"خطأ غير معروف"),"error")}
+  finally{button.disabled=false}
+ });
+
  $("finance-year").addEventListener("change",()=>loadFinance().catch(e=>message("finance-msg",e.message,"error")));
  $("close-year").onclick=async()=>{const y=years.find(x=>String(x.fiscal_year)===$("finance-year").value);if(!y||y.is_closed)return;if(!confirm("إقفال السنة "+y.fiscal_year+"؟ سيصبح سجل عملياتها للقراءة فقط."))return;try{const closing=Number($("finance-closing").value.replace(/[^0-9,.-]/g,"").replace(",", "."));const officialTransactions=transactions.filter(x=>!x.is_test),income=officialTransactions.filter(x=>x.transaction_type==="income").reduce((a,x)=>a+Number(x.amount),0),expense=officialTransactions.filter(x=>x.transaction_type==="expense").reduce((a,x)=>a+Number(x.amount),0);const balance=Number(y.opening_balance)+income-expense;const {error}=await sb.from("financial_years").update({is_closed:true,closing_balance:balance,closed_at:new Date().toISOString(),closed_by:user.id}).eq("fiscal_year",y.fiscal_year);if(error)throw error;await loadYears();await loadFinance();message("finance-msg","أُقفلت السنة المالية وحُفظ رصيدها الختامي.","success")}catch(e){message("finance-msg","تعذر إقفال السنة: "+e.message,"error")}};
  $("finance-cancel").onclick=()=>{setForm($("finance-form"));$("finance-form").elements.transaction_date.value=localToday();message("finance-msg","تم إلغاء التعديل.")};
