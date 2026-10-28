@@ -3,14 +3,15 @@ const C=window.ElAfakSupabaseConfig;if(!C)return;
 const $=id=>document.getElementById(id);
 const TITLES={deliberation:"سجل المداولة",accounting:"سجل المحاسبة",equipment:"سجل العتاد",outgoing_mail:"سجل المراسلات الصادرة",incoming_mail:"سجل المراسلات الواردة",activities:"سجل الأنشطة",tasks:"سجل المهام",inspection:"سجل التفتيش والمراقبة"};
 const ROLES={
- deliberation:["president","deputy_president","secretary_general","deputy_secretary_general","inspection_inspector"],
- accounting:["president","deputy_president","treasurer","deputy_treasurer","technical_director","inspection_inspector"],
- equipment:["president","deputy_president","treasurer","deputy_treasurer","technical_director","inspection_inspector"],
- outgoing_mail:["president","deputy_president","secretary_general","deputy_secretary_general","inspection_inspector"],
- incoming_mail:["president","deputy_president","secretary_general","deputy_secretary_general","inspection_inspector"],
- activities:["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director","inspection_inspector"],
- tasks:["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director"],
- inspection:["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director","inspection_inspector"]
+ // site_admin may preview all register screens, but is not granted drafting or approval rights here.
+ deliberation:["site_admin","president","deputy_president","secretary_general","deputy_secretary_general","inspection_inspector"],
+ accounting:["site_admin","president","deputy_president","treasurer","deputy_treasurer","technical_director","inspection_inspector"],
+ equipment:["site_admin","president","deputy_president","treasurer","deputy_treasurer","technical_director","inspection_inspector"],
+ outgoing_mail:["site_admin","president","deputy_president","secretary_general","deputy_secretary_general","inspection_inspector"],
+ incoming_mail:["site_admin","president","deputy_president","secretary_general","deputy_secretary_general","inspection_inspector"],
+ activities:["site_admin","president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director","inspection_inspector"],
+ tasks:["site_admin","president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director"],
+ inspection:["site_admin","president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer","technical_director","inspection_inspector"]
 };
 const DRAFT_ROLE={deliberation:"secretary_general",accounting:"treasurer",equipment:"treasurer",outgoing_mail:"secretary_general",incoming_mail:"secretary_general",activities:"technical_director"};
 const FIELDS={
