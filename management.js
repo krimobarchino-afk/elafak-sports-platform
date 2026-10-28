@@ -22,10 +22,10 @@ function button(parent,label,fn,kind=""){const b=document.createElement("button"
 function rowActions(tr){const td=document.createElement("td"),box=document.createElement("div");box.className="m-actions";td.append(box);tr.append(td);return box;}
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
-function canViewFinance(){return roleIs("president","treasurer");}
+function canViewFinance(){return roleIs("president","treasurer","inspection_inspector");}
 function canWriteFinance(){return roleIs("president","treasurer");}
-function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
-function canViewEquipment(){return roleIs("president","treasurer");}
+function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director","inspection_inspector");}
+function canViewEquipment(){return roleIs("president","treasurer","inspection_inspector");}
 function canViewTasks(){return roleIs("president");}
 function canViewInspections(){return roleIs("inspection_inspector","president","secretary_general");}
 function canEditInspections(){return roleIs("inspection_inspector");}
@@ -106,7 +106,7 @@ function applyPermissions(){
  $("tab-office-roster").classList.toggle("m-hide",!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
- $("m-permissions").textContent=roleIs("inspection_inspector")?"صلاحيات حساب المفتش محصورة في سجل التفتيش والمراقبة فقط، دون الاطلاع على بقية سجلات الجمعية أو تعديلها أو إدارة الحسابات. تُفرض الصلاحيات من قاعدة البيانات أيضًا.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
+ $("m-permissions").textContent=roleIs("inspection_inspector")?"يملك المفتش صلاحية الرقابة والاطلاع على السجلات الرسمية الثمانية، مع بقاء تعديل القيود واعتمادها وإدارة الحسابات خاضعة للمسؤولين المخولين. تُفرض الصلاحيات من قاعدة البيانات أيضًا.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
  $("tab-finance").classList.toggle("m-hide",!canViewFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
  $("decision-settings-form").classList.toggle("m-hide",!roleIs("president"));
