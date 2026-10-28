@@ -59,7 +59,8 @@ set search_path = pg_catalog, public, private, auth
 as $$
 declare v_event text; v_role text; v_title text; v_body text;
 begin
- if tg_op='INSERT' or (old.status='changes_requested' and new.status='draft') then v_event:='draft_created'; v_role:='president'; v_title:='مسودة سجل جديدة للمراجعة'; v_body:='أُعيد إرسال مسودة بعد استكمال التعديلات في سجل '||new.register_key||'.';
+ if tg_op='INSERT' then v_event:='draft_created'; v_role:='president'; v_title:='مسودة سجل جديدة'; v_body:='توجد مسودة جديدة للمراجعة في سجل '||new.register_key||'.';
+ elsif old.status='changes_requested' and new.status='draft' then v_event:='draft_created'; v_role:='president'; v_title:='إعادة إرسال مسودة للمراجعة'; v_body:='أُعيد إرسال مسودة بعد استكمال التعديلات في سجل '||new.register_key||'.';
  elsif new.status='changes_requested' and old.status is distinct from new.status then v_event:='changes_requested'; v_role:=case new.register_key when 'accounting' then 'treasurer' when 'equipment' then 'treasurer' when 'activities' then 'technical_director' else 'secretary_general' end; v_title:='طلب تعديل مسودة'; v_body:=coalesce(new.review_note,'طلب الرئيس تعديل المسودة.');
  elsif new.status='approved' and old.status is distinct from new.status then v_event:='approved'; v_role:=case new.register_key when 'accounting' then 'treasurer' when 'equipment' then 'treasurer' when 'activities' then 'technical_director' else 'secretary_general' end; v_title:='اعتماد مسودة سجل'; v_body:='اعتمد الرئيس المسودة وأدرجها في السجل الرسمي.';
  else return new; end if;
