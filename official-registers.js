@@ -179,6 +179,11 @@ function renderTable(key,entries,drafts){
  }
  if(registerView!=="review")section.append(el("h4","السجل الرسمي"));
  let officialEntries=registerView==="review"?[]:[...entries];
+ if(key!=="deliberation"){
+  const printBar=el("div",undefined,"m-toolbar ledger-print-toolbar m-no-print");
+  printBar.append(el("p","يعرض هذا السجل منفصلًا عند الطباعة؛ اختر «حفظ كملف PDF» من نافذة الطباعة.","m-note"));
+  const printButton=el("button","عرض السجل / حفظ PDF","m-small");printButton.type="button";printButton.onclick=()=>{document.querySelectorAll(".register-print-active").forEach(n=>n.classList.remove("register-print-active"));host.classList.add("register-print-active");const clean=()=>{host.classList.remove("register-print-active");window.removeEventListener("afterprint",clean)};window.addEventListener("afterprint",clean);window.print();setTimeout(clean,1500)};printBar.append(printButton);section.append(printBar);
+ }
  if(key==="deliberation"){
   const printBar=el("div",undefined,"m-toolbar ledger-print-toolbar m-no-print");
   printBar.append(el("p","يمكن طباعة كل المحاضر المعتمدة الظاهرة أو اختيار «حفظ بتنسيق PDF» من نافذة الطباعة.","m-note"));
