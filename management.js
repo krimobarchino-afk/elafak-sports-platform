@@ -24,16 +24,16 @@ function button(parent,label,fn,kind=""){const b=document.createElement("button"
 function rowActions(tr){const td=document.createElement("td"),box=document.createElement("div");box.className="m-actions";td.append(box);tr.append(td);return box;}
 function roleIs(...roles){return !!profile&&roles.includes(profile.role);}
 function canFinance(){return roleIs("president","treasurer");}
-function canViewFinance(){return roleIs("president","treasurer","inspection_inspector");}
+function canViewFinance(){return roleIs("president","treasurer");}
 function canWriteFinance(){return roleIs("treasurer");}
 function canCreateOfficialDraft(table){return table==="finance_transactions"||table==="equipment"?roleIs("treasurer"):table==="activities"?roleIs("technical_director"):false;}
 function canViewActivities(){return roleIs("president","deputy_president","secretary_general","deputy_secretary_general","technical_director");}
-function canViewEquipment(){return roleIs("president","treasurer","inspection_inspector");}
+function canViewEquipment(){return roleIs("president","treasurer");}
 function canViewTasks(){return roleIs("president");}
 function canViewInspections(){return roleIs("inspection_inspector",...EXECUTIVE_ROLES);}
 function canEditInspections(){return roleIs("inspection_inspector");}
 function canEditInspectionFollowups(){return roleIs("president","secretary_general");}
-function canViewMeetings(){return roleIs("president","secretary_general","deputy_president","deputy_secretary_general","technical_director","inspection_inspector");}
+function canViewMeetings(){return roleIs("president","secretary_general","deputy_president","deputy_secretary_general","technical_director");}
 function canEditActivities(){return roleIs("technical_director");}
 function canEditEquipment(){return roleIs("treasurer");}
 function canEditMeetings(){return roleIs("president","secretary_general");}
@@ -112,7 +112,7 @@ function applyPermissions(){
  $("tab-office-roster").classList.toggle("m-hide",roleIs("inspection_inspector")||!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
- $("m-permissions").textContent=roleIs("inspection_inspector")?"صلاحيات رقابية على السجلات التي يجيزها نطاق التفتيش، مع إنشاء تقارير التفتيش ومتابعتها. لا تتيح هذه الصلاحيات تحرير المسودات الإدارية أو اعتمادها أو إدارة حسابات المسيّرين.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
+ $("m-permissions").textContent=roleIs("inspection_inspector")?"صلاحية الاطلاع على تقارير التفتيش والمراقبة السابقة والجديدة، وإنشاء التقارير ومتابعتها ضمن سجل التفتيش فقط. لا يتيح الحساب الوصول إلى بقية سجلات الجمعية أو تحريرها أو اعتمادها.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
  $("tab-finance").classList.toggle("m-hide",!canViewFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
  $("payment-workflow-card").classList.toggle("m-hide",!canFinance());
