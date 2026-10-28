@@ -70,7 +70,7 @@ function renderDashboardCards(){
  const icons={"join-requests":"↗",finance:"دج",activities:"✦",equipment:"◇",tasks:"✓",inspections:"⌕",meetings:"▤","office-roster":"♙",archive:"▣"};
  const grid=$("m-dashboard-cards");if(!grid)return;grid.replaceChildren();
  const tabs=[...document.querySelectorAll(".m-tabs button[data-pane]")].filter(b=>b.dataset.pane!=="overview"&&!b.classList.contains("m-hide"));
- for(const b of tabs){const card=document.createElement("button");card.type="button";card.className="m-dashboard-card";
+ for(const b of tabs){const card=document.createElement("button");card.type="button";card.className="m-dashboard-card";card.dataset.pane=b.dataset.pane;
   const icon=document.createElement("span");icon.className="m-dashboard-icon";icon.setAttribute("aria-hidden","true");icon.textContent=icons[b.dataset.pane]||"•";
   const title=document.createElement("span");title.className="m-dashboard-title";title.textContent=b.textContent.trim();
   const desc=document.createElement("span");desc.className="m-dashboard-description";desc.textContent=descriptions[b.dataset.pane]||"فتح القسم المسموح به لحسابك.";
