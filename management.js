@@ -123,6 +123,24 @@ function applyPermissions(){
  $("finance-closing").closest("label").classList.toggle("m-hide",!canViewFinance());
  $("finance-year-status").closest("label").classList.toggle("m-hide",!canViewFinance());
  renderDashboardCards();
+ // The management workspace is intentionally reduced to the official registers only.
+ document.querySelectorAll(".m-tabs button[data-pane]").forEach(button=>{
+  const keep=button.dataset.pane==="official-registers";
+  button.classList.toggle("m-hide",!keep);
+  button.setAttribute("aria-hidden",keep?"false":"true");
+  button.tabIndex=keep?0:-1;
+  button.classList.toggle("active",keep);
+ });
+ document.querySelectorAll(".m-pane").forEach(pane=>{
+  const keep=pane.id==="pane-official-registers";
+  pane.hidden=!keep;
+  pane.setAttribute("aria-hidden",keep?"false":"true");
+ });
+ document.querySelectorAll(".m-dashboard-card,.m-dashboard-grid,.m-stats,.m-stat").forEach(el=>el.classList.add("m-hide"));
+ const home=document.querySelector("#pane-overview");
+ if(home)home.hidden=true;
+ const registerTab=$("tab-official-registers");
+ if(registerTab)registerTab.classList.toggle("m-hide",!canViewOfficialRegisters());
 }
 async function loadYears(){
  if(!canViewFinance())return;
