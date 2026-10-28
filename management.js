@@ -7,8 +7,18 @@ const KEY=CONFIG.key;
 const $=id=>document.getElementById(id);
 const ENTRY=new URLSearchParams(window.location.search).get("entry");
 const EXECUTIVE_ROLES=["president","deputy_president","secretary_general","deputy_secretary_general","treasurer","deputy_treasurer"];
-function entryAllows(role){return ENTRY==="executive"?EXECUTIVE_ROLES.includes(role):ENTRY==="technical_director"?role==="technical_director":ENTRY==="inspection_inspector"?role==="inspection_inspector":false;}
+function entryAllows(role){return ENTRY===role||(ENTRY==="executive"&&EXECUTIVE_ROLES.includes(role));}
 const ROLE={site_admin:"مدير الموقع — مسؤول تقني",president:"الرئيس — عضو المكتب التنفيذي",deputy_president:"نائب الرئيس — عضو المكتب التنفيذي",secretary_general:"الأمين العام — عضو المكتب التنفيذي",treasurer:"أمين المال — عضو المكتب التنفيذي",deputy_secretary_general:"نائب الأمين العام — عضو المكتب التنفيذي",deputy_treasurer:"نائب أمين المال — عضو المكتب التنفيذي",technical_director:"المدير التقني الولائي",inspection_inspector:"مفتش الشباب والرياضة — حساب اطلاع وتفتيش"};
+const ROLE_PAGE={
+ president:["فضاء الرئيس","الإشراف العام والمهام والتكليفات ومراجعة السجلات واعتمادها وفق الإجراءات المعتمدة."],
+ deputy_president:["فضاء نائب الرئيس","متابعة الأعمال والمهام المفوضة إليك؛ لا تمنحك النيابة تلقائيًا صلاحية تعديل السجلات المالية أو سجل العتاد."],
+ secretary_general:["فضاء الأمين العام","المراسلات والأرشيف والاجتماعات والمحاضر ومتابعة طلبات الانخراط ضمن الصلاحيات المعتمدة."],
+ deputy_secretary_general:["فضاء نائب الأمين العام","متابعة الأعمال الإدارية المسندة إليك ضمن حدود التفويض."],
+ treasurer:["فضاء أمين المال","السجل المالي ومسودات العمليات المالية وسجل العتاد والجرد والتحقق المالي ضمن الاختصاص."],
+ deputy_treasurer:["فضاء نائب أمين المال","متابعة الأعمال المالية المسندة إليك؛ لا تمتد صلاحياتك تلقائيًا إلى كامل صلاحيات أمين المال."],
+ technical_director:["فضاء المدير التقني الولائي","البرامج والأنشطة والتقارير التقنية والمهام الرياضية المسندة إليك."],
+ inspection_inspector:["فضاء التفتيش والمراقبة","تقارير التفتيش والمراقبة السابقة والجديدة ومتابعاتها فقط، دون الوصول إلى بقية سجلات الجمعية."]
+};
 const TYPE={income:"إيراد",expense:"مصروف"};
 const PAY={bank:"البنك",cash:"نقدًا",transfer:"تحويل",other:"أخرى"};
 const ACTTYPE={paragliding:"الطيران الشراعي",hiking:"المشي الجبلي",training:"التكوين",volunteering:"التطوع",other:"أخرى"};
@@ -112,6 +122,9 @@ function applyPermissions(){
  $("tab-office-roster").classList.toggle("m-hide",roleIs("inspection_inspector")||!(canViewMeetings()||roleIs("treasurer","deputy_treasurer")));
  $("m-role").textContent=ROLE[profile.role]||profile.role;
  $("m-welcome").textContent="مرحبًا، "+profile.username;
+ const rolePage=ROLE_PAGE[profile.role];
+ $("management-title").textContent=rolePage?.[0]||"فضاء التسيير";
+ $("management-intro").textContent=rolePage?.[1]||"فضاء مخصص وفق الدور والصلاحيات المعتمدة للحساب.";
  $("m-permissions").textContent=roleIs("inspection_inspector")?"صلاحية الاطلاع على تقارير التفتيش والمراقبة السابقة والجديدة، وإنشاء التقارير ومتابعتها ضمن سجل التفتيش فقط. لا يتيح الحساب الوصول إلى بقية سجلات الجمعية أو تحريرها أو اعتمادها.":"تُفرض الصلاحيات من قاعدة البيانات أيضًا؛ إخفاء الأزرار في الواجهة ليس بديلًا عن سياسات الأمان.";
  $("tab-finance").classList.toggle("m-hide",!canViewFinance());
  $("dues-generation-card").classList.toggle("m-hide",!canFinance());
