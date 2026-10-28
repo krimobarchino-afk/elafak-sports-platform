@@ -16,7 +16,7 @@ const ROUTES={
  treasurer:{title:"المكتب التنفيذي",description:"فضاء المكتب التنفيذي وفق الصلاحيات المرتبطة بمنصبك.",href:"/management.html?entry=executive"},
  deputy_treasurer:{title:"المكتب التنفيذي",description:"فضاء المكتب التنفيذي وفق الصلاحيات المرتبطة بمنصبك.",href:"/management.html?entry=executive"},
  technical_director:{title:"المدير التقني الولائي",description:"فضاء المهام التقنية والرياضية المخصص لحسابك.",href:"/management.html?entry=technical_director"},
- inspection_inspector:{title:"التفتيش والسجلات الرسمية",description:"تقارير التفتيش، وقراءة السجل المحاسبي وسجل الجرد وسجل المداولة الرسمي فقط، دون أدوات إدخال أو اعتماد أو وصول لبقية سجلات الجمعية.",href:"/management.html?entry=inspection_inspector"}
+ inspection_inspector:{title:"التفتيش والمراقبة",description:"الاطلاع على تقارير التفتيش والمراقبة السابقة والجديدة، وإنشاء التقارير ومتابعتها فقط، دون الوصول إلى بقية سجلات الجمعية.",href:"/management.html?entry=inspection_inspector"}
 };
 let sb=null;
 function message(text,kind=""){const el=$("portal-login-msg");el.textContent=text;el.className="portal-msg"+(kind?" "+kind:"")}
