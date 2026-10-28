@@ -153,7 +153,7 @@ function renderDeliberationPage(entry){
  const sign=el("div",undefined,"ledger-signatures");sign.append(el("span","الأمين العام"),el("span","رئيس الجمعية"));page.append(sign);
  return page;
 }
-function renderTable(key,entries,drafts){
+async function renderTable(key,entries,drafts){
  const host=$("register-"+key);if(!host)return;host.replaceChildren();
  const nav=el("div",undefined,"m-toolbar register-page-nav m-no-print");
  const back=el("button","العودة إلى قائمة السجلات","m-small");back.type="button";back.onclick=()=>{activeRegisterKey=null;registerView="home";host.hidden=true;$("register-choice-grid").hidden=false;$("register-selection-hint").textContent="اختر السجل المناسب لحسابك.";renderRegisterChoices()};nav.append(back,el("span",TITLES[key],"m-dashboard-title"));host.append(nav);
