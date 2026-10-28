@@ -76,8 +76,9 @@ function makeForm(key){
       if(memberId){const q=await sb.from("association_members").select("id,founder_number,full_name,membership_status").eq("id",memberId).maybeSingle();if(!q.error)member=q.data}
       if(!member&&memberNo){const q=await sb.from("members").select("id,member_no,join_request_id,membership_status").eq("member_no",memberNo).eq("is_test",false).maybeSingle();if(!q.error&&q.data){const d=await sb.from("join_requests").select("full_name").eq("id",q.data.join_request_id).maybeSingle();if(!d.error&&d.data)member={id:q.data.id,full_name:d.data.full_name,membership_status:q.data.membership_status}}}
       if(!member&&founderNo){const q=await sb.from("association_members").select("id,founder_number,full_name,membership_status").eq("founder_number",founderNo).maybeSingle();if(!q.error)member=q.data}
-      if(!member&&qr.full_name)member={full_name:String(qr.full_name),membership_status:"unverified"};
-      if(!member){scanStatus.textContent="لم يُعثر على العضو في السجل. تأكد أن QR يحتوي معرّف العضو المسجل.";return}
+      const qrName=String(qr.full_name||(!Object.keys(qr).length?raw:"")).trim();
+      if(!member&&qrName){const q=await sb.from("association_members").select("id,founder_number,full_name,membership_status").eq("full_name",qrName).maybeSingle();if(!q.error)member=q.data}
+      if(!member){scanStatus.textContent="لم يُعثر على العضو في السجل. تأكد أن QR يحتوي رقم العضوية أو معرّف العضو المسجل.";return}
       if(member.membership_status&&member.membership_status!=="active"){scanStatus.textContent="العضوية ليست نشطة؛ لم يُضف الاسم. راجع حالة العضو.";return}
       const area=f.elements.attendees;const name=String(member.full_name||"").trim();if(!name){scanStatus.textContent="لم يتوفر اسم العضو في السجل.";return}
       const current=area.value.split("\n").map(x=>x.trim()).filter(Boolean);if(current.some(x=>x.includes(name))){scanStatus.textContent="العضو موجود مسبقًا في قائمة الحضور: "+name;return}
