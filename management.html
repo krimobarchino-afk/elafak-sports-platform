@@ -8,7 +8,7 @@
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="/management.js?v=20261027-dashboard-cards-3" defer></script>
-<script src="/official-registers.js?v=20261028-registers-2" defer></script>
+<script src="/official-registers.js?v=20261028-registers-3" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -22,6 +22,7 @@
 .m-dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.9rem;margin:1.2rem 0}
 .m-dashboard-card{display:flex;flex-direction:column;align-items:flex-start;gap:.65rem;min-height:145px;padding:1.1rem;border:1px solid var(--m-line);border-radius:14px;background:#fff;color:#17352e;text-align:right;font:inherit;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
 .m-dashboard-card:hover{transform:translateY(-2px);border-color:#8da99b;box-shadow:0 8px 20px #123b3210}
+.m-dashboard-card.active{border-color:#123b32;background:#f0f6f1;box-shadow:inset 0 0 0 2px #123b3218}
 .m-dashboard-card:focus-visible{outline:3px solid #8aa99a;outline-offset:2px}
 .m-dashboard-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:11px;background:#edf4ef;color:#123b32;font-size:1.25rem;font-weight:700}
 .m-dashboard-title{font-weight:750;font-size:1.03rem}
