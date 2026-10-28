@@ -8,7 +8,7 @@
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="/management.js?v=20261027-dashboard-cards-3" defer></script>
-<script src="/official-registers.js?v=20261028-registers-1" defer></script>
+<script src="/official-registers.js?v=20261028-registers-2" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -252,6 +252,8 @@
 <p class="m-note">تُحفظ السجلات الرسمية بعد اعتماد الرئيس للمسودات. السجل المعتمد غير قابل للتعديل. لا تُدرج بيانات تجريبية في القيود الرسمية.</p>
 <p id="registers-msg" role="status"></p>
 <div class="m-card"><h3>الإشعارات</h3><div id="register-notifications" class="m-dashboard-grid"></div></div>
+<div id="register-choice-grid" class="m-dashboard-grid" aria-label="اختيار السجل الرسمي"></div>
+<p class="m-note" id="register-selection-hint">اختر سجلًا واحدًا لعرض تفاصيله ومسوداته.</p>
 <form id="register-draft-form" class="m-grid m-no-print" hidden></form>
 <div id="register-deliberation" class="m-card" hidden></div>
 <div id="register-accounting" class="m-card" hidden></div>
