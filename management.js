@@ -136,7 +136,6 @@ function applyPermissions(){
   pane.hidden=!keep;
   pane.setAttribute("aria-hidden",keep?"false":"true");
  });
- document.querySelectorAll(".m-dashboard-card,.m-dashboard-grid,.m-stats,.m-stat").forEach(el=>el.classList.add("m-hide"));
  const home=document.querySelector("#pane-overview");
  if(home)home.hidden=true;
  const registerTab=$("tab-official-registers");
