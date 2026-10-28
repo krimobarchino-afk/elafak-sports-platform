@@ -186,11 +186,8 @@ function renderTable(key,entries,drafts){
   const printButton=el("button","عرض السجل / حفظ PDF","m-small");printButton.type="button";printButton.onclick=()=>{document.querySelectorAll(".register-print-active").forEach(n=>n.classList.remove("register-print-active"));host.classList.add("register-print-active");const clean=()=>{host.classList.remove("register-print-active");window.removeEventListener("afterprint",clean)};window.addEventListener("afterprint",clean);window.print();setTimeout(clean,1500)};printBar.append(printButton);section.append(printBar);
  }
  if(key==="deliberation"){
-  const printBar=el("div",undefined,"m-toolbar ledger-print-toolbar m-no-print");
-  printBar.append(el("p","يمكن طباعة كل المحاضر المعتمدة الظاهرة أو اختيار «حفظ بتنسيق PDF» من نافذة الطباعة.","m-note"));
-  const printButton=el("button","طباعة السجل / حفظ PDF","m-small");printButton.type="button";printButton.onclick=()=>window.print();printBar.append(printButton);section.append(printBar);
-  if(!officialEntries.length)section.append(el("p","لا توجد مداولات معتمدة مسجلة في هذا السجل حتى الآن.","m-note"));
-  for(const entry of officialEntries)section.append(renderDeliberationPage(entry));
+  if(registerView==="review") {host.append(section);return}
+  await renderDeliberationArchive(section,officialEntries);
   host.append(section);
   return;
  }
@@ -234,7 +231,52 @@ function renderRegisterChoices(){
 function profileUserId(){return profile?.user_id}
 function notifyUI(items){const host=$("register-notifications");host.replaceChildren();if(!items.length){host.append(el("p","لا توجد إشعارات جديدة.","m-note"));return}for(const n of items){const card=el("div",undefined,"delib-notification");card.append(el("strong",n.title),el("p",n.body),el("small",formatDate(n.created_at)));const b=el("button","تمييز كمقروء","m-small");b.onclick=async()=>{await sb.from("association_register_notifications").update({read_at:new Date().toISOString()}).eq("id",n.id);await loadNotifications()};card.append(b);host.append(card)}}
 async function loadNotifications(){const {data,error}=await sb.from("association_register_notifications").select("*").is("read_at",null).order("created_at",{ascending:false}).limit(30);if(error){$("register-notifications").textContent="تعذر تحميل الإشعارات: "+error.message;return}notifyUI(data||[])}
-async function review(d,status,note){msg("جارٍ حفظ قرار المراجعة وإتمام الإجراء…");const {data,error}=await sb.rpc("review_association_register_draft",{p_draft_id:d.id,p_status:status,p_note:note||null});if(error){msg("لم تكتمل العملية ولم يُؤكَّد الاعتماد: "+error.message,"error");return}if(!data||data.success!==true){msg("لم يؤكد النظام اكتمال العملية؛ حدّث السجلات وتحقق من الحالة قبل إعادة المحاولة.","error");return}msg(status==="approved"?"تم اعتماد المحضر وإدراجه في السجل الرسمي برقم "+data.register_year+"/"+String(data.register_number).padStart(3,"0")+".":"أُعيدت المسودة إلى صاحبها مع ملاحظة التعديل.","success");await loadAll()}
+async function loadHtml2Pdf(){
+ if(window.html2pdf)return window.html2pdf;
+ await new Promise((resolve,reject)=>{const script=document.createElement("script");script.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";script.onload=resolve;script.onerror=()=>reject(new Error("تعذر تحميل أداة إنشاء PDF."));document.head.append(script)});
+ if(!window.html2pdf)throw new Error("أداة PDF غير متاحة.");return window.html2pdf;
+}
+function deliberationPdfPath(entry){return "deliberation/"+entry.register_year+"/"+String(entry.register_number).padStart(4,"0")+".pdf"}
+async function createDeliberationPdf(entry){
+ const html2pdf=await loadHtml2Pdf();
+ const stage=el("div");stage.style.cssText="position:fixed;left:-12000px;top:0;width:794px;background:#fff;color:#111;z-index:-1;direction:rtl";
+ const page=renderDeliberationPage(entry);page.style.cssText+=";width:100%;max-width:none;margin:0;padding:48px 56px;background:#fff;color:#111;box-shadow:none;border:0;border-right:8px solid #6c806d;font-family:Arial,'Noto Naskh Arabic',sans-serif;font-size:18px;line-height:1.9";
+ stage.append(page);document.body.append(stage);
+ try{
+  const blob=await html2pdf().set({margin:0,filename:deliberationPdfPath(entry).split("/").pop(),image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",logging:false},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"]}}).from(stage).outputPdf("blob");
+  const {error}=await sb.storage.from("official-register-pdfs").upload(deliberationPdfPath(entry),blob,{contentType:"application/pdf",upsert:true});
+  if(error)throw error;return deliberationPdfPath(entry);
+ }finally{stage.remove()}
+}
+async function renderDeliberationArchive(section,entries){
+ const folder=el("section",undefined,"m-card");folder.append(el("h4","أرشيف سجل المداولة — ملفات PDF المعتمدة"),el("p","كل ملف يمثل مداولة رسمية مستقلة، مرتبة حسب السنة ورقم القيد. تُفتح الملفات للقراءة أو الطباعة، ولا تُعرض المسودات في هذا الأرشيف.","m-note"));
+ if(!entries.length){folder.append(el("p","لا توجد مداولات معتمدة في الأرشيف حتى الآن.","m-note"));section.append(folder);return}
+ const table=el("table");table.className="m-table";const head=el("thead"),hr=el("tr");["رقم القيد","تاريخ الاعتماد","عنوان المداولة","ملف PDF الرسمي"].forEach(x=>hr.append(el("th",x)));head.append(hr);const body=el("tbody");table.append(head,body);folder.append(table);section.append(folder);
+ const ordered=[...entries].sort((a,b)=>a.register_year-b.register_year||a.register_number-b.register_number);
+ for(const entry of ordered){
+  const row=el("tr");row.append(el("td",entry.register_year+"/"+String(entry.register_number).padStart(3,"0")),el("td",formatDate(entry.approved_at)),el("td",entry.payload?.title||"مداولة"));
+  const cell=el("td");const {data,error}=await sb.storage.from("official-register-pdfs").createSignedUrl(deliberationPdfPath(entry),300);
+  if(!error&&data?.signedUrl){const link=el("a","فتح ملف PDF");link.href=data.signedUrl;link.target="_blank";link.rel="noopener noreferrer";link.className="m-small";cell.append(link)}
+  else{
+   cell.append(el("span","ملف PDF غير موجود بعد","m-note"));
+   if(profile?.role==="president"){const make=el("button","إنشاء ملف PDF","m-small");make.type="button";make.onclick=async()=>{make.disabled=true;try{await createDeliberationPdf(entry);msg("تم إنشاء PDF للمداولة "+entry.register_year+"/"+entry.register_number+".","success");renderTable("deliberation",cachedEntries.deliberation||[],cachedDrafts.deliberation||[])}catch(e){msg("تعذر إنشاء PDF: "+(e.message||"خطأ غير معروف"),"error");make.disabled=false}};cell.append(make)}
+  }
+  row.append(cell);body.append(row);
+ }
+}
+async function review(d,status,note){
+ msg("جارٍ حفظ قرار المراجعة وإتمام الإجراء…");
+ const {data,error}=await sb.rpc("review_association_register_draft",{p_draft_id:d.id,p_status:status,p_note:note||null});
+ if(error){msg("لم تكتمل العملية ولم يُؤكَّد الاعتماد: "+error.message,"error");return}
+ if(!data||data.success!==true){msg("لم يؤكد النظام اكتمال العملية؛ حدّث السجلات وتحقق من الحالة قبل إعادة المحاولة.","error");return}
+ if(status==="approved"&&d.register_key==="deliberation"){
+  const {data:entry,error:entryError}=await sb.from("association_register_entries").select("*").eq("id",data.official_entry_id).eq("is_test",false).single();
+  if(entryError||!entry){msg("تم اعتماد المداولة، لكن تعذر تحميل القيد لإنشاء PDF. يمكن إعادة إنشاء الملف من أرشيف السجل.","error");await loadAll();return}
+  try{await createDeliberationPdf(entry);msg("تم اعتماد المداولة وحفظ ملف PDF الرسمي رقم "+data.register_year+"/"+String(data.register_number).padStart(3,"0")+" في أرشيف الجمعية.","success")}
+  catch(e){msg("تم اعتماد المداولة رسميًا، لكن تعذر حفظ PDF تلقائيًا: "+(e.message||"خطأ غير معروف")+". يمكن للرئيس إعادة إنشاء الملف من الأرشيف.","error")}
+ }else msg(status==="approved"?"تم اعتماد القيد وإدراجه في السجل الرسمي برقم "+data.register_year+"/"+String(data.register_number).padStart(3,"0")+".":"أُعيدت المسودة إلى صاحبها مع ملاحظة التعديل.","success");
+ await loadAll()
+}
 async function loadAll(){
  msg("جارٍ تحميل السجلات الرسمية…");
  const keys=Object.keys(TITLES);
