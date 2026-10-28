@@ -16,7 +16,7 @@ const ROUTES={
  treasurer:{title:"فضاء أمين المال",description:"السجل المالي ومسودات العمليات المالية وسجل العتاد والجرد والتحقق من التسديد ضمن الاختصاص.",href:"/management.html?entry=treasurer"},
  deputy_treasurer:{title:"فضاء نائب أمين المال",description:"متابعة الأعمال المالية المسندة إليك ضمن الصلاحيات المحددة، دون امتلاك صلاحيات أمين المال كاملة تلقائيًا.",href:"/management.html?entry=deputy_treasurer"},
  technical_director:{title:"المدير التقني الولائي",description:"فضاء المهام التقنية والرياضية المخصص لحسابك.",href:"/management.html?entry=technical_director"},
- inspection_inspector:{title:"التفتيش والمراقبة",description:"الاطلاع على تقارير التفتيش والمراقبة السابقة والجديدة، وإنشاء التقارير ومتابعتها فقط، دون الوصول إلى بقية سجلات الجمعية.",href:"/management.html?entry=inspection_inspector"}
+ inspection_inspector:{title:"التفتيش والمراقبة",description:"إنشاء تقارير التفتيش والمراقبة والاطلاع عليها، والاطلاع على السجلات التي خُصصت للمفتش وفق الصلاحيات المعتمدة، دون صلاحية إنشاء مسودات السجلات الأخرى أو اعتمادها.",href:"/management.html?entry=inspection_inspector"}
 };
 let sb=null;
 function message(text,kind=""){const el=$("portal-login-msg");el.textContent=text;el.className="portal-msg"+(kind?" "+kind:"")}
