@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123b32">
+<title>السجل الرسمي | جمعية الأفق</title>
+<link rel="icon" href="/icon.svg">
+<link rel="stylesheet" href="/style.css?v=20261029-horizontal-transition-1">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7f1;color:#17352e;font-family:inherit}
+.page-head{background:#123b32;color:#fff;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap}
+.page-head h1{font-size:1.08rem;margin:0}.page-head p{font-size:.8rem;color:#d4e2d8;margin:.2rem 0 0}
+.page-head a{color:#e0efb3;text-decoration:none;border:1px solid #52776b;border-radius:7px;padding:.4rem .65rem}
+main{max-width:1280px;margin:0 auto;padding:.5rem .7rem}
+iframe{display:block;width:100%;height:calc(100vh - 82px);min-height:560px;border:1px solid #dce5df;border-radius:10px;background:#fff}
+#error{display:none;padding:1rem;background:#fff0ef;color:#8c231b;border-radius:8px}
+@media(max-width:600px){main{padding:.25rem}iframe{height:calc(100vh - 100px);min-height:500px;border-radius:6px}.page-head{padding:.55rem .7rem}}
+</style>
+</head>
+<body>
+<header class="page-head"><div><h1 id="page-title">السجل الرسمي</h1><p>صفحة مستقلة للسجل — الوصول بحسب صلاحيات الحساب</p></div><a id="back-link" href="/management-portal.html">العودة إلى حساب التسيير</a></header>
+<main><p id="error" role="alert"></p><iframe id="register-frame" title="محتوى السجل الرسمي" hidden></iframe></main>
+<script>
+(function(){
+ const p=new URLSearchParams(location.search);
+ const allowedEntries=["executive","technical_director","inspection_inspector"];
+ const allowedRegisters=["deliberation","accounting","equipment","outgoing_mail","incoming_mail","activities","tasks","inspection"];
+ const entry=p.get("entry"),register=p.get("register"),draft=p.get("draft");
+ const labels={deliberation:"سجل المداولة",accounting:"سجل المحاسبة",equipment:"سجل العتاد",outgoing_mail:"سجل المراسلات الصادرة",incoming_mail:"سجل المراسلات الواردة",activities:"سجل الأنشطة",tasks:"سجل المهام",inspection:"سجل التفتيش والمراقبة"};
+ const error=document.getElementById("error"),frame=document.getElementById("register-frame");
+ if(!allowedEntries.includes(entry)||!allowedRegisters.includes(register)){
+  error.style.display="block";error.textContent="الرابط غير مكتمل أو غير صحيح. افتح السجل من داخل حساب التسيير المخوّل.";return;
+ }
+ document.getElementById("page-title").textContent=labels[register];
+ document.getElementById("back-link").href="/management.html?entry="+encodeURIComponent(entry);
+ const q=new URLSearchParams({entry,standalone_register:"1",register});if(draft)q.set("draft",draft);
+ frame.src="/management.html?"+q.toString();frame.hidden=false;
+})();
+</script>
+</body></html>
