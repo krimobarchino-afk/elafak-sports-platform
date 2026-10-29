@@ -67,10 +67,14 @@
 #m-app>.m-card:first-child .m-note{font-size:.8rem;margin:.1rem 0}
 #m-app>.m-card:first-child #m-message{margin:.2rem 0;color:#e0efb3}
 #pane-official-registers>.m-card:first-child{margin-top:.4rem}
-#pane-official-registers>.m-card:nth-of-type(2){display:grid;grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);gap:.8rem;align-items:start;margin:.6rem 0;padding:.7rem;background:#f5f8f5}
-#pane-official-registers>.m-card:nth-of-type(2)>h3,#pane-official-registers>.m-card:nth-of-type(2)>.m-note{grid-column:1/-1;margin:.1rem 0}
-#pane-official-registers>.m-card:nth-of-type(2) #register-top-actions{grid-column:1}
-#pane-official-registers>.m-card:nth-of-type(2) #register-notifications{grid-column:2;display:flex;flex-direction:column;gap:.35rem;margin:.25rem 0}
+#pane-official-registers>.m-card:nth-of-type(2){display:grid;grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);gap:.55rem .8rem;align-items:start;margin:.6rem 0;padding:.7rem;background:#f5f8f5}
+#pane-official-registers>.m-card:nth-of-type(2)>h3{grid-column:1/-1;margin:.1rem 0;font-size:1rem}
+#pane-official-registers>.m-card:nth-of-type(2)>div{min-width:0}
+#pane-official-registers>.m-card:nth-of-type(2)>div>p{margin:.1rem 0 .35rem;font-size:.82rem}
+#pane-official-registers>.m-card:nth-of-type(2)>div:nth-of-type(1){grid-column:1}
+#pane-official-registers>.m-card:nth-of-type(2)>div:nth-of-type(2){grid-column:2}
+#pane-official-registers>.m-card:nth-of-type(2) #register-top-actions{display:flex;flex-wrap:wrap;gap:.4rem;margin:.25rem 0}
+#pane-official-registers>.m-card:nth-of-type(2) #register-notifications{display:flex;flex-direction:column;gap:.35rem;margin:.25rem 0}
 #pane-official-registers>.m-card:nth-of-type(2) #register-notifications>div{padding:.45rem;border:1px solid var(--m-line);border-radius:8px;background:#fff}
 #pane-official-registers>.m-card:nth-of-type(3){margin-top:.7rem}
 @media(max-width:720px){#pane-official-registers>.m-card:nth-of-type(2){grid-template-columns:1fr}#pane-official-registers>.m-card:nth-of-type(2) #register-top-actions,#pane-official-registers>.m-card:nth-of-type(2) #register-notifications{grid-column:1}}
