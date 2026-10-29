@@ -57,13 +57,7 @@ function setupTabs(){
   if(b.dataset.pane==="tasks")loadTasks().catch(e=>message("tasks-msg",e.message,"error"));
   if(b.dataset.pane==="inspections")loadInspectionReports().catch(e=>message("inspections-msg",e.message,"error"));
  }));
- document.querySelectorAll(".m-pane").forEach(pane=>{
-  if(pane.id==="pane-overview"||pane.querySelector(".m-homebar"))return;
-  const bar=document.createElement("div");bar.className="m-homebar m-no-print";
-  const label=document.createElement("span");label.className="m-note";label.textContent="اختر العودة إلى الرئيسية للانتقال إلى خيار آخر.";
-  const back=document.createElement("button");back.type="button";back.textContent="← العودة إلى الرئيسية";back.addEventListener("click",()=>$("tab-overview").click());
-  bar.append(label,back);pane.prepend(bar);
- });
+
 }
 function renderDashboardCards(){
  const descriptions={"join-requests":"مراجعة الطلبات ومتابعة ملفات استكمال الانخراط وفق الصلاحيات.","finance":"عرض السجل المالي والعمليات والتقارير المالية المتاحة لحسابك.","activities":"متابعة برامج الجمعية وأنشطتها وخططها.","equipment":"جرد المعدات ومتابعة حالتها وسجلها.","tasks":"متابعة المهام والتكليفات التي تدخل ضمن صلاحية الرئيس.","inspections":"إعداد تقارير التفتيش ومراجعة التقارير والمتابعات المسموح بها.","meetings":"الاجتماعات والمحاضر والقرارات والسجلات المرتبطة بها.","office-roster":"الاطلاع على التشكيلة الرسمية للمكتب التنفيذي عند السماح بذلك.","archive":"الأرشيف وسجل العمليات والنسخ المسموح بها."};
