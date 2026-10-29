@@ -378,7 +378,7 @@ async function loadAll(){
   const {data:entries,error}=await sb.from("association_register_entries").select("*").eq("register_key",key).eq("is_test",false).order("register_year",{ascending:false}).order("register_number",{ascending:false}).limit(200);
   if(error){host.textContent="تعذر تحميل السجل: "+error.message;continue}
   let drafts=[];if(key in DRAFT_ROLE){const q=sb.from("association_register_drafts").select("*").eq("register_key",key).neq("status","approved").order("created_at",{ascending:false}).limit(100);const {data:d,error:de}=await q;if(!de)drafts=d||[]}
-  cachedEntries[key]=entries||[];cachedDrafts[key]=drafts;renderTable(key,cachedEntries[key],cachedDrafts[key]);
+  cachedEntries[key]=entries||[];cachedDrafts[key]=drafts;
  }
  await loadNotifications();
  if(!activeRegisterKey||!ROLES[activeRegisterKey]?.includes(profile.role))activeRegisterKey=keys.find(k=>ROLES[k].includes(profile.role))||null;
