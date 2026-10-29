@@ -239,13 +239,23 @@ async function loadHtml2Pdf(){
 function deliberationPdfPath(entry){return "deliberation/"+entry.register_year+"/"+String(entry.register_number).padStart(4,"0")+".pdf"}
 async function createDeliberationPdf(entry){
  const html2pdf=await loadHtml2Pdf();
- const stage=el("div");stage.style.cssText="position:fixed;left:-12000px;top:0;width:794px;background:#fff;color:#111;z-index:-1;direction:rtl";
- const page=renderDeliberationPage(entry);page.style.cssText+=";width:100%;max-width:none;margin:0;padding:48px 56px;background:#fff;color:#111;box-shadow:none;border:0;border-right:8px solid #6c806d;font-family:Arial,'Noto Naskh Arabic',sans-serif;font-size:18px;line-height:1.9";
+ const page=renderDeliberationPage(entry);
+ const stage=el("div");stage.dir="rtl";
+ stage.style.cssText="display:block;position:fixed;left:0;top:0;width:794px;min-height:10px;box-sizing:border-box;z-index:2147483000;background:#fff;color:#111;direction:rtl;pointer-events:none";
+ page.style.cssText+=";display:block;visibility:visible;opacity:1;position:relative;box-sizing:border-box;width:100%;max-width:none;height:auto;min-height:1px;overflow:visible;margin:0;padding:42px 52px;background:#fff;color:#111;box-shadow:none;border:0;border-right:8px solid #6c806d;font-family:Arial,sans-serif;font-size:16px;line-height:1.8;break-inside:auto!important;page-break-inside:auto!important;break-after:auto!important;page-break-after:auto!important";
  stage.append(page);document.body.append(stage);
  try{
-  const blob=await html2pdf().set({margin:0,filename:deliberationPdfPath(entry).split("/").pop(),image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",logging:false},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"]}}).from(stage).outputPdf("blob");
+  if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  if(!page.textContent.trim())throw new Error("محتوى المداولة فارغ؛ أُلغي إنشاء PDF");
+  const options={margin:[12,12,12,12],image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",logging:false,scrollX:0,scrollY:0,width:794,windowWidth:794},jsPDF:{unit:"mm",format:"a4",orientation:"portrait",compress:true},pagebreak:{mode:["css","legacy"],avoid:[".ledger-bookhead",".ledger-meta",".ledger-signatures",".ledger-field",".ledger-minutes p"]}};
+  const pdf=await html2pdf().set(options).from(page).toPdf().get("pdf");
+  if(!pdf||pdf.getNumberOfPages()<1)throw new Error("لم تُنشأ صفحات PDF");
+  const blob=pdf.output("blob");
+  if(!blob||blob.size<1000)throw new Error("ملف PDF الناتج فارغ أو غير مكتمل");
   const {error}=await sb.storage.from("official-register-pdfs").upload(deliberationPdfPath(entry),blob,{contentType:"application/pdf",upsert:true});
-  if(error)throw error;return deliberationPdfPath(entry);
+  if(error)throw error;
+  return deliberationPdfPath(entry);
  }finally{stage.remove()}
 }
 async function renderDeliberationArchive(section,entries){
