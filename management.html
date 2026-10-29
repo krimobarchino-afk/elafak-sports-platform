@@ -8,7 +8,8 @@
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css?v=20261029-horizontal-transition-1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="/management.js?v=20261029-no-return-bars-1" defer></script>
-<script src="/official-registers.js?v=20261029-single-action-revision-1" defer></script>
+<script src="/official-registers.js?v=20261029-dedicated-register-page-1" defer></script>
+<script>if(new URLSearchParams(location.search).get("standalone_register")==="1")document.documentElement.classList.add("standalone-register")</script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -91,6 +92,13 @@
 #management-content>section,#management-pages>section,.management-pages>section,.m-workspace-pages>section,.page-stage>section,.page-container>section{flex:0 0 100%;min-width:0;max-width:100%;scroll-snap-align:start}
 #management-content>main,#management-pages>main,.management-pages>main,.m-workspace-pages>main{flex:0 0 100%;min-width:0;scroll-snap-align:start}
 @media(max-width:720px){#management-content,#management-pages,.management-pages,.m-workspace-pages,.page-stage,.page-container{gap:.5rem}}
+
+html.standalone-register .m-header,html.standalone-register #m-login,html.standalone-register #m-app>.m-top-combined,html.standalone-register #m-app>.m-tabs,html.standalone-register #m-app>.m-pane:not(#pane-official-registers){display:none!important}
+html.standalone-register .m-wrap{max-width:1180px;margin:.5rem auto;padding:.2rem .8rem 2rem}
+html.standalone-register #m-app{display:block!important}
+html.standalone-register #pane-official-registers{display:block!important}
+html.standalone-register #pane-official-registers>.m-card:first-child{display:none!important}
+html.standalone-register #pane-official-registers>.m-card{margin:.25rem 0}
 </style>
 </head>
 <body>
