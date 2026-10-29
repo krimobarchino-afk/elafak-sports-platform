@@ -250,7 +250,8 @@ function openDraftForEdit(d){
   msg("يمكن تعديل المسودة فقط من حساب منشئها وبعد طلب التعديل من الرئيس.","error");return;
  }
  const tab=$("tab-official-registers");if(tab?.classList.contains("m-hide")){msg("لا يملك هذا الحساب صلاحية الوصول إلى السجل المطلوب.","error");return}
- tab?.click();
+ document.querySelectorAll(".m-tabs button").forEach(b=>b.classList.toggle("active",b.id==="tab-official-registers"));
+ document.querySelectorAll(".m-pane").forEach(p=>p.hidden=p.id!=="pane-official-registers");
  activeRegisterKey=key;registerView="create";
  $("register-choice-grid").hidden=true;
  $("register-selection-hint").textContent="تعديل المسودة بناءً على ملاحظة الرئيس — "+TITLES[key];
