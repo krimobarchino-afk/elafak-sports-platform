@@ -30,6 +30,7 @@
 .m-homebar{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap;margin:0 0 1rem}
 .m-homebar button{border:1px solid var(--m-line);background:#f5f8f5;color:#17352e;border-radius:8px;padding:.55rem .8rem;font:inherit;cursor:pointer}
 .m-dashboard-empty{padding:1rem;border:1px dashed var(--m-line);border-radius:12px;color:#52665d}
+.register-top-actions{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}.register-top-actions button{padding:.65rem .85rem;border:1px solid #b9c9c0;border-radius:8px;background:#f5f8f5;color:#17352e;font:inherit;cursor:pointer}.register-top-actions button:hover{border-color:#123b32;background:#edf4ef}
 @media(max-width:620px){.m-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}.m-dashboard-card{padding:.8rem;min-height:135px}.m-dashboard-title{font-size:.92rem}.m-dashboard-description{font-size:.8rem}}
 .m-tabs button{border:1px solid var(--m-line);background:#fff;color:#17352e;padding:.7rem 1rem;border-radius:8px;font:inherit;cursor:pointer}
 .m-tabs button.active{background:#123b32;color:#fff;border-color:#123b32}
@@ -258,9 +259,10 @@
 <div class="m-card"><div class="m-toolbar"><h2>السجلات الرسمية للجمعية</h2><button type="button" class="m-small" id="register-refresh">تحديث السجلات</button></div>
 <p class="m-note">تُحفظ السجلات الرسمية بعد اعتماد الرئيس للمسودات. السجل المعتمد غير قابل للتعديل. لا تُدرج بيانات تجريبية في القيود الرسمية.</p>
 <p id="registers-msg" role="status"></p>
-<div class="m-card"><h3>الإشعارات</h3><div id="register-notifications" class="m-dashboard-grid"></div></div>
-<div id="register-choice-grid" class="m-dashboard-grid" aria-label="اختيار السجل الرسمي"></div>
-<p class="m-note" id="register-selection-hint">اختر سجلًا واحدًا لعرض تفاصيله ومسوداته.</p>
+<div class="m-card m-no-print"><h3>إنشاء مسودة حسب صلاحيات الحساب</h3><p class="m-note">تظهر هنا فقط إجراءات الإنشاء المسموح بها لحسابك.</p><div id="register-top-actions" class="register-top-actions"></div></div>
+<div class="m-card"><h3>الإشعارات</h3><p class="m-note">يبقى الإشعار ظاهرًا ما دامت المسودة غير معتمدة نهائيًا من الرئيس.</p><div id="register-notifications" class="m-dashboard-grid"></div></div>
+<div class="m-card"><h3>السجلات الرسمية</h3><p class="m-note">اختر سجلًا لفتحه في صفحة قراءة مستقلة. محتوى السجل المعتمد للقراءة فقط.</p><div id="register-choice-grid" class="m-dashboard-grid" aria-label="اختيار السجل الرسمي"></div>
+<p class="m-note" id="register-selection-hint">اختر سجلًا لفتحه في وضع القراءة فقط.</p></div>
 <form id="register-draft-form" class="m-grid m-no-print" hidden></form>
 <div id="register-deliberation" class="m-card" hidden></div>
 <div id="register-accounting" class="m-card" hidden></div>
