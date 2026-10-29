@@ -8,7 +8,7 @@
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="/management.js?v=20261027-dashboard-cards-3" defer></script>
-<script src="/official-registers.js?v=20261028-pdf-archive-1" defer></script>
+<script src="/official-registers.js?v=20261029-pdf-fix-1" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -57,6 +57,12 @@
 .m-header a{color:#e0efb3}
 @media(max-width:620px){.m-wrap{padding:0 .7rem 2rem}.m-card{padding:.85rem}.m-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.m-tabs button{font-size:.85rem;padding:.6rem .4rem}.m-table{min-width:680px}}
 @media print{.m-header,.m-tabs,.m-no-print,form{display:none!important}.m-wrap{max-width:none;margin:0;padding:0}.m-card{border:0;break-inside:avoid}}
+
+/* Horizontal navigation for management workspaces and full-width panels */
+#management-content,#management-pages,.management-pages,.m-workspace-pages,.page-stage,.page-container{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:stretch;gap:1rem;max-width:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:thin;direction:rtl}
+#management-content>section,#management-pages>section,.management-pages>section,.m-workspace-pages>section,.page-stage>section,.page-container>section{flex:0 0 100%;min-width:0;max-width:100%;scroll-snap-align:start}
+#management-content>main,#management-pages>main,.management-pages>main,.m-workspace-pages>main{flex:0 0 100%;min-width:0;scroll-snap-align:start}
+@media(max-width:720px){#management-content,#management-pages,.management-pages,.m-workspace-pages,.page-stage,.page-container{gap:.5rem}}
 </style>
 </head>
 <body>
