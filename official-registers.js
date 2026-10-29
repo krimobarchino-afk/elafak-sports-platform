@@ -244,9 +244,34 @@ function renderTopActions(){
  }
  if(!host.children.length)host.append(el("p","لا توجد خيارات إنشاء مسودة مفعّلة لهذا الحساب.","m-note"));
 }
+function openDraftForEdit(d){
+ const key=d.register_key;
+ if(!ROLES[key]?.includes(profile.role)||d.created_by!==profileUserId()||d.status!=="changes_requested"){
+  msg("يمكن تعديل المسودة فقط من حساب منشئها وبعد طلب التعديل من الرئيس.","error");return;
+ }
+ const tab=$("tab-official-registers");if(tab?.classList.contains("m-hide")){msg("لا يملك هذا الحساب صلاحية الوصول إلى السجل المطلوب.","error");return}
+ tab?.click();
+ activeRegisterKey=key;registerView="create";
+ $("register-choice-grid").hidden=true;
+ $("register-selection-hint").textContent="تعديل المسودة بناءً على ملاحظة الرئيس — "+TITLES[key];
+ for(const k of Object.keys(TITLES)){const h=$("register-"+k);if(h)h.hidden=k!==key}
+ editDraft=d;
+ const host=$("register-"+key);host.hidden=false;host.replaceChildren();
+ const nav=el("div",undefined,"m-toolbar register-page-nav m-no-print");
+ const back=el("button","العودة إلى قائمة السجلات","m-small");back.type="button";back.onclick=()=>{activeRegisterKey=null;registerView="home";host.hidden=true;$("register-choice-grid").hidden=false;renderRegisterChoices()};
+ nav.append(back,el("span",TITLES[key],"m-dashboard-title"));host.append(nav);
+ host.append(el("h3","تعديل المسودة — "+TITLES[key]));
+ const note=el("p","ملاحظة الرئيس: "+(d.review_note||"يرجى مراجعة المسودة وتعديلها."),"m-note");note.style.whiteSpace="pre-wrap";host.append(note);
+ makeForm(key);const form=$("register-draft-form");
+ if(key==="deliberation"&&d.payload?.minutes_text&&!form.elements.minutes_text){
+  const wrap=el("label","نص المحضر المحرر (قابل للمراجعة)");const area=document.createElement("textarea");area.name="minutes_text";area.rows=16;area.maxLength=16000;area.required=true;wrap.append(area);form.insertBefore(wrap,form.querySelector(".m-actions"));
+ }
+ for(const [k,v] of Object.entries(d.payload||{})){if(form.elements[k])form.elements[k].value=v??""}
+ host.append(form);form.hidden=false;form.scrollIntoView({behavior:"smooth",block:"start"});
+}
 function notifyUI(items){
  const host=$("register-notifications");host.replaceChildren();
- if(!items.length){host.append(el("p","لا توجد إشعارات غير محسومة.","m-note"));return}
+ if(!items.length)host.append(el("p","لا توجد إشعارات غير محسومة.","m-note"));
  for(const n of items){
   const card=el("div",undefined,"delib-notification");
   card.append(el("strong",n.title),el("p",n.body),el("small",formatDate(n.created_at)));
@@ -278,6 +303,17 @@ async function loadNotifications(){
   if(!q.error)for(const d of q.data||[])draftsById[d.id]=d;
  }
  notifyUI(items.filter(n=>!n.draft_id||draftsById[n.draft_id]?.status!=="approved"));
+ const {data:returned,error:returnedError}=await sb.from("association_register_drafts").select("*").eq("created_by",profileUserId()).eq("status","changes_requested").order("created_at",{ascending:false}).limit(30);
+ if(returnedError){const host=$("register-notifications");host.append(el("p","تعذر تحميل المسودات المطلوب تعديلها: "+returnedError.message,"m-note"));return}
+ const host=$("register-notifications");
+ if(returned?.length){
+  const heading=el("div",undefined,"delib-notification");heading.append(el("strong","مسودات مطلوب تعديلها"),el("p","راجع ملاحظة الرئيس وعدّل المسودة ثم أعد إرسالها للمراجعة."));host.append(heading);
+  for(const d of returned){
+   const card=el("div",undefined,"delib-notification");
+   card.append(el("strong",TITLES[d.register_key]||"مسودة"),el("p",d.review_note||"لم تُرفق ملاحظة؛ راجع المسودة."),el("small",formatDate(d.created_at)));
+   const edit=el("button","تعديل المسودة","m-small");edit.type="button";edit.onclick=()=>openDraftForEdit(d);card.append(edit);host.append(card);
+  }
+ } 
 }
 async function loadHtml2Pdf(){
  if(window.html2pdf)return window.html2pdf;
