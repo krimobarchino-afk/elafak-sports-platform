@@ -156,7 +156,7 @@ function renderDeliberationPage(entry){
 async function renderTable(key,entries,drafts){
  const host=$("register-"+key);if(!host)return;host.replaceChildren();
  const nav=el("div",undefined,"m-toolbar register-page-nav m-no-print");
- const back=el("button","العودة إلى قائمة السجلات","m-small");back.type="button";back.onclick=()=>{activeRegisterKey=null;registerView="home";document.getElementById("pane-official-registers")?.classList.remove("register-detail-open");host.hidden=true;$("register-choice-grid").hidden=false;$("register-selection-hint").hidden=false;$("register-selection-hint").textContent="اختر السجل المناسب لحسابك.";renderRegisterChoices()};nav.append(back,el("span",TITLES[key],"m-dashboard-title"));host.append(nav);
+ const back=el("button","العودة إلى قائمة السجلات","m-small");back.type="button";back.onclick=()=>{activeRegisterKey=null;registerView="home";host.hidden=true;$("register-choice-grid").hidden=false;$("register-selection-hint").textContent="اختر السجل المناسب لحسابك.";renderRegisterChoices()};nav.append(back,el("span",TITLES[key],"m-dashboard-title"));host.append(nav);
  if(registerView==="home"){
   const intro=el("section",undefined,"m-card register-action-page");intro.append(el("h3",TITLES[key]),el("p",canReview(key)?"توجد هنا مسودات تحتاج إلى مراجعة الرئيس واعتمادها أو إعادتها للتعديل.":canCreate(key)?"اختر العملية التي تريد تنفيذها في هذا السجل.":"يمكنك تصفح القيود الرسمية المعتمدة في هذا السجل."));
   const actions=el("div",undefined,"m-dashboard-grid");
@@ -208,13 +208,14 @@ function showRegister(key){
  activeRegisterKey=key;
  registerView=canReview(key)?"home":canCreate(key)?"home":"browse";
  $("register-choice-grid").hidden=true;
- $("register-selection-hint").hidden=true;
- document.getElementById("pane-official-registers")?.classList.add("register-detail-open");
  $("register-selection-hint").textContent="أنت الآن داخل "+TITLES[key]+".";
  for(const k of Object.keys(TITLES)){const host=$("register-"+k);if(host)host.hidden=k!==key}
  const form=$("register-draft-form");
  if(form.dataset.key&&form.dataset.key!==key){form.hidden=true;form.reset();editDraft=null}
- const host=$("register-"+key);if(host){host.hidden=false;}
+ const host=$("register-"+key);if(host){host.hidden=false;
+  if(registerView==="browse")renderTable(key,[],[]);
+  else renderTable(key,[],[]);
+ }
 }
 function renderRegisterChoices(){
  const grid=$("register-choice-grid");grid.replaceChildren();
@@ -296,15 +297,10 @@ async function loadAll(){
   cachedEntries[key]=entries||[];cachedDrafts[key]=drafts;renderTable(key,cachedEntries[key],cachedDrafts[key]);
  }
  await loadNotifications();
- if(activeRegisterKey&&!ROLES[activeRegisterKey]?.includes(profile.role))activeRegisterKey=null;
+ if(!activeRegisterKey||!ROLES[activeRegisterKey]?.includes(profile.role))activeRegisterKey=keys.find(k=>ROLES[k].includes(profile.role))||null;
  renderRegisterChoices();
- if(activeRegisterKey){const savedKey=activeRegisterKey;showRegister(savedKey);renderTable(savedKey,cachedEntries[savedKey]||[],cachedDrafts[savedKey]||[])}
- else {
-  $("pane-official-registers")?.classList.remove("register-detail-open");
-  $("register-choice-grid").hidden=false;$("register-selection-hint").hidden=false;
-  $("register-selection-hint").textContent="اختر سجلًا واحدًا للانتقال إلى صفحته الخاصة.";
-  for(const key of keys){const host=$("register-"+key);if(host)host.hidden=true}
- }
+ if(activeRegisterKey&&ROLES[activeRegisterKey]?.includes(profile.role)){const savedKey=activeRegisterKey;showRegister(savedKey);renderTable(savedKey,cachedEntries[savedKey]||[],cachedDrafts[savedKey]||[])}
+ else {activeRegisterKey=null;$("register-choice-grid").hidden=false;for(const key of keys){const host=$("register-"+key);if(host)host.hidden=true}}
  msg("تم تحديث السجلات التي يسمح بها حسابك.","success")
 }
 document.addEventListener("DOMContentLoaded",async()=>{
