@@ -179,31 +179,55 @@ async function renderTable(key,entries,drafts){
   for(const d of drafts){const row=el("tr");row.append(el("td",formatDate(d.created_at)),el("td",renderPayload(d.payload)),el("td",d.status==="changes_requested"?"مطلوب تعديل":"مسودة"),el("td",d.review_note||"—"));const td=el("td");if(roleIs("president")){const note=document.createElement("textarea");note.placeholder="ملاحظة التعديل (إن لزم)";note.rows=2;td.append(note);const ask=el("button","طلب تعديل","m-small");ask.onclick=async()=>{if(note.value.trim().length<3){msg("اكتب ملاحظة واضحة بطلب التعديل.","error");return}await review(d,"changes_requested",note.value.trim())};const approve=el("button","اعتماد وإدراج","m-small");approve.onclick=async()=>{if(!confirm("اعتماد هذه المسودة وإدراجها نهائيًا في "+TITLES[key]+"؟"))return;await review(d,"approved","")};td.append(ask,approve)}else if(d.created_by===profileUserId()){const edit=el("button","تعديل المسودة","m-small");edit.onclick=()=>{editDraft=d;makeForm(key);const f=$("register-draft-form");if(key==="deliberation"&&d.payload?.minutes_text&&!f.elements.minutes_text){const wrap=el("label","نص المحضر المحرر (قابل للمراجعة)");const area=document.createElement("textarea");area.name="minutes_text";area.rows=16;area.maxLength=16000;area.required=true;wrap.append(area);f.insertBefore(wrap,f.querySelector(".m-actions"))}for(const [k,v] of Object.entries(d.payload||{})){if(f.elements[k])f.elements[k].value=v??""}f.scrollIntoView({behavior:"smooth",block:"start"})};td.append(edit)}row.append(td);tb.append(row)}
   table.append(tb);section.append(table)
  }
- if(registerView!=="review")section.append(el("h4","السجل الرسمي"));
+ if(registerView!=="review")section.append(el("h4","صفحات السجل الرسمي"));
  let officialEntries=registerView==="review"?[]:[...entries];
- if(key!=="deliberation"){
-  const printBar=el("div",undefined,"m-toolbar ledger-print-toolbar m-no-print");
-  printBar.append(el("p","يعرض هذا السجل منفصلًا عند الطباعة؛ اختر «حفظ كملف PDF» من نافذة الطباعة.","m-note"));
-  const printButton=el("button","عرض السجل / حفظ PDF","m-small");printButton.type="button";printButton.onclick=()=>{document.querySelectorAll(".register-print-active").forEach(n=>n.classList.remove("register-print-active"));host.classList.add("register-print-active");const clean=()=>{host.classList.remove("register-print-active");window.removeEventListener("afterprint",clean)};window.addEventListener("afterprint",clean);window.print();setTimeout(clean,1500)};printBar.append(printButton);section.append(printBar);
- }
- if(key==="deliberation"){
-  if(registerView==="review") {host.append(section);return}
-  await renderDeliberationArchive(section,officialEntries);
-  host.append(section);
-  return;
- }
+ const renderBookInto=(target,items,bookKey=key)=>{
+  const book=el("div",undefined,"ledger-book-reader");
+  if(!items.length){book.append(el("p","لا توجد قيود رسمية مسجلة في هذا السجل حتى الآن.","m-note"));target.append(book);return}
+  let pageIndex=0;
+  const stage=el("div",undefined,"ledger-book-stage");
+  const controls=el("div",undefined,"ledger-book-controls m-no-print");
+  const prev=el("button","← الصفحة السابقة","m-small"),next=el("button","الصفحة التالية →","m-small"),counter=el("span",undefined,"ledger-page-counter");
+  prev.type=next.type="button";
+  const draw=()=>{
+   stage.replaceChildren();
+   const entry=items[pageIndex];
+   let page;
+   if(bookKey==="deliberation")page=renderDeliberationPage(entry);
+   else{
+    page=el("article",undefined,"official-ledger-page");
+    const head=el("div",undefined,"ledger-bookhead");
+    head.append(el("div","الجمهورية الجزائرية الديمقراطية الشعبية"),el("div","جمعية الأفق الولائية للرياضات الجوية والجبلية — ولاية الشلف"),el("h3",TITLES[bookKey]));
+    page.append(head);
+    const meta=el("div",undefined,"ledger-meta");
+    meta.append(el("span","رقم القيد: "+entry.register_year+"/"+String(entry.register_number).padStart(3,"0")),el("span","تاريخ القيد: "+formatDate(entry.approved_at)),el("span",entry.approved_by?"معتمد من الرئيس":"قيد مسجل وفق الصلاحية"));
+    page.append(meta);
+    const body=el("div",undefined,"ledger-minutes");
+    for(const field of (FIELDS[bookKey]||[])){const value=entry.payload?.[field[0]];if(value===undefined||value===null||value==="")continue;const block=el("div",undefined,"ledger-field");block.append(el("strong",field[1]));block.append(el("p",valText(value)));body.append(block)}
+    if(!body.childElementCount)body.append(el("p","لا توجد تفاصيل إضافية لهذا القيد."));
+    page.append(body);
+    const sign=el("div",undefined,"ledger-signatures");sign.append(el("span","المسؤول عن السجل"),el("span","رئيس الجمعية"));page.append(sign);
+   }
+   page.append(el("div","صفحة "+(pageIndex+1)+" من "+items.length+" — رقم القيد "+entry.register_year+"/"+String(entry.register_number).padStart(3,"0"),"ledger-page-footer"));
+   stage.append(page);
+   prev.disabled=pageIndex===0;next.disabled=pageIndex===items.length-1;counter.textContent="صفحة "+(pageIndex+1)+" من "+items.length;
+  };
+  prev.onclick=()=>{if(pageIndex>0){pageIndex--;draw()}};
+  next.onclick=()=>{if(pageIndex<items.length-1){pageIndex++;draw()}};
+  controls.append(prev,counter,next);book.append(controls,stage);target.append(book);draw();
+ };
  if(key==="outgoing_mail"||key==="incoming_mail"){
   officialEntries.sort((a,b)=>String(b.payload?.mail_date||"").localeCompare(String(a.payload?.mail_date||"")));
-  const filters=el("div",undefined,"m-actions");const from=el("input"),to=el("input"),apply=el("button","تصفية بالتاريخ"),clear=el("button","مسح التصفية");
+  const filters=el("div",undefined,"m-actions m-no-print");const from=el("input"),to=el("input"),apply=el("button","تصفية بالتاريخ"),clear=el("button","مسح التصفية");
   from.type="date";to.type="date";from.setAttribute("aria-label","من تاريخ");to.setAttribute("aria-label","إلى تاريخ");from.title="من تاريخ";to.title="إلى تاريخ";apply.type="button";clear.type="button";apply.className="m-small";clear.className="m-small";
   filters.append(el("label","من تاريخ"),from,el("label","إلى تاريخ"),to,apply,clear);section.append(filters);
-  const table=el("table");table.className="m-table";const head=el("thead"),hr=el("tr");["الرقم الرسمي","تاريخ المراسلة","المحتوى","القيد"].forEach(x=>hr.append(el("th",x)));head.append(hr);table.append(head);const body=el("tbody");table.append(body);section.append(table);
-  const draw=()=>{body.replaceChildren();const filtered=officialEntries.filter(e=>{const d=String(e.payload?.mail_date||"");return (!from.value||d>=from.value)&&(!to.value||d<=to.value)});if(!filtered.length){const row=el("tr");row.append(el("td","لا توجد مراسلات ضمن الفترة المحددة."));row.firstChild.colSpan=4;body.append(row);return}for(const e of filtered){const row=el("tr");row.append(el("td",e.register_year+"/"+e.register_number),el("td",formatDate(e.payload?.mail_date)),el("td",renderPayload(e.payload)),el("td",e.approved_by?"معتمد من الرئيس":"قيد مباشر وفق الصلاحية"));body.append(row)}};
+  const bookHost=el("div");section.append(bookHost);
+  const draw=()=>{bookHost.replaceChildren();const filtered=officialEntries.filter(e=>{const d=String(e.payload?.mail_date||"");return (!from.value||d>=from.value)&&(!to.value||d<=to.value)});renderBookInto(bookHost,filtered,key)};
   apply.onclick=draw;clear.onclick=()=>{from.value="";to.value="";draw()};draw();
- }else if(!officialEntries.length)section.append(el("p","لا توجد قيود رسمية مسجلة في هذا السجل حتى الآن.","m-note"));
- else {const table=el("table");table.className="m-table";const head=el("thead"),hr=el("tr");["الرقم الرسمي","التاريخ","المحتوى","القيد"].forEach(x=>hr.append(el("th",x)));head.append(hr);table.append(head);const body=el("tbody");for(const e of officialEntries){const row=el("tr");row.append(el("td",e.register_year+"/"+e.register_number),el("td",formatDate(e.approved_at)),el("td",renderPayload(e.payload)),el("td",e.approved_by?"معتمد من الرئيس":"قيد مباشر وفق الصلاحية"));body.append(row)}table.append(body);section.append(table)}
+ }else renderBookInto(section,officialEntries,key);
  host.append(section)
 }
+
 function showRegister(key){
  if(!key||!ROLES[key]?.includes(profile?.role))return;
  activeRegisterKey=key;
@@ -315,74 +339,12 @@ async function loadNotifications(){
   const edit=el("button","فتح المسودة","m-small");edit.type="button";edit.onclick=()=>openDraftForEdit(d);card.append(edit);host.append(card);
  }
 }
-async function loadHtml2Pdf(){
- if(window.html2pdf)return window.html2pdf;
- await new Promise((resolve,reject)=>{const script=document.createElement("script");script.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";script.onload=resolve;script.onerror=()=>reject(new Error("تعذر تحميل أداة إنشاء PDF."));document.head.append(script)});
- if(!window.html2pdf)throw new Error("أداة PDF غير متاحة.");return window.html2pdf;
-}
-function deliberationPdfPath(entry){return "deliberation/"+entry.register_year+"/"+String(entry.register_number).padStart(4,"0")+".pdf"}
-async function createDeliberationPdf(entry){
- const html2pdf=await loadHtml2Pdf();
- const page=renderDeliberationPage(entry);
- const stage=el("div");stage.dir="rtl";
- stage.style.cssText="display:block;position:fixed;left:0;top:0;width:794px;min-height:10px;box-sizing:border-box;z-index:2147483000;background:#fff;color:#111;direction:rtl;pointer-events:none";
- page.style.cssText+=";display:block;visibility:visible;opacity:1;position:relative;box-sizing:border-box;width:100%;max-width:none;height:auto;min-height:1px;overflow:visible;margin:0;padding:42px 52px;background:#fff;color:#111;box-shadow:none;border:0;border-right:8px solid #6c806d;font-family:Arial,sans-serif;font-size:16px;line-height:1.8;break-inside:auto!important;page-break-inside:auto!important;break-after:auto!important;page-break-after:auto!important";
- stage.append(page);document.body.append(stage);
- try{
-  if(document.fonts&&document.fonts.ready)await document.fonts.ready;
-  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  if(!page.textContent.trim())throw new Error("محتوى المداولة فارغ؛ أُلغي إنشاء PDF");
-  const options={margin:[12,12,12,12],image:{type:"jpeg",quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff",logging:false,scrollX:0,scrollY:0,width:794,windowWidth:794},jsPDF:{unit:"mm",format:"a4",orientation:"portrait",compress:true},pagebreak:{mode:["css","legacy"],avoid:[".ledger-bookhead",".ledger-meta",".ledger-signatures",".ledger-field",".ledger-minutes p"]}};
-  const pdf=await html2pdf().set(options).from(page).toPdf().get("pdf");
-  if(!pdf||pdf.getNumberOfPages()<1)throw new Error("لم تُنشأ صفحات PDF");
-  // اعتماد هيئة دفتر رسمي: إطار داخلي ثابت، هامش جانبي، وترقيم متسلسل لكل صفحة في الملف.
-  const totalPages=pdf.getNumberOfPages();
-  for(let pageNo=1;pageNo<=totalPages;pageNo++){
-   pdf.setPage(pageNo);
-   const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
-   pdf.setDrawColor(135,145,126);pdf.setLineWidth(0.35);
-   pdf.rect(8,8,pw-16,ph-16);
-   pdf.setDrawColor(176,94,87);pdf.setLineWidth(0.45);
-   pdf.line(pw-19,14,pw-19,ph-14);
-   pdf.setDrawColor(135,145,126);pdf.setLineWidth(0.3);
-   pdf.line(14,ph-18,pw-14,ph-18);
-   pdf.setTextColor(45,65,54);pdf.setFont("helvetica","normal");pdf.setFontSize(9);
-   pdf.text(String(pageNo),pw/2,ph-11,{align:"center"});
-  }
-  const blob=pdf.output("blob");
-  if(!blob||blob.size<1000)throw new Error("ملف PDF الناتج فارغ أو غير مكتمل");
-  const {error}=await sb.storage.from("official-register-pdfs").upload(deliberationPdfPath(entry),blob,{contentType:"application/pdf",upsert:true});
-  if(error)throw error;
-  return deliberationPdfPath(entry);
- }finally{stage.remove()}
-}
-async function renderDeliberationArchive(section,entries){
- const folder=el("section",undefined,"m-card");folder.append(el("h4","أرشيف سجل المداولة — ملفات PDF المعتمدة"),el("p","كل ملف يمثل مداولة رسمية مستقلة، مرتبة حسب السنة ورقم القيد. تُفتح الملفات للقراءة أو الطباعة، ولا تُعرض المسودات في هذا الأرشيف.","m-note"));
- if(!entries.length){folder.append(el("p","لا توجد مداولات معتمدة في الأرشيف حتى الآن.","m-note"));section.append(folder);return}
- const table=el("table");table.className="m-table";const head=el("thead"),hr=el("tr");["رقم القيد","تاريخ الاعتماد","عنوان المداولة","ملف PDF الرسمي"].forEach(x=>hr.append(el("th",x)));head.append(hr);const body=el("tbody");table.append(head,body);folder.append(table);section.append(folder);
- const ordered=[...entries].sort((a,b)=>a.register_year-b.register_year||a.register_number-b.register_number);
- for(const entry of ordered){
-  const row=el("tr");row.append(el("td",entry.register_year+"/"+String(entry.register_number).padStart(3,"0")),el("td",formatDate(entry.approved_at)),el("td",entry.payload?.title||"مداولة"));
-  const cell=el("td");const {data,error}=await sb.storage.from("official-register-pdfs").createSignedUrl(deliberationPdfPath(entry),300);
-  if(!error&&data?.signedUrl){const link=el("a","فتح ملف PDF");link.href=data.signedUrl;link.target="_blank";link.rel="noopener noreferrer";link.className="m-small";cell.append(link)}
-  else{
-   cell.append(el("span","ملف PDF غير موجود بعد","m-note"));
-   if(profile?.role==="president"){const make=el("button","إنشاء ملف PDF","m-small");make.type="button";make.onclick=async()=>{make.disabled=true;try{await createDeliberationPdf(entry);msg("تم إنشاء PDF للمداولة "+entry.register_year+"/"+entry.register_number+".","success");renderTable("deliberation",cachedEntries.deliberation||[],cachedDrafts.deliberation||[])}catch(e){msg("تعذر إنشاء PDF: "+(e.message||"خطأ غير معروف"),"error");make.disabled=false}};cell.append(make)}
-  }
-  row.append(cell);body.append(row);
- }
-}
 async function review(d,status,note){
  msg("جارٍ حفظ قرار المراجعة وإتمام الإجراء…");
  const {data,error}=await sb.rpc("review_association_register_draft",{p_draft_id:d.id,p_status:status,p_note:note||null});
  if(error){msg("لم تكتمل العملية ولم يُؤكَّد الاعتماد: "+error.message,"error");return}
  if(!data||data.success!==true){msg("لم يؤكد النظام اكتمال العملية؛ حدّث السجلات وتحقق من الحالة قبل إعادة المحاولة.","error");return}
- if(status==="approved"&&d.register_key==="deliberation"){
-  const {data:entry,error:entryError}=await sb.from("association_register_entries").select("*").eq("id",data.official_entry_id).eq("is_test",false).single();
-  if(entryError||!entry){msg("تم اعتماد المداولة، لكن تعذر تحميل القيد لإنشاء PDF. يمكن إعادة إنشاء الملف من أرشيف السجل.","error");await loadAll();return}
-  try{await createDeliberationPdf(entry);msg("تم اعتماد المداولة وحفظ ملف PDF الرسمي رقم "+data.register_year+"/"+String(data.register_number).padStart(3,"0")+" في أرشيف الجمعية.","success")}
-  catch(e){msg("تم اعتماد المداولة رسميًا، لكن تعذر حفظ PDF تلقائيًا: "+(e.message||"خطأ غير معروف")+". يمكن للرئيس إعادة إنشاء الملف من الأرشيف.","error")}
- }else msg(status==="approved"?"تم اعتماد القيد وإدراجه في السجل الرسمي برقم "+data.register_year+"/"+String(data.register_number).padStart(3,"0")+".":"أُعيدت المسودة إلى صاحبها مع ملاحظة التعديل.","success");
+ msg(status==="approved"?"تم اعتماد القيد وإدراجه في صفحات السجل الرسمي برقم "+data.register_year+"/"+String(data.register_number).padStart(3,"0")+".":"أُعيدت المسودة إلى صاحبها مع ملاحظة التعديل.","success");
  await loadAll()
 }
 async function loadAll(){
