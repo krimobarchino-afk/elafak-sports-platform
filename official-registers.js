@@ -206,16 +206,13 @@ async function renderTable(key,entries,drafts){
 function showRegister(key){
  if(!key||!ROLES[key]?.includes(profile?.role))return;
  activeRegisterKey=key;
- registerView=canReview(key)?"home":canCreate(key)?"home":"browse";
+ registerView="browse";
  $("register-choice-grid").hidden=true;
- $("register-selection-hint").textContent="أنت الآن داخل "+TITLES[key]+".";
+ $("register-selection-hint").textContent="أنت الآن داخل "+TITLES[key]+" — وضع القراءة فقط.";
  for(const k of Object.keys(TITLES)){const host=$("register-"+k);if(host)host.hidden=k!==key}
  const form=$("register-draft-form");
  if(form.dataset.key&&form.dataset.key!==key){form.hidden=true;form.reset();editDraft=null}
- const host=$("register-"+key);if(host){host.hidden=false;
-  if(registerView==="browse")renderTable(key,[],[]);
-  else renderTable(key,[],[]);
- }
+ const host=$("register-"+key);if(host){host.hidden=false;renderTable(key,cachedEntries[key]||[],[])}
 }
 function renderRegisterChoices(){
  const grid=$("register-choice-grid");grid.replaceChildren();
@@ -229,8 +226,59 @@ function renderRegisterChoices(){
  }
 }
 function profileUserId(){return profile?.user_id}
-function notifyUI(items){const host=$("register-notifications");host.replaceChildren();if(!items.length){host.append(el("p","لا توجد إشعارات جديدة.","m-note"));return}for(const n of items){const card=el("div",undefined,"delib-notification");card.append(el("strong",n.title),el("p",n.body),el("small",formatDate(n.created_at)));const b=el("button","تمييز كمقروء","m-small");b.onclick=async()=>{await sb.from("association_register_notifications").update({read_at:new Date().toISOString()}).eq("id",n.id);await loadNotifications()};card.append(b);host.append(card)}}
-async function loadNotifications(){const {data,error}=await sb.from("association_register_notifications").select("*").is("read_at",null).order("created_at",{ascending:false}).limit(30);if(error){$("register-notifications").textContent="تعذر تحميل الإشعارات: "+error.message;return}notifyUI(data||[])}
+function renderTopActions(){
+ const host=$("register-top-actions");if(!host)return;host.replaceChildren();
+ const labels={deliberation:"إنشاء مسودة المداولة",accounting:"إنشاء مسودة المحاسبة",equipment:"إنشاء مسودة العتاد",outgoing_mail:"مسودة مراسلة صادرة",incoming_mail:"مسودة مراسلة واردة",activities:"إنشاء مسودة نشاط",tasks:"إنشاء مهمة/تكليف",inspection:"إنشاء تقرير تفتيش"};
+ for(const key of Object.keys(TITLES)){
+  if(!canCreate(key))continue;
+  const b=el("button",labels[key]||("إنشاء مسودة — "+TITLES[key]),"m-small");b.type="button";
+  b.onclick=()=>{
+   activeRegisterKey=key;registerView="create";
+   $("register-choice-grid").hidden=true;
+   $("register-selection-hint").textContent="إنشاء — "+TITLES[key];
+   for(const k of Object.keys(TITLES)){const h=$("register-"+k);if(h)h.hidden=k!==key}
+   const form=$("register-draft-form");if(form.dataset.key&&form.dataset.key!==key){form.reset();editDraft=null}
+   const host=$("register-"+key);host.hidden=false;renderTable(key,cachedEntries[key]||[],cachedDrafts[key]||[]);
+  };
+  host.append(b);
+ }
+ if(!host.children.length)host.append(el("p","لا توجد خيارات إنشاء مسودة مفعّلة لهذا الحساب.","m-note"));
+}
+function notifyUI(items){
+ const host=$("register-notifications");host.replaceChildren();
+ if(!items.length){host.append(el("p","لا توجد إشعارات غير محسومة.","m-note"));return}
+ for(const n of items){
+  const card=el("div",undefined,"delib-notification");
+  card.append(el("strong",n.title),el("p",n.body),el("small",formatDate(n.created_at)));
+  if(roleIs("president")&&n.draft_id){
+   const b=el("button","فتح للمراجعة","m-small");b.type="button";
+   b.onclick=async()=>{
+    const {data:d,error}=await sb.from("association_register_drafts").select("*").eq("id",n.draft_id).maybeSingle();
+    if(error||!d){msg("تعذر فتح المسودة المرتبطة بهذا الإشعار.","error");return}
+    const key=d.register_key;if(!ROLES[key]?.includes(profile.role)){msg("لا يملك هذا الحساب صلاحية مراجعة هذا السجل.","error");return}
+    if(d.status==="approved"){await loadNotifications();msg("هذه المسودة معتمدة نهائيًا بالفعل.","success");return}
+    activeRegisterKey=key;registerView="review";$("register-choice-grid").hidden=true;
+    $("register-selection-hint").textContent="مراجعة المسودات — "+TITLES[key];
+    for(const k of Object.keys(TITLES)){const h=$("register-"+k);if(h)h.hidden=k!==key}
+    const {data:drafts}=await sb.from("association_register_drafts").select("*").eq("register_key",key).neq("status","approved").order("created_at",{ascending:false});
+    cachedDrafts[key]=drafts||[];const h=$("register-"+key);h.hidden=false;renderTable(key,cachedEntries[key]||[],cachedDrafts[key]);
+   };
+   card.append(b);
+  }
+  host.append(card);
+ }
+}
+async function loadNotifications(){
+ const {data,error}=await sb.from("association_register_notifications").select("*").is("read_at",null).order("created_at",{ascending:false}).limit(100);
+ if(error){$("register-notifications").textContent="تعذر تحميل الإشعارات: "+error.message;return}
+ const items=data||[],ids=[...new Set(items.map(n=>n.draft_id).filter(Boolean))];
+ let draftsById={};
+ if(ids.length){
+  const q=await sb.from("association_register_drafts").select("id,status").in("id",ids);
+  if(!q.error)for(const d of q.data||[])draftsById[d.id]=d;
+ }
+ notifyUI(items.filter(n=>!n.draft_id||draftsById[n.draft_id]?.status!=="approved"));
+}
 async function loadHtml2Pdf(){
  if(window.html2pdf)return window.html2pdf;
  await new Promise((resolve,reject)=>{const script=document.createElement("script");script.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";script.onload=resolve;script.onerror=()=>reject(new Error("تعذر تحميل أداة إنشاء PDF."));document.head.append(script)});
@@ -299,7 +347,8 @@ async function loadAll(){
  await loadNotifications();
  if(!activeRegisterKey||!ROLES[activeRegisterKey]?.includes(profile.role))activeRegisterKey=keys.find(k=>ROLES[k].includes(profile.role))||null;
  renderRegisterChoices();
- if(activeRegisterKey&&ROLES[activeRegisterKey]?.includes(profile.role)){const savedKey=activeRegisterKey;showRegister(savedKey);renderTable(savedKey,cachedEntries[savedKey]||[],cachedDrafts[savedKey]||[])}
+ renderTopActions();
+ if(activeRegisterKey&&ROLES[activeRegisterKey]?.includes(profile.role)){const savedKey=activeRegisterKey;activeRegisterKey=null;$("register-choice-grid").hidden=false;$("register-selection-hint").textContent="اختر سجلًا لفتحه في وضع القراءة فقط.";for(const key of keys){const host=$("register-"+key);if(host)host.hidden=true}}
  else {activeRegisterKey=null;$("register-choice-grid").hidden=false;for(const key of keys){const host=$("register-"+key);if(host)host.hidden=true}}
  msg("تم تحديث السجلات التي يسمح بها حسابك.","success")
 }
@@ -316,6 +365,7 @@ document.addEventListener("DOMContentLoaded",async()=>{
   document.querySelectorAll(".m-dashboard-card").forEach(card=>{if(["finance","activities","equipment","meetings"].includes(card.dataset.pane))card.classList.add("m-hide")});
   if(tab.classList.contains("m-hide")){pane.hidden=true;return}
   renderRegisterChoices();
+  renderTopActions();
   tab.addEventListener("click",()=>loadAll().catch(e=>msg(e.message,"error")));
   $("register-refresh").addEventListener("click",()=>loadAll().catch(e=>msg(e.message,"error")));
   $("register-draft-form").addEventListener("submit",async e=>{
