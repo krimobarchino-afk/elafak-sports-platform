@@ -160,3 +160,11 @@
 .path-dark .path-link{border-color:#ffffff30}
 @media(max-width:850px){.paths-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.paths-heading{align-items:start;flex-direction:column;gap:12px}}
 @media(max-width:540px){.public-paths{padding:52px 0 58px}.paths-grid{grid-template-columns:1fr;gap:10px}.path-card{min-height:0;padding:19px}.path-icon{margin-bottom:12px}.path-card p{margin-bottom:13px}.paths-heading h2{font-size:31px}}
+
+/* Site-wide horizontal page transitions */
+@keyframes elafakPageEnter{from{opacity:.65;transform:translateX(34px)}to{opacity:1;transform:translateX(0)}}
+@keyframes elafakPageExit{from{opacity:1;transform:translateX(0)}to{opacity:.7;transform:translateX(-24px)}}
+body{animation:elafakPageEnter .38s cubic-bezier(.2,.7,.2,1) both;}
+body.elafak-page-leaving{animation:elafakPageExit .18s ease-in both;}
+html{scroll-behavior:smooth;}
+@media(prefers-reduced-motion:reduce){body,body.elafak-page-leaving{animation:none!important}html{scroll-behavior:auto}}
