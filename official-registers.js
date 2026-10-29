@@ -294,26 +294,26 @@ function notifyUI(items){
  }
 }
 async function loadNotifications(){
+ const host=$("register-notifications");
  const {data,error}=await sb.from("association_register_notifications").select("*").is("read_at",null).order("created_at",{ascending:false}).limit(100);
- if(error){$("register-notifications").textContent="تعذر تحميل الإشعارات: "+error.message;return}
+ if(error){host.textContent="تعذر تحميل الإشعارات: "+error.message;return}
  const items=data||[],ids=[...new Set(items.map(n=>n.draft_id).filter(Boolean))];
  let draftsById={};
  if(ids.length){
-  const q=await sb.from("association_register_drafts").select("id,status").in("id",ids);
+  const q=await sb.from("association_register_drafts").select("id,status,created_by").in("id",ids);
   if(!q.error)for(const d of q.data||[])draftsById[d.id]=d;
  }
- notifyUI(items.filter(n=>!n.draft_id||draftsById[n.draft_id]?.status!=="approved"));
  const {data:returned,error:returnedError}=await sb.from("association_register_drafts").select("*").eq("created_by",profileUserId()).eq("status","changes_requested").order("created_at",{ascending:false}).limit(30);
- if(returnedError){const host=$("register-notifications");host.append(el("p","تعذر تحميل المسودات المطلوب تعديلها: "+returnedError.message,"m-note"));return}
- const host=$("register-notifications");
- if(returned?.length){
-  const heading=el("div",undefined,"delib-notification");heading.append(el("strong","مسودات مطلوب تعديلها"),el("p","راجع ملاحظة الرئيس وعدّل المسودة ثم أعد إرسالها للمراجعة."));host.append(heading);
-  for(const d of returned){
-   const card=el("div",undefined,"delib-notification");
-   card.append(el("strong",TITLES[d.register_key]||"مسودة"),el("p",d.review_note||"لم تُرفق ملاحظة؛ راجع المسودة."),el("small",formatDate(d.created_at)));
-   const edit=el("button","تعديل المسودة","m-small");edit.type="button";edit.onclick=()=>openDraftForEdit(d);card.append(edit);host.append(card);
-  }
- } 
+ if(returnedError){notifyUI(items.filter(n=>!n.draft_id||draftsById[n.draft_id]?.status!=="approved"));host.append(el("p","تعذر تحميل المسودات المطلوب تعديلها: "+returnedError.message,"m-note"));return}
+ const returnedIds=new Set((returned||[]).map(d=>d.id));
+ const ownUnresolvedIds=new Set(Object.values(draftsById).filter(d=>d.created_by===profileUserId()&&["changes_requested","draft"].includes(d.status)).map(d=>d.id));
+ // One short actionable alert per returned draft; hide its duplicate generic notification.
+ notifyUI(items.filter(n=>!n.draft_id||(!returnedIds.has(n.draft_id)&&!ownUnresolvedIds.has(n.draft_id)&&draftsById[n.draft_id]?.status!=="approved")));
+ for(const d of returned||[]){
+  const card=el("div",undefined,"delib-notification");
+  card.append(el("strong","تعديل مطلوب — "+(TITLES[d.register_key]||"مسودة")),el("p","طلب الرئيس تعديل هذه المسودة."));
+  const edit=el("button","فتح المسودة","m-small");edit.type="button";edit.onclick=()=>openDraftForEdit(d);card.append(edit);host.append(card);
+ }
 }
 async function loadHtml2Pdf(){
  if(window.html2pdf)return window.html2pdf;
