@@ -58,14 +58,24 @@
 .m-header a{color:#e0efb3}
 .m-header .m-actions{align-items:center}
 .m-wrap{margin:.65rem auto 2rem}
-#m-app>.m-card:first-child{margin:.0rem 0 .75rem;padding:.65rem .9rem;background:#123b32;color:#fff;border:1px solid #28564b;border-radius:0 0 12px 12px}
-#m-app>.m-card:first-child h2,#m-app>.m-card:first-child .m-note,#m-app>.m-card:first-child .m-badge{color:#fff}
-#m-app>.m-card:first-child .m-badge{background:#2b5c4e}
-#m-app>.m-card:first-child .m-toolbar{margin:0;gap:.5rem}
-#m-app>.m-card:first-child .m-toolbar>div{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
-#m-app>.m-card:first-child h2{font-size:1.05rem;margin:0}
-#m-app>.m-card:first-child .m-note{font-size:.8rem;margin:.1rem 0}
-#m-app>.m-card:first-child #m-message{margin:.2rem 0;color:#e0efb3}
+#m-app>.m-top-combined{margin:0 0 .45rem;padding:.38rem .65rem;background:#123b32;color:#fff;border:1px solid #28564b;border-radius:0 0 10px 10px}
+.m-top-welcome{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.m-top-identity{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;min-width:0}
+.m-top-identity h2{font-size:.98rem;margin:0;color:#fff}
+.m-top-identity .m-note{font-size:.76rem;margin:0;color:#e4eee7}
+.m-top-identity .m-badge{background:#2b5c4e;color:#fff;white-space:nowrap}
+.m-top-controls{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.m-top-controls #m-refresh{padding:.35rem .6rem;font-size:.82rem}
+.m-top-controls #m-message{margin:0;color:#e0efb3;font-size:.8rem}
+.m-top-register-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.55rem;border-top:1px solid #41695e;margin-top:.35rem;padding-top:.35rem}
+.m-top-actions,.m-top-notifications{min-width:0;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.m-top-actions>strong,.m-top-notifications>strong{font-size:.78rem;color:#e0efb3;white-space:nowrap}
+.m-top-register-tools .register-top-actions{gap:.3rem;margin:0}
+.m-top-register-tools .register-top-actions button{padding:.28rem .5rem;font-size:.78rem;border-color:#739387;background:#214a40;color:#fff}
+.m-top-register-tools #register-notifications{display:flex;flex-direction:row;flex-wrap:wrap;gap:.3rem;margin:0}
+.m-top-register-tools #register-notifications>div{padding:.25rem .4rem;margin:0;border:1px solid #41695e;border-radius:6px;background:#1b443a;color:#fff;font-size:.76rem;line-height:1.35}
+.m-top-register-tools #register-notifications button{padding:.2rem .35rem;font-size:.74rem}
+@media(max-width:720px){.m-top-register-tools{grid-template-columns:1fr;gap:.3rem}.m-top-identity{gap:.35rem}.m-top-identity .m-note{flex-basis:100%}.m-top-welcome{align-items:flex-start}.m-top-controls{margin-inline-start:auto}}
 #pane-official-registers>.m-card:first-child{margin-top:.4rem}
 #pane-official-registers>.m-card:nth-of-type(2){display:grid;grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);gap:.55rem .8rem;align-items:start;margin:.6rem 0;padding:.7rem;background:#f5f8f5}
 #pane-official-registers>.m-card:nth-of-type(2)>h3{grid-column:1/-1;margin:.1rem 0;font-size:1rem}
@@ -100,7 +110,7 @@
 <form id="m-login-form" class="m-grid"><label>اسم المستخدم<input name="username" autocomplete="username" minlength="3" maxlength="32" required></label><label>كلمة المرور<input name="password" type="password" autocomplete="current-password" required></label><div style="align-self:end"><button class="btn btn-dark" id="m-login-btn">دخول آمن</button></div></form><p id="m-login-msg" role="status"></p>
 </section>
 <section id="m-app" class="m-hide">
-<div class="m-card"><div class="m-toolbar"><div><span class="m-badge" id="m-role">مسيّر</span><h2 id="m-welcome">لوحة التسيير</h2><p class="m-note" id="m-permissions"></p></div><button id="m-refresh" class="btn btn-dark m-no-print">تحديث البيانات</button></div><p id="m-message" role="status"></p></div>
+<div class="m-card m-top-combined"><div class="m-top-welcome"><div class="m-top-identity"><span class="m-badge" id="m-role">مسيّر</span><h2 id="m-welcome">لوحة التسيير</h2><p class="m-note" id="m-permissions"></p></div><div class="m-top-controls"><button id="m-refresh" class="btn btn-dark m-no-print">تحديث</button><span id="m-message" role="status"></span></div></div><div class="m-top-register-tools m-no-print"><div class="m-top-actions"><strong>مسودة جديدة</strong><div id="register-top-actions" class="register-top-actions"></div></div><div class="m-top-notifications"><strong>الإشعارات</strong><div id="register-notifications" class="m-dashboard-grid"></div></div></div></div>
 <nav class="m-tabs m-no-print" aria-label="وحدات التسيير">
 <button data-pane="overview" id="tab-overview" class="active">الرئيسية</button>
 <button data-pane="join-requests" id="tab-join-requests">طلبات الانخراط</button>
@@ -282,7 +292,7 @@
 <div class="m-card"><div class="m-toolbar"><h2>السجلات الرسمية للجمعية</h2><button type="button" class="m-small" id="register-refresh">تحديث السجلات</button></div>
 <p class="m-note">تُحفظ السجلات الرسمية بعد اعتماد الرئيس للمسودات. السجل المعتمد غير قابل للتعديل. لا تُدرج بيانات تجريبية في القيود الرسمية.</p>
 <p id="registers-msg" role="status"></p>
-<div class="m-card m-no-print"><h3>الإجراءات والإشعارات</h3><div><p class="m-note">إنشاء المسودات المسموح بها لحسابك</p><div id="register-top-actions" class="register-top-actions"></div></div><div><p class="m-note">الإشعارات غير المحسومة — تختفي عند الاعتماد النهائي</p><div id="register-notifications" class="m-dashboard-grid"></div></div></div>
+
 <div class="m-card"><div class="m-toolbar"><h3>السجلات الرسمية</h3><span class="m-note">اختر سجلًا لفتحه في صفحة مستقلة للقراءة فقط.</span></div><div id="register-choice-grid" class="m-dashboard-grid" aria-label="اختيار السجل الرسمي"></div>
 <p class="m-note" id="register-selection-hint">اختر سجلًا لفتحه في وضع القراءة فقط.</p></div>
 <form id="register-draft-form" class="m-grid m-no-print" hidden></form>
