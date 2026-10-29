@@ -10,10 +10,16 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="/management-portal.js?v=20261027-role-gate-2" defer></script>
 <style>
-.portal{max-width:760px;margin:3rem auto;padding:1.25rem}
-.portal-intro{text-align:center;margin:0 auto 2rem}
-.portal-intro h1{font-size:clamp(2rem,4vw,3rem);margin:.6rem 0}
-.portal-intro p{line-height:1.9;color:#52665d}
+.portal-header .nav-wrap{display:flex;align-items:center;gap:.8rem;padding-top:.35rem;padding-bottom:.35rem;min-height:0}
+.portal-header .brand{flex:0 0 auto;gap:.45rem}
+.portal-header .brand img{width:34px;height:34px;object-fit:contain}
+.portal-header .brand b{font-size:.95rem}
+.portal-header .brand small{font-size:.72rem}
+.portal-header-copy{flex:1 1 360px;min-width:180px;padding:.15rem 0}
+.portal-header-copy h1{font-size:clamp(1rem,2vw,1.35rem);line-height:1.2;margin:0 0 .12rem}
+.portal-header-copy p{font-size:.78rem;line-height:1.45;margin:0;color:var(--muted,#52665d)}
+.portal-header .nav{flex:0 0 auto;white-space:nowrap;font-size:.82rem}
+.portal{max-width:760px;margin:1.2rem auto;padding:1.25rem}
 .portal-panel{border:1px solid #dce5df;border-radius:18px;background:#fff;padding:1.4rem;box-shadow:0 8px 24px #123b320b}
 .portal-form{display:grid;gap:1rem}
 .portal-form label{display:grid;gap:.4rem;font-weight:600}
@@ -26,16 +32,17 @@
 .portal-actions a{display:inline-block;text-decoration:none}
 .portal-note{margin-top:1.5rem;padding:1rem;border-radius:12px;background:#f0f5ef;line-height:1.8;color:#41594e}
 [hidden]{display:none!important}
-@media(max-width:600px){.portal{margin:1.5rem auto;padding:1rem}.portal-panel{padding:1rem}}
+@media(max-width:700px){.portal-header .nav-wrap{gap:.45rem;flex-wrap:wrap}.portal-header-copy{order:3;flex-basis:100%;padding:.1rem 0 .15rem}.portal-header .brand img{width:30px;height:30px}.portal-header .nav{margin-inline-start:auto;font-size:.76rem}.portal{margin:1rem auto;padding:1rem}.portal-panel{padding:1rem}}
 </style>
 </head>
 <body>
-<header class="header"><div class="container nav-wrap">
-<a class="brand" href="/" aria-label="جمعية الأفق، الصفحة الرئيسية"><img src="/icon.svg" alt="" width="44" height="44"><span><b>جمعية الأفق</b><small>للرياضات الجوية والجبلية</small></span></a>
+<header class="header portal-header"><div class="container nav-wrap">
+<a class="brand" href="/" aria-label="جمعية الأفق، الصفحة الرئيسية"><img src="/icon.svg" alt="" width="34" height="34"><span><b>جمعية الأفق</b><small>للرياضات الجوية والجبلية</small></span></a>
+<div class="portal-header-copy"><h1>بوابة <em>التسيير</em></h1><p>سجّل الدخول بحسابك؛ ستظهر لك نافذة واحدة فقط مطابقة للدور المسجل في حسابك. لا يمنح اختيار الرابط صلاحيات إضافية.</p></div>
 <nav class="nav" style="display:flex"><a href="/">العودة للموقع العام ←</a></nav>
 </div></header>
 <main class="portal">
-<div class="portal-intro"><span class="kicker">دخول آمن</span><h1>بوابة <em>التسيير</em></h1><p>سجّل الدخول بحسابك؛ ستظهر لك نافذة واحدة فقط مطابقة للدور المسجل في حسابك. لا يمنح اختيار الرابط صلاحيات إضافية.</p></div>
+
 <section class="portal-panel" id="portal-login">
 <h2>تسجيل الدخول</h2>
 <form id="portal-login-form" class="portal-form">
