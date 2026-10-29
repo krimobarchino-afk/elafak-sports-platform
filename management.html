@@ -52,10 +52,29 @@
 .m-msg.error{background:#fff0ef;color:#8c231b}.m-msg.success{background:#e9f7ed;color:#1d6032}
 .m-toolbar{display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap;margin:.7rem 0}
 .m-badge{display:inline-block;padding:.2rem .5rem;border-radius:5px;background:#edf2e8;font-size:.78rem}
-.m-header{background:#123b32;color:#fff;padding:1.5rem 0}
-.m-header .container{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
-.m-header h1{font-size:clamp(1.3rem,3vw,2rem);margin:0}.m-header p{margin:.4rem 0 0;color:#d4e2d8;font-size:.9rem}
+.m-header{background:#123b32;color:#fff;padding:.65rem 0 .8rem}
+.m-header .container{display:flex;justify-content:space-between;align-items:center;gap:.8rem;flex-wrap:wrap}
+.m-header h1{font-size:clamp(1.05rem,2vw,1.55rem);margin:.15rem 0}.m-header p{margin:.15rem 0 0;color:#d4e2d8;font-size:.82rem}
 .m-header a{color:#e0efb3}
+.m-header .m-actions{align-items:center}
+.m-wrap{margin:.65rem auto 2rem}
+#m-app>.m-card:first-child{margin:.0rem 0 .75rem;padding:.65rem .9rem;background:#123b32;color:#fff;border:1px solid #28564b;border-radius:0 0 12px 12px}
+#m-app>.m-card:first-child h2,#m-app>.m-card:first-child .m-note,#m-app>.m-card:first-child .m-badge{color:#fff}
+#m-app>.m-card:first-child .m-badge{background:#2b5c4e}
+#m-app>.m-card:first-child .m-toolbar{margin:0;gap:.5rem}
+#m-app>.m-card:first-child .m-toolbar>div{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
+#m-app>.m-card:first-child h2{font-size:1.05rem;margin:0}
+#m-app>.m-card:first-child .m-note{font-size:.8rem;margin:.1rem 0}
+#m-app>.m-card:first-child #m-message{margin:.2rem 0;color:#e0efb3}
+#pane-official-registers>.m-card:first-child{margin-top:.4rem}
+#pane-official-registers>.m-card:nth-of-type(2){display:grid;grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);gap:.8rem;align-items:start;margin:.6rem 0;padding:.7rem;background:#f5f8f5}
+#pane-official-registers>.m-card:nth-of-type(2)>h3,#pane-official-registers>.m-card:nth-of-type(2)>.m-note{grid-column:1/-1;margin:.1rem 0}
+#pane-official-registers>.m-card:nth-of-type(2) #register-top-actions{grid-column:1}
+#pane-official-registers>.m-card:nth-of-type(2) #register-notifications{grid-column:2;display:flex;flex-direction:column;gap:.35rem;margin:.25rem 0}
+#pane-official-registers>.m-card:nth-of-type(2) #register-notifications>div{padding:.45rem;border:1px solid var(--m-line);border-radius:8px;background:#fff}
+#pane-official-registers>.m-card:nth-of-type(3){margin-top:.7rem}
+@media(max-width:720px){#pane-official-registers>.m-card:nth-of-type(2){grid-template-columns:1fr}#pane-official-registers>.m-card:nth-of-type(2) #register-top-actions,#pane-official-registers>.m-card:nth-of-type(2) #register-notifications{grid-column:1}}
+
 @media(max-width:620px){.m-wrap{padding:0 .7rem 2rem}.m-card{padding:.85rem}.m-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.m-tabs button{font-size:.85rem;padding:.6rem .4rem}.m-table{min-width:680px}}
 @media print{.m-header,.m-tabs,.m-no-print,form{display:none!important}.m-wrap{max-width:none;margin:0;padding:0}.m-card{border:0;break-inside:avoid}}
 
@@ -259,9 +278,8 @@
 <div class="m-card"><div class="m-toolbar"><h2>السجلات الرسمية للجمعية</h2><button type="button" class="m-small" id="register-refresh">تحديث السجلات</button></div>
 <p class="m-note">تُحفظ السجلات الرسمية بعد اعتماد الرئيس للمسودات. السجل المعتمد غير قابل للتعديل. لا تُدرج بيانات تجريبية في القيود الرسمية.</p>
 <p id="registers-msg" role="status"></p>
-<div class="m-card m-no-print"><h3>إنشاء مسودة حسب صلاحيات الحساب</h3><p class="m-note">تظهر هنا فقط إجراءات الإنشاء المسموح بها لحسابك.</p><div id="register-top-actions" class="register-top-actions"></div></div>
-<div class="m-card"><h3>الإشعارات</h3><p class="m-note">يبقى الإشعار ظاهرًا ما دامت المسودة غير معتمدة نهائيًا من الرئيس.</p><div id="register-notifications" class="m-dashboard-grid"></div></div>
-<div class="m-card"><h3>السجلات الرسمية</h3><p class="m-note">اختر سجلًا لفتحه في صفحة قراءة مستقلة. محتوى السجل المعتمد للقراءة فقط.</p><div id="register-choice-grid" class="m-dashboard-grid" aria-label="اختيار السجل الرسمي"></div>
+<div class="m-card m-no-print"><h3>الإجراءات والإشعارات</h3><div><p class="m-note">إنشاء المسودات المسموح بها لحسابك</p><div id="register-top-actions" class="register-top-actions"></div></div><div><p class="m-note">الإشعارات غير المحسومة — تختفي عند الاعتماد النهائي</p><div id="register-notifications" class="m-dashboard-grid"></div></div></div>
+<div class="m-card"><div class="m-toolbar"><h3>السجلات الرسمية</h3><span class="m-note">اختر سجلًا لفتحه في صفحة مستقلة للقراءة فقط.</span></div><div id="register-choice-grid" class="m-dashboard-grid" aria-label="اختيار السجل الرسمي"></div>
 <p class="m-note" id="register-selection-hint">اختر سجلًا لفتحه في وضع القراءة فقط.</p></div>
 <form id="register-draft-form" class="m-grid m-no-print" hidden></form>
 <div id="register-deliberation" class="m-card" hidden></div>
