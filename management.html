@@ -8,7 +8,7 @@
 <link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/style.css?v=20261029-horizontal-transition-1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script src="/management.js?v=20261027-dashboard-cards-3" defer></script>
-<script src="/official-registers.js?v=20261029-pdf-fix-1" defer></script>
+<script src="/official-registers.js?v=20261029-register-pages-2" defer></script>
 <style>
 :root{--m-line:#dce5df;--m-ink:#17352e;--m-soft:#f4f7f1}
 .m-wrap{max-width:1280px;margin:1.6rem auto;padding:0 1rem 3rem;color:var(--m-ink)}
@@ -63,6 +63,22 @@
 #management-content>section,#management-pages>section,.management-pages>section,.m-workspace-pages>section,.page-stage>section,.page-container>section{flex:0 0 100%;min-width:0;max-width:100%;scroll-snap-align:start}
 #management-content>main,#management-pages>main,.management-pages>main,.m-workspace-pages>main{flex:0 0 100%;min-width:0;scroll-snap-align:start}
 @media(max-width:720px){#management-content,#management-pages,.management-pages,.m-workspace-pages,.page-stage,.page-container{gap:.5rem}}
+/* Compact register workspace: each selected register becomes its own screen */
+.m-wrap{max-width:1440px;margin:.7rem auto;padding:0 .8rem 1rem}.m-header{padding:.7rem 0}
+#pane-official-registers{height:calc(100vh - 155px);min-height:420px;overflow:hidden}
+#pane-official-registers>.m-card{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#pane-official-registers #register-notifications-card{flex:0 0 auto;padding:.5rem;margin:.35rem 0}
+#pane-official-registers #register-notifications-card h3{margin:0;font-size:.95rem}
+#pane-official-registers #register-notifications{display:flex;gap:.45rem;overflow-x:auto;margin:.3rem 0}
+#pane-official-registers #register-notifications>*{flex:0 0 min(260px,32%);margin:0;padding:.55rem}
+#pane-official-registers #register-choice-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:.55rem;overflow-y:auto;align-content:start;margin:.5rem 0}
+#pane-official-registers .register-detail-host{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain}
+#pane-official-registers.register-detail-open #register-home-header,#pane-official-registers.register-detail-open #register-intro-note,#pane-official-registers.register-detail-open #register-notifications-card,#pane-official-registers.register-detail-open #register-choice-grid,#pane-official-registers.register-detail-open #register-selection-hint{display:none!important}
+#pane-official-registers.register-detail-open #registers-msg{display:none}
+#pane-official-registers .register-page-nav{position:sticky;top:0;z-index:3;background:#fff;padding:.35rem 0;border-bottom:1px solid var(--m-line)}
+#pane-official-registers .register-detail-host>.m-card{margin:.25rem 0;padding:.75rem}
+@media(max-width:900px){#pane-official-registers #register-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#pane-official-registers{height:auto;min-height:calc(100vh - 150px);overflow:visible}#pane-official-registers>.m-card{height:auto;overflow:visible}#pane-official-registers .register-detail-host{overflow:visible}}
+@media(max-width:620px){.m-wrap{padding:0 .55rem .8rem}.m-header{padding:.65rem 0}#pane-official-registers #register-notifications>*{flex-basis:85%}}
 </style>
 </head>
 <body>
@@ -255,21 +271,21 @@
 </div>
 </section>
 <section class="m-pane" id="pane-official-registers" hidden>
-<div class="m-card"><div class="m-toolbar"><h2>السجلات الرسمية للجمعية</h2><button type="button" class="m-small" id="register-refresh">تحديث السجلات</button></div>
-<p class="m-note">تُحفظ السجلات الرسمية بعد اعتماد الرئيس للمسودات. السجل المعتمد غير قابل للتعديل. لا تُدرج بيانات تجريبية في القيود الرسمية.</p>
+<div class="m-card"><div class="m-toolbar" id="register-home-header"><h2>السجلات الرسمية للجمعية</h2><button type="button" class="m-small" id="register-refresh">تحديث السجلات</button></div>
+<p class="m-note" id="register-intro-note">تُحفظ السجلات الرسمية بعد اعتماد الرئيس للمسودات. السجل المعتمد غير قابل للتعديل. لا تُدرج بيانات تجريبية في القيود الرسمية.</p>
 <p id="registers-msg" role="status"></p>
-<div class="m-card"><h3>الإشعارات</h3><div id="register-notifications" class="m-dashboard-grid"></div></div>
+<div class="m-card" id="register-notifications-card"><h3>الإشعارات</h3><div id="register-notifications" class="m-dashboard-grid"></div></div>
 <div id="register-choice-grid" class="m-dashboard-grid" aria-label="اختيار السجل الرسمي"></div>
 <p class="m-note" id="register-selection-hint">اختر سجلًا واحدًا لعرض تفاصيله ومسوداته.</p>
 <form id="register-draft-form" class="m-grid m-no-print" hidden></form>
-<div id="register-deliberation" class="m-card" hidden></div>
-<div id="register-accounting" class="m-card" hidden></div>
-<div id="register-equipment" class="m-card" hidden></div>
-<div id="register-outgoing_mail" class="m-card" hidden></div>
-<div id="register-incoming_mail" class="m-card" hidden></div>
-<div id="register-activities" class="m-card" hidden></div>
-<div id="register-tasks" class="m-card" hidden></div>
-<div id="register-inspection" class="m-card" hidden></div>
+<div id="register-deliberation" class="m-card register-detail-host" hidden></div>
+<div id="register-accounting" class="m-card register-detail-host" hidden></div>
+<div id="register-equipment" class="m-card register-detail-host" hidden></div>
+<div id="register-outgoing_mail" class="m-card register-detail-host" hidden></div>
+<div id="register-incoming_mail" class="m-card register-detail-host" hidden></div>
+<div id="register-activities" class="m-card register-detail-host" hidden></div>
+<div id="register-tasks" class="m-card register-detail-host" hidden></div>
+<div id="register-inspection" class="m-card register-detail-host" hidden></div>
 </div></section>
 <section class="m-pane" id="pane-archive" hidden>
 <div class="m-card"><h2>الأرشيف والنسخ الاحتياطي</h2><p class="m-note">أرشفة المحاضر والعمليات تتم في قاعدة البيانات. يمكن تنزيل نسخة JSON من السجلات التي يستطيع حسابك قراءتها، أو طباعة الصفحة/المحضر إلى PDF من المتصفح. النسخة لا تشمل كلمات المرور أو جلسات الدخول ولا تُعد نسخة كاملة من Supabase Storage.</p><div class="m-actions m-no-print"><button id="backup-json" class="btn btn-dark">تنزيل نسخة بيانات JSON</button><button id="print-page" class="m-small">طباعة / حفظ PDF</button><button id="audit-refresh" class="m-small">تحديث سجل العمليات</button></div><p id="archive-msg" role="status"></p><h3>سجل العمليات الإدارية</h3><div class="m-tablewrap"><table class="m-table"><thead><tr><th>الوقت</th><th>الوحدة</th><th>العملية</th><th>معرّف السجل</th><th>التفاصيل</th></tr></thead><tbody id="audit-rows"></tbody></table></div></div>
