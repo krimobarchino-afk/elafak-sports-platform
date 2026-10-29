@@ -367,7 +367,6 @@ document.addEventListener("DOMContentLoaded",async()=>{
   renderRegisterChoices();
   renderTopActions();
   tab.addEventListener("click",()=>loadAll().catch(e=>msg(e.message,"error")));
-  $("register-refresh").addEventListener("click",()=>loadAll().catch(e=>msg(e.message,"error")));
   $("register-draft-form").addEventListener("submit",async e=>{
    e.preventDefault();const f=e.currentTarget,key=f.dataset.key,payload=payloadFromForm(f);msg("جارٍ حفظ المسودة…");
    if(key==="tasks"||key==="inspection"){
