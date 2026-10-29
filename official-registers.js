@@ -214,10 +214,7 @@ function showRegister(key){
  for(const k of Object.keys(TITLES)){const host=$("register-"+k);if(host)host.hidden=k!==key}
  const form=$("register-draft-form");
  if(form.dataset.key&&form.dataset.key!==key){form.hidden=true;form.reset();editDraft=null}
- const host=$("register-"+key);if(host){host.hidden=false;
-  if(registerView==="browse")renderTable(key,[],[]);
-  else renderTable(key,[],[]);
- }
+ const host=$("register-"+key);if(host){host.hidden=false;}
 }
 function renderRegisterChoices(){
  const grid=$("register-choice-grid");grid.replaceChildren();
