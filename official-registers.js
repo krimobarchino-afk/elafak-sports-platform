@@ -222,9 +222,10 @@ function renderRegisterChoices(){
   b.append(el("span","▤","m-dashboard-icon"),el("span",TITLES[key],"m-dashboard-title"));
   const descriptions={deliberation:"المداولات والقرارات المعتمدة",accounting:"الإيرادات والمصروفات والقيود المالية",equipment:"جرد العتاد وحالته",outgoing_mail:"المراسلات الصادرة مرتبة بالتاريخ",incoming_mail:"المراسلات الواردة مرتبة بالتاريخ",activities:"الأنشطة والبرامج المنجزة والمبرمجة",tasks:"المهام والتكليفات الرئاسية",inspection:"تقارير التفتيش والمراقبة"};
   b.append(el("span",descriptions[key],"m-dashboard-description"));
-  b.setAttribute("aria-pressed","false");b.onclick=()=>{showRegister(key);renderTable(key,cachedEntries[key]||[],cachedDrafts[key]||[])};grid.append(b);
+  b.setAttribute("aria-pressed","false");b.onclick=()=>openStandaloneRegister(key);grid.append(b);
  }
 }
+function openStandaloneRegister(key,draftId){if(!key||!ROLES[key]?.includes(profile?.role)){msg("لا يملك هذا الحساب صلاحية الوصول إلى السجل المطلوب.","error");return}const params=new URLSearchParams({entry:ENTRY||"executive",register:key});if(draftId)params.set("draft",draftId);const url="/official-register.html?"+params.toString();try{window.parent.location.href=url}catch(_){window.location.href=url}}
 function profileUserId(){return profile?.user_id}
 function renderTopActions(){
  const host=$("register-top-actions");if(!host)return;host.replaceChildren();
@@ -233,6 +234,7 @@ function renderTopActions(){
   if(!canCreate(key))continue;
   const b=el("button",labels[key]||("إنشاء مسودة — "+TITLES[key]),"m-small");b.type="button";
   b.onclick=()=>{
+   openStandaloneRegister(key);return;
    activeRegisterKey=key;registerView="create";
    $("register-choice-grid").hidden=true;
    $("register-selection-hint").textContent="إنشاء — "+TITLES[key];
@@ -283,11 +285,7 @@ function notifyUI(items){
     if(error||!d){msg("تعذر فتح المسودة المرتبطة بهذا الإشعار.","error");return}
     const key=d.register_key;if(!ROLES[key]?.includes(profile.role)){msg("لا يملك هذا الحساب صلاحية مراجعة هذا السجل.","error");return}
     if(d.status==="approved"){await loadNotifications();msg("هذه المسودة معتمدة نهائيًا بالفعل.","success");return}
-    activeRegisterKey=key;registerView="review";$("register-choice-grid").hidden=true;
-    $("register-selection-hint").textContent="مراجعة المسودات — "+TITLES[key];
-    for(const k of Object.keys(TITLES)){const h=$("register-"+k);if(h)h.hidden=k!==key}
-    const {data:drafts}=await sb.from("association_register_drafts").select("*").eq("register_key",key).neq("status","approved").order("created_at",{ascending:false});
-    cachedDrafts[key]=drafts||[];const h=$("register-"+key);h.hidden=false;renderTable(key,cachedEntries[key]||[],cachedDrafts[key]);
+    openStandaloneRegister(key,d.id);
    };
    card.append(b);
   }
@@ -422,6 +420,22 @@ document.addEventListener("DOMContentLoaded",async()=>{
    f.reset();f.hidden=true;await loadAll();
   });
   await loadAll();
+  const params=new URLSearchParams(window.location.search);
+  if(params.get("standalone_register")==="1"){
+   const key=params.get("register"),draftId=params.get("draft");
+   if(!key||!ROLES[key]?.includes(profile.role))throw new Error("هذا الحساب غير مخوّل لهذا السجل.");
+   if(draftId){
+    const {data:d,error:de}=await sb.from("association_register_drafts").select("*").eq("id",draftId).maybeSingle();
+    if(de)throw de;if(!d)throw new Error("لم يتم العثور على المسودة المطلوبة.");
+    if(d.register_key!==key)throw new Error("المسودة لا تتطابق مع السجل المطلوب.");
+    if(d.created_by!==profile.user_id&&profile.role!=="president")throw new Error("لا تملك صلاحية فتح هذه المسودة.");
+    if(profile.role==="president"){
+     activeRegisterKey=key;registerView="review";$("register-choice-grid").hidden=true;
+     for(const k of Object.keys(TITLES)){const h=$("register-"+k);if(h)h.hidden=k!==key}
+     cachedDrafts[key]=[d];const host=$("register-"+key);host.hidden=false;await renderTable(key,cachedEntries[key]||[],cachedDrafts[key]);
+    }else openDraftForEdit(d);
+   }else{showRegister(key);await renderTable(key,cachedEntries[key]||[],cachedDrafts[key]||[])}
+  }
  }catch(e){msg(e.message||"تعذر تهيئة السجلات.","error")}
 });
 })();
